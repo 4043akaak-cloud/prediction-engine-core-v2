@@ -17,7 +17,3 @@
 - [x] Implemented updateEntry in DiaryContext
 - [x] Added PredictionFeedbackSection UI to PredictionDetail.tsx
 - [x] Resolved TypeScript compilation errors
-- [ ] Verify feedback saves to LocalStorage
-- [ ] Verify feedback persists after page reload
-- [ ] Final ADF self-review
-- [ ] Git commit and push
