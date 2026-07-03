@@ -1,6 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -8,12 +7,19 @@ import { PredictionProvider } from "./contexts/PredictionContext";
 import { DiaryProvider } from "./contexts/DiaryContext";
 import { UIProvider } from "./contexts/UIContext";
 import Home from "./pages/Home";
+import PredictionInput from "./pages/PredictionInput";
+import PredictionResult from "./pages/PredictionResult";
+import PredictionDiary from "./pages/PredictionDiary";
+import NotFound from "@/pages/NotFound";
 
 
 function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/predict"} component={PredictionInput} />
+      <Route path={"/result"} component={PredictionResult} />
+      <Route path={"/diary"} component={PredictionDiary} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

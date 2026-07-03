@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { useLocation } from "wouter";
 
 /**
  * PEC Homepage Skeleton (Phase 1)
@@ -9,6 +10,7 @@ import { useState } from "react";
  */
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [, setLocation] = useLocation();
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
@@ -19,9 +21,9 @@ export default function Home() {
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex gap-8">
-            <a href="#" className="text-sm hover:text-primary">Predictions</a>
-            <a href="#" className="text-sm hover:text-primary">Models</a>
-            <a href="#" className="text-sm hover:text-primary">Community</a>
+            <button onClick={() => setLocation("/diary")} className="text-sm hover:text-primary">Predictions</button>
+            <a href="#" className="text-sm hover:text-primary">Tools</a>
+            <a href="#" className="text-sm hover:text-primary">Learn</a>
           </nav>
           
           {/* Header Actions */}
@@ -42,9 +44,9 @@ export default function Home() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <nav className="md:hidden border-t border-border p-4 flex flex-col gap-4">
-            <a href="#" className="text-sm">Predictions</a>
-            <a href="#" className="text-sm">Models</a>
-            <a href="#" className="text-sm">Community</a>
+            <button onClick={() => { setLocation("/diary"); setMobileMenuOpen(false); }} className="text-sm hover:text-primary">Predictions</button>
+            <a href="#" className="text-sm">Tools</a>
+            <a href="#" className="text-sm">Learn</a>
             <Button variant="outline" size="sm" className="w-full">Sign In</Button>
           </nav>
         )}
@@ -65,9 +67,13 @@ export default function Home() {
               <input
                 type="text"
                 placeholder="What would you like to predict?"
-                className="border border-border rounded px-4 py-3 text-base"
+                readOnly
+                className="border border-border rounded px-4 py-3 text-base cursor-pointer"
+                onClick={() => setLocation("/predict")}
               />
-              <Button className="w-full md:w-auto">Predict</Button>
+              <Button onClick={() => setLocation("/predict")} className="w-full md:w-auto">
+                Start Prediction
+              </Button>
             </div>
           </div>
         </section>
@@ -77,22 +83,46 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {/* Featured Prediction Types */}
             <div className="border border-border rounded p-8 min-h-40 flex items-center justify-center">
-              <h2 className="text-xl font-semibold text-muted-foreground">Featured Prediction Types</h2>
+              <div className="text-center">
+                <h2 className="text-xl font-semibold mb-4">Prediction Types</h2>
+                <p className="text-sm text-muted-foreground mb-4">Choose from various prediction categories</p>
+                <Button variant="outline" size="sm" onClick={() => setLocation("/predict")}>
+                  Explore
+                </Button>
+              </div>
             </div>
             
             {/* Community */}
             <div className="border border-border rounded p-8 min-h-40 flex items-center justify-center">
-              <h2 className="text-xl font-semibold text-muted-foreground">Community</h2>
+              <div className="text-center">
+                <h2 className="text-xl font-semibold mb-4">Your Predictions</h2>
+                <p className="text-sm text-muted-foreground mb-4">View your prediction history</p>
+                <Button variant="outline" size="sm" onClick={() => setLocation("/diary")}>
+                  View Diary
+                </Button>
+              </div>
             </div>
             
             {/* Marketplace */}
             <div className="border border-border rounded p-8 min-h-40 flex items-center justify-center">
-              <h2 className="text-xl font-semibold text-muted-foreground">Marketplace</h2>
+              <div className="text-center">
+                <h2 className="text-xl font-semibold mb-4">Insights</h2>
+                <p className="text-sm text-muted-foreground mb-4">Discover prediction insights</p>
+                <Button variant="outline" size="sm" disabled>
+                  Coming Soon
+                </Button>
+              </div>
             </div>
             
-            {/* Latest Models */}
+            {/* Trending */}
             <div className="border border-border rounded p-8 min-h-40 flex items-center justify-center">
-              <h2 className="text-xl font-semibold text-muted-foreground">Latest Models</h2>
+              <div className="text-center">
+                <h2 className="text-xl font-semibold mb-4">Trending Topics</h2>
+                <p className="text-sm text-muted-foreground mb-4">See what others are predicting</p>
+                <Button variant="outline" size="sm" disabled>
+                  Coming Soon
+                </Button>
+              </div>
             </div>
           </div>
         </section>
