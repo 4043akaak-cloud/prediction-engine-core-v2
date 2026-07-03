@@ -28,14 +28,14 @@ export default function Home() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex gap-8">
             <button onClick={() => setLocation("/diary")} className="text-sm hover:text-primary transition-colors">Predictions</button>
-            <a href="#" className="text-sm hover:text-primary transition-colors">Tools</a>
-            <a href="#" className="text-sm hover:text-primary transition-colors">Learn</a>
+            <button onClick={() => setLocation("/tools")} className="text-sm hover:text-primary transition-colors">Tools</button>
+            <button onClick={() => setLocation("/learn")} className="text-sm hover:text-primary transition-colors">Learn</button>
           </nav>
           
           {/* Header Actions */}
           <div className="hidden md:flex items-center gap-4">
             <button className="text-sm hover:text-primary transition-colors">Theme</button>
-            <Button variant="outline" size="sm">Sign In</Button>
+            <Button variant="outline" size="sm" onClick={() => setLocation("/signin")}>Sign In</Button>
           </div>
           
           {/* Mobile Menu Button */}
@@ -51,9 +51,9 @@ export default function Home() {
         {mobileMenuOpen && (
           <nav className="md:hidden border-t border-border p-4 flex flex-col gap-4">
             <button onClick={() => { setLocation("/diary"); setMobileMenuOpen(false); }} className="text-sm hover:text-primary transition-colors">Predictions</button>
-            <a href="#" className="text-sm hover:text-primary transition-colors">Tools</a>
-            <a href="#" className="text-sm hover:text-primary transition-colors">Learn</a>
-            <Button variant="outline" size="sm" className="w-full">Sign In</Button>
+            <button onClick={() => { setLocation("/tools"); setMobileMenuOpen(false); }} className="text-sm hover:text-primary transition-colors">Tools</button>
+            <button onClick={() => { setLocation("/learn"); setMobileMenuOpen(false); }} className="text-sm hover:text-primary transition-colors">Learn</button>
+            <Button variant="outline" size="sm" className="w-full" onClick={() => { setLocation("/signin"); setMobileMenuOpen(false); }}>Sign In</Button>
           </nav>
         )}
       </header>
@@ -138,11 +138,11 @@ export default function Home() {
       <footer className="border-t border-border">
         <div className="container py-12">
           <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-8">
-            <a href="#" className="text-sm hover:text-primary transition-colors">About</a>
-            <a href="#" className="text-sm hover:text-primary transition-colors">Privacy</a>
-            <a href="#" className="text-sm hover:text-primary transition-colors">Terms</a>
-            <a href="#" className="text-sm hover:text-primary transition-colors">Contact</a>
-            <a href="#" className="text-sm hover:text-primary transition-colors">GitHub</a>
+            <button onClick={() => setLocation("/about")} className="text-sm hover:text-primary transition-colors">About</button>
+            <button onClick={() => setLocation("/privacy")} className="text-sm hover:text-primary transition-colors">Privacy</button>
+            <button onClick={() => setLocation("/terms")} className="text-sm hover:text-primary transition-colors">Terms</button>
+            <button onClick={() => setLocation("/contact")} className="text-sm hover:text-primary transition-colors">Contact</button>
+            <button onClick={() => setLocation("/github")} className="text-sm hover:text-primary transition-colors">GitHub</button>
             <div className="text-sm text-muted-foreground">v0.1</div>
           </div>
           <div className="text-xs text-muted-foreground border-t border-border pt-8">

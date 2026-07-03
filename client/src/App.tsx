@@ -16,6 +16,14 @@ import RecipeList from "./pages/RecipeList";
 import RecipeDetail from "./pages/RecipeDetail";
 import Settings from "./pages/Settings";
 import { SettingsProvider } from "./contexts/SettingsContext";
+import About from "./pages/About";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Contact from "./pages/Contact";
+import Tools from "./pages/Tools";
+import Learn from "./pages/Learn";
+import SignIn from "./pages/SignIn";
+import GitHub from "./pages/GitHub";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -29,6 +37,14 @@ function Router() {
       <Route path={"/recipes"} component={RecipeList} />
       <Route path={"/recipes/:id"} component={RecipeDetail} />
       <Route path={"/settings"} component={Settings} />
+      <Route path={"/about"} component={About} />
+      <Route path={"/privacy"} component={Privacy} />
+      <Route path={"/terms"} component={Terms} />
+      <Route path={"/contact"} component={Contact} />
+      <Route path={"/tools"} component={Tools} />
+      <Route path={"/learn"} component={Learn} />
+      <Route path={"/signin"} component={SignIn} />
+      <Route path={"/github"} component={GitHub} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
