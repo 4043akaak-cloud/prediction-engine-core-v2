@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { usePrediction } from "@/hooks/usePrediction";
+import { generatePrediction } from "@/services/api";
 
 /**
  * Prediction Input Experience
@@ -10,39 +11,45 @@ import { usePrediction } from "@/hooks/usePrediction";
  */
 export default function PredictionInput() {
   const [, setLocation] = useLocation();
-  const { setPrediction, setLoading } = usePrediction();
+  const { setPrediction, setCounterPrediction, setLoading, setError, setLastInput } = usePrediction();
   
   const [question, setQuestion] = useState("");
   const [predictionType, setPredictionType] = useState("general");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!question.trim()) return;
 
+    // Save user input for potential retry
+    setLastInput({ question, predictionType });
+
+    // Clear previous errors
+    setError(null);
+
     // Set loading state
     setLoading(true);
 
-    // Simulate prediction generation with placeholder data
-    setTimeout(() => {
-      const mockPrediction = {
-        id: Date.now().toString(),
+    try {
+      // Call the Prediction Engine API (currently using mock)
+      const result = await generatePrediction({
         question,
         predictionType,
-        prediction: "Based on current trends and historical patterns, the most likely outcome is positive growth.",
-        confidence: 0.78,
-        reason: "Strong momentum combined with favorable market conditions suggests continued upward trajectory.",
-        metadata: {
-          createdAt: new Date().toISOString(),
-          modelUsed: "Ensemble Analysis",
-          informationSources: ["Market Data", "Historical Trends", "Recent Indicators"],
-        },
-      };
+      });
 
-      setPrediction(mockPrediction);
+      // Store the prediction and counter prediction in context
+      setPrediction(result.prediction);
+      setCounterPrediction(result.counterPrediction);
+
+      // Navigate to result page
       setLoading(false);
       setLocation("/result");
-    }, 1000);
+    } catch (err) {
+      // Keep loading state off and set error
+      setLoading(false);
+      setError(err instanceof Error ? err.message : 'Failed to generate prediction');
+      // User input is preserved in state for retry
+    }
   };
 
   return (

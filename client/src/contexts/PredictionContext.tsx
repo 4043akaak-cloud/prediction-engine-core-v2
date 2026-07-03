@@ -28,6 +28,7 @@ export interface PredictionState {
   selectedModel: string;
   isLoading: boolean;
   error: string | null;
+  lastInput: { question: string; predictionType: string } | null;
 }
 
 export interface PredictionContextType {
@@ -37,6 +38,8 @@ export interface PredictionContextType {
   setSelectedModel: (model: string) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  setLastInput: (input: { question: string; predictionType: string }) => void;
+  retryPrediction: () => Promise<void>;
   clearPrediction: () => void;
 }
 
@@ -46,6 +49,7 @@ const initialState: PredictionState = {
   selectedModel: 'default',
   isLoading: false,
   error: null,
+  lastInput: null,
 };
 
 export const PredictionContext = createContext<PredictionContextType | undefined>(undefined);
@@ -59,6 +63,16 @@ export const PredictionProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const setCounterPrediction = (counterPrediction: CounterPrediction) => {
     setState((prev) => ({ ...prev, counterPrediction }));
+  };
+
+  const setLastInput = (input: { question: string; predictionType: string }) => {
+    setState((prev) => ({ ...prev, lastInput: input }));
+  };
+
+  const retryPrediction = async () => {
+    if (!state.lastInput) return;
+    // This will be implemented by the component using the context
+    // The component will call generatePrediction with the lastInput
   };
 
   const setSelectedModel = (model: string) => {
@@ -84,6 +98,8 @@ export const PredictionProvider: React.FC<{ children: ReactNode }> = ({ children
     setSelectedModel,
     setLoading,
     setError,
+    setLastInput,
+    retryPrediction,
     clearPrediction,
   };
 
