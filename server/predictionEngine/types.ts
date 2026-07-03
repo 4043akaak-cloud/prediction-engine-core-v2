@@ -57,3 +57,7 @@ export interface IPredictionResultBuilder {
 export interface IPredictionEngine {
   predict(request: PredictionRequest): Promise<PredictionResult>;
 }
+
+export interface IPredictionEngineMulti {
+  predictMultiple(request: PredictionRequest): Promise<PredictionResult[]>;
+}
