@@ -1,5 +1,33 @@
 # Project TODO
 
+## Issue #025: Settings Foundation
+
+### Phase 1: SettingsContext Creation
+- [x] Create SettingsContext with extensible data structure
+- [x] Design LocalStorage persistence
+- [x] Plan Backend API migration path
+
+### Phase 2: Settings Page Implementation
+- [x] Create Settings page with 6 sections (General, Prediction, Notifications, Appearance, Account, About)
+- [x] Add placeholder content for future settings
+- [x] Implement responsive design
+
+### Phase 3: Appearance Theme Switching
+- [x] Implement light/dark/system theme switching
+- [x] Connect to SettingsContext
+- [x] Add visual feedback for selected theme
+
+### Phase 4: Desktop/Mobile Confirmation
+- [x] Desktop view verification
+- [x] Mobile view verification
+- [x] Settings persistence check
+- [x] UX review
+
+### Phase 5: Git Commit & Push
+- [x] Final self-review
+- [x] Git commit
+- [x] Push to GitHub
+
 ## Issue #024: Prediction Recipe Library
 
 ### Phase 1: Recipe Model Extension

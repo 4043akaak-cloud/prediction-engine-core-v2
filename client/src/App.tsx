@@ -14,6 +14,8 @@ import PredictionDetail from "./pages/PredictionDetail";
 import NotFound from "@/pages/NotFound";
 import RecipeList from "./pages/RecipeList";
 import RecipeDetail from "./pages/RecipeDetail";
+import Settings from "./pages/Settings";
+import { SettingsProvider } from "./contexts/SettingsContext";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -26,6 +28,7 @@ function Router() {
       <Route path={"/detail/:id"} component={PredictionDetail} />
       <Route path={"/recipes"} component={RecipeList} />
       <Route path={"/recipes/:id"} component={RecipeDetail} />
+      <Route path={"/settings"} component={Settings} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -48,10 +51,12 @@ function App() {
         <UIProvider>
           <PredictionProvider>
             <DiaryProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Router />
-              </TooltipProvider>
+              <SettingsProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Router />
+                </TooltipProvider>
+              </SettingsProvider>
             </DiaryProvider>
           </PredictionProvider>
         </UIProvider>
