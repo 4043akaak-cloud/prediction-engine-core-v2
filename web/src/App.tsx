@@ -2,9 +2,10 @@ import React from 'react'
 import PredictionResultCard from './components/PredictionResultCard'
 import PredictionDiary from './components/PredictionDiary'
 import Navigation from './components/Navigation'
+import PredictionInputExperience from './components/PredictionInputExperience'
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = React.useState<'home' | 'prediction' | 'diary'>('home')
+  const [currentScreen, setCurrentScreen] = React.useState<'home' | 'input' | 'prediction' | 'diary'>('home')
   const [userQuestion, setUserQuestion] = React.useState('')
 
   const handleNavigate = (page: 'home' | 'prediction' | 'diary') => {
@@ -12,10 +13,13 @@ export default function App() {
     setUserQuestion('')
   }
 
-  const handlePredict = () => {
-    if (userQuestion.trim()) {
-      setCurrentScreen('prediction')
-    }
+  const handleStartPrediction = () => {
+    setCurrentScreen('input')
+  }
+
+  const handlePredict = (question: string) => {
+    setUserQuestion(question)
+    setCurrentScreen('prediction')
   }
 
   const handleBackToHome = () => {
@@ -28,6 +32,18 @@ export default function App() {
 
   const handleBackFromDiary = () => {
     handleNavigate('home')
+  }
+
+  if (currentScreen === 'input') {
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        {/* Navigation */}
+        <Navigation currentPage="home" onNavigate={handleNavigate} />
+
+        {/* Prediction Input Experience */}
+        <PredictionInputExperience onPredict={handlePredict} />
+      </div>
+    )
   }
 
   if (currentScreen === 'diary') {
@@ -103,11 +119,11 @@ export default function App() {
               type="text"
               value={userQuestion}
               onChange={(e) => setUserQuestion(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handlePredict()}
+              onKeyPress={(e) => e.key === 'Enter' && handleStartPrediction()}
               placeholder="Ask anything about the future..."
               className="w-full px-6 py-4 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
             />
-            <button onClick={handlePredict} className="w-full px-6 py-4 text-lg font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">
+            <button onClick={handleStartPrediction} className="w-full px-6 py-4 text-lg font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">
               Predict
             </button>
             <button onClick={handleOpenDiary} className="w-full px-6 py-4 text-lg font-semibold text-gray-900 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
