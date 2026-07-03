@@ -29,6 +29,8 @@ export interface IRecipe {
   id: string;
   name: string;
   description: string;
+  version: string;
+  category: string;
   execute(evidence: Evidence): Promise<RecipeExecutionResult>;
 }
 

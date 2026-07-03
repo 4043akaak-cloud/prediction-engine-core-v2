@@ -9,6 +9,8 @@ export class TrendRecipe implements IRecipe {
   name = "Trend Analysis Recipe";
   description =
     "Analyzes directional patterns in mock evidence to produce a trend-oriented prediction.";
+  version = "1.0.0";
+  category = "trend";
 
   async execute(evidence: Evidence): Promise<RecipeExecutionResult> {
     const prediction = `Based on current trends, '${evidence.query}' is likely to continue in its present direction.`;

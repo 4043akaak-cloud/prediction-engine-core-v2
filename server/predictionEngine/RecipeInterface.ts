@@ -4,6 +4,8 @@ export class MockRecipe implements IRecipe {
   id: string = "mock-recipe";
   name: string = "Mock Prediction Recipe";
   description: string = "This is a mock recipe for testing purposes.";
+  version: string = "1.0.0";
+  category: string = "mock";
 
   async execute(evidence: Evidence): Promise<RecipeExecutionResult> {
     console.log("Executing MockRecipe with evidence:", evidence);

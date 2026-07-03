@@ -9,6 +9,8 @@ export class StatisticalRecipe implements IRecipe {
   name = "Statistical Analysis Recipe";
   description =
     "Applies statistical methods to mock evidence to generate a probability-based prediction.";
+  version = "1.0.0";
+  category = "statistical";
 
   async execute(evidence: Evidence): Promise<RecipeExecutionResult> {
     const prediction = `Statistically, there is a high probability that \'${evidence.query}\' will exhibit a certain behavior.`;
