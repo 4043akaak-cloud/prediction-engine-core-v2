@@ -3,6 +3,7 @@ import PredictionResultCard from './components/PredictionResultCard'
 import PredictionDiary from './components/PredictionDiary'
 import Navigation from './components/Navigation'
 import PredictionInputExperience from './components/PredictionInputExperience'
+import CounterPredictionCard from './components/CounterPredictionCard'
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = React.useState<'home' | 'input' | 'prediction' | 'diary'>('home')
@@ -78,6 +79,13 @@ export default function App() {
               prediction="High"
               confidence="82%"
               reason="Short explanation describing why this prediction was selected."
+            />
+
+            {/* Counter Prediction Card */}
+            <CounterPredictionCard
+              prediction="Low"
+              confidence="38%"
+              reason="This scenario was considered but not selected as the primary prediction."
             />
           </div>
         </div>
