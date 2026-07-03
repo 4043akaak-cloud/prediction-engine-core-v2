@@ -1,10 +1,9 @@
 import React from 'react'
+import PredictionResultCard from './components/PredictionResultCard'
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = React.useState<'home' | 'prediction'>('home')
   const [userQuestion, setUserQuestion] = React.useState('')
-  const [detailsOpen, setDetailsOpen] = React.useState(false)
-  const [counterOpen, setCounterOpen] = React.useState(false)
 
   const handlePredict = () => {
     if (userQuestion.trim()) {
@@ -15,8 +14,6 @@ export default function App() {
   const handleBackToHome = () => {
     setCurrentScreen('home')
     setUserQuestion('')
-    setDetailsOpen(false)
-    setCounterOpen(false)
   }
 
   if (currentScreen === 'prediction') {
@@ -41,59 +38,12 @@ export default function App() {
               <p className="text-lg text-gray-900">{userQuestion}</p>
             </div>
 
-            {/* Prediction Section */}
-            <div className="pb-8 border-b border-gray-200">
-              <h2 className="text-sm font-semibold text-gray-600 mb-4">Prediction</h2>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-gray-600 font-semibold mb-2">Prediction:</p>
-                  <p className="text-gray-400">—</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 font-semibold mb-2">Confidence:</p>
-                  <p className="text-gray-400">—</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 font-semibold mb-2">Reason:</p>
-                  <p className="text-gray-400">—</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Details Section (Collapsible) */}
-            <div className="pb-8 border-b border-gray-200">
-              <button
-                onClick={() => setDetailsOpen(!detailsOpen)}
-                className="flex items-center gap-2 text-lg font-semibold text-gray-900 hover:text-gray-600 w-full"
-              >
-                <span>{detailsOpen ? '▼' : '▶'}</span>
-                <span>Details</span>
-              </button>
-              {detailsOpen && (
-                <div className="mt-4 space-y-3 text-gray-600">
-                  <p>Previous Data</p>
-                  <p>Model Used</p>
-                  <p>Information Sources</p>
-                  <p>Confidence Breakdown</p>
-                </div>
-              )}
-            </div>
-
-            {/* Counter Prediction Section (Collapsible) */}
-            <div>
-              <button
-                onClick={() => setCounterOpen(!counterOpen)}
-                className="flex items-center gap-2 text-lg font-semibold text-gray-900 hover:text-gray-600 w-full"
-              >
-                <span>{counterOpen ? '▼' : '▶'}</span>
-                <span>Counter Prediction</span>
-              </button>
-              {counterOpen && (
-                <div className="mt-4 text-gray-600">
-                  <p>The opposite scenario will appear here.</p>
-                </div>
-              )}
-            </div>
+            {/* Prediction Result Card */}
+            <PredictionResultCard
+              prediction="High"
+              confidence="82%"
+              reason="Short explanation describing why this prediction was selected."
+            />
           </div>
         </div>
       </div>
