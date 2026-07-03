@@ -1,5 +1,31 @@
 # Project TODO
 
+## Issue #024: Prediction Recipe Library
+
+### Phase 1: Recipe Model Extension
+- [x] Add detailed fields to PredictionRecipe (useCases, examples, versionHistory, availability)
+- [x] Create mock recipe data with complete information
+- [x] Design Backend API-compatible structure
+
+### Phase 2: Recipe List Page Enhancement
+- [x] Display recipe name, description, use cases, expected effect, availability, version
+- [x] Add clickable recipe cards for detail navigation
+- [x] Maintain existing filter functionality
+
+### Phase 3: Recipe Detail Page
+- [x] Create RecipeDetail page component
+- [x] Display overview, use cases, expected effect, examples, version history
+- [x] Add back navigation to recipe list
+- [x] Implement responsive design
+
+### Phase 4: Desktop/Mobile Confirmation
+- [x] Desktop view verification
+- [x] Mobile view verification
+- [x] Navigation flow testing
+- [x] UX review
+
+### Phase 5: Git Commit & Checkpoint
+
 ## Issue #023: Prediction Recipe System
 
 ### Phase 1: Recipe Type Definition & Management
