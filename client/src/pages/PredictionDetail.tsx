@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import { useDiary } from "@/hooks/useDiary";
 import type { DiaryEntryEnhanced } from "@/contexts/DiaryContext";
+import type { PredictionIngredient } from "@/services/mockPrediction";
 
 /**
  * Prediction Detail Experience
@@ -58,6 +59,7 @@ export default function PredictionDetail() {
   // Extract metadata from entry
   const metadata = entry.metadata || {};
   const recipe = metadata.recipe || [];
+  const ingredients = metadata.ingredients || [];
   const reasonSummary = metadata.reasonSummary || entry.question;
 
   return (
@@ -122,20 +124,18 @@ export default function PredictionDetail() {
 
             {/* ④ Details - Prediction Recipe */}
             <div className="mb-12 pb-12 border-b border-border">
-              <h2 className="text-sm font-medium text-muted-foreground mb-6">Prediction Recipe</h2>
+              <h2 className="text-sm font-medium text-muted-foreground mb-6">How This Prediction Was Made</h2>
               <div className="space-y-3">
-                {recipe.length > 0 ? (
-                  recipe.map((item: { name: string; strength: 'Strong' | 'Medium' | 'Weak' }, idx: number) => (
-                    <div key={idx} className="flex justify-between items-center p-3 bg-muted rounded">
-                      <span className="text-sm font-medium">{item.name}</span>
-                      <span className="text-xs font-semibold text-primary">
-                        {item.strength}
-                      </span>
+                {ingredients.length > 0 ? (
+                  ingredients.map((item: PredictionIngredient, idx: number) => (
+                    <div key={idx} className="p-4 bg-muted rounded">
+                      <h3 className="text-sm font-semibold mb-1">{item.title}</h3>
+                      <p className="text-xs text-muted-foreground">{item.description}</p>
                     </div>
                   ))
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    No recipe details available
+                    No ingredient details available
                   </p>
                 )}
               </div>

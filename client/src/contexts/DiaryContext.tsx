@@ -49,6 +49,7 @@ export interface DiaryEntryMetadata {
   // Current fields
   predictionModel?: string;
   recipe?: Array<{ name: string; strength: 'Strong' | 'Medium' | 'Weak' }>;
+  ingredients?: Array<{ title: string; description: string }>;
   reasonSummary?: string;
   informationSources?: string[];
   
