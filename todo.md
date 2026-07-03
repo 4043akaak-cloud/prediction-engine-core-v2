@@ -193,3 +193,31 @@
 - [ ] Git commit
 - [ ] Push to GitHub
 - [ ] Checkpoint save
+
+## Issue #028: Prediction Input UX Refinement
+
+### Phase 1: Prediction Input UI レイアウト設計・実装
+- [x] Refactor PredictionInput.tsx for improved UX
+- [x] Clarify input item priority (Question: Required, Prediction Type: Optional)
+- [x] Simplify descriptions and guidance text
+- [x] Improve placeholders with concrete examples
+- [x] Add example display (Show example for this type)
+- [x] Display Required/Optional badges
+- [x] Organize category selection clearly
+- [x] Add loading state indicator
+- [x] Add character count display for Question
+- [x] Ensure TypeScript compilation: 0 errors
+
+### Phase 2: Desktop/Mobile 確認・セルフレビュー
+- [x] Desktop view verification (1280x720)
+- [x] Mobile view verification (375x812)
+- [x] 30-second rule verification (初心者が 30 秒以内に入力完了できるか)
+- [x] Confusion point check (迷うポイントはないか)
+- [x] Design consistency with PredictionResult (デザイン統一性)
+- [x] ADF principle verification (過剰設計なし)
+
+### Phase 3: Git Commit・Push
+- [ ] Final self-review
+- [ ] Git commit
+- [ ] Push to GitHub
+- [ ] Checkpoint save
