@@ -209,6 +209,9 @@
 - [x] ADF principle verification (過剰設計なし)
 
 ### Phase 3: Git Commit・Push
+- [x] Final self-review
+- [x] Git commit
+- [x] Checkpoint save
 
 ## Issue #029: Design System & UI Consistency
 
