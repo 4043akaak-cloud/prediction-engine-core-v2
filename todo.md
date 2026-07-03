@@ -240,6 +240,3 @@
 - [x] ADF principle verification (過剰実装なし)
 
 ### Phase 4: Git Commit & Push
-- [ ] Final self-review
-- [ ] Git commit
-- [ ] Checkpoint save
