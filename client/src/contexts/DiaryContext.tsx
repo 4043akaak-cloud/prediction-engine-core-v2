@@ -1,6 +1,34 @@
 import React, { createContext, useState, ReactNode } from 'react';
 
 /**
+ * Prediction Lifecycle Types
+ * Supports the full lifecycle: Prediction → Outcome → Evaluation → Archive
+ */
+
+export type OutcomeType = 'occurred' | 'did_not_occur' | 'partially_occurred' | 'unknown';
+export type EvaluationType = 'correct' | 'partially_correct' | 'incorrect';
+export type PredictionStatus = 'pending' | 'resolved' | 'archived';
+
+export interface PredictionLifecycle {
+  status: PredictionStatus;
+  
+  // Notes: メモ（予測全体に対する自由記述）
+  notes?: string;
+  
+  // Outcome: 実際に起きた結果
+  outcome?: {
+    type: OutcomeType;
+    timestamp: string;
+  };
+  
+  // Evaluation: 予測の正確性評価
+  evaluation?: {
+    type: EvaluationType;
+    timestamp: string;
+  };
+}
+
+/**
  * LocalStorage key for persisting diary entries
  * This is a separate layer that can be replaced with Backend DB later
  */
@@ -41,6 +69,18 @@ export interface DiaryEntry {
   predictionType: string;
 }
 
+export interface DiaryEntryWithLifecycle extends DiaryEntry {
+  // Timestamps for lifecycle tracking
+  createdAt: string;
+  updatedAt: string;
+  
+  // Model version for future comparison
+  modelVersion: string;
+  
+  // Lifecycle data
+  lifecycle: PredictionLifecycle;
+}
+
 /**
  * Extended metadata for future Learning/Evaluation/Recipe improvement
  * Currently unused fields are reserved for future functionality
@@ -79,6 +119,10 @@ export interface DiaryEntryMetadata {
  */
 export interface DiaryEntryEnhanced extends DiaryEntry {
   metadata?: DiaryEntryMetadata;
+  lifecycle?: PredictionLifecycle;
+  createdAt?: string;
+  updatedAt?: string;
+  modelVersion?: string;
 }
 
 export interface DiaryState {
@@ -101,6 +145,7 @@ export interface DiaryContextType {
   setError: (error: string | null) => void;
   loadEntries: () => void;
   clearDiary: () => void;
+  updateEntry: (id: string, updates: Partial<DiaryEntryEnhanced>) => void;
 }
 
 const initialState: DiaryState = {
@@ -172,6 +217,26 @@ export const DiaryProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setState(initialState);
   };
 
+  const updateEntry = (id: string, updates: Partial<DiaryEntryEnhanced>) => {
+    setState((prev) => {
+      const newEntries = prev.entries.map((e) =>
+        e.id === id
+          ? {
+              ...e,
+              ...updates,
+              updatedAt: new Date().toISOString(),
+            }
+          : e
+      );
+      saveEntriesToStorage(newEntries);
+      return {
+        ...prev,
+        entries: newEntries,
+        isSaved: false,
+      };
+    });
+  };
+
   const value: DiaryContextType = {
     state,
     addEntry,
@@ -183,6 +248,7 @@ export const DiaryProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setError,
     loadEntries,
     clearDiary,
+    updateEntry,
   };
 
   return (
