@@ -1,10 +1,16 @@
 import React from 'react'
 import PredictionResultCard from './components/PredictionResultCard'
 import PredictionDiary from './components/PredictionDiary'
+import Navigation from './components/Navigation'
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = React.useState<'home' | 'prediction' | 'diary'>('home')
   const [userQuestion, setUserQuestion] = React.useState('')
+
+  const handleNavigate = (page: 'home' | 'prediction' | 'diary') => {
+    setCurrentScreen(page)
+    setUserQuestion('')
+  }
 
   const handlePredict = () => {
     if (userQuestion.trim()) {
@@ -13,30 +19,22 @@ export default function App() {
   }
 
   const handleBackToHome = () => {
-    setCurrentScreen('home')
-    setUserQuestion('')
+    handleNavigate('home')
   }
 
   const handleOpenDiary = () => {
-    setCurrentScreen('diary')
+    handleNavigate('diary')
   }
 
   const handleBackFromDiary = () => {
-    setCurrentScreen('home')
+    handleNavigate('home')
   }
 
   if (currentScreen === 'diary') {
     return (
       <div className="min-h-screen bg-white flex flex-col">
-        {/* Back Button */}
-        <div className="px-4 py-4 border-b border-gray-200">
-          <button
-            onClick={handleBackFromDiary}
-            className="text-gray-600 hover:text-gray-900 font-semibold"
-          >
-            ← Back
-          </button>
-        </div>
+        {/* Navigation */}
+        <Navigation currentPage="diary" onNavigate={handleNavigate} />
 
         {/* Diary Content */}
         <PredictionDiary />
@@ -47,15 +45,8 @@ export default function App() {
   if (currentScreen === 'prediction') {
     return (
       <div className="min-h-screen bg-white flex flex-col">
-        {/* Back Button */}
-        <div className="px-4 py-4 border-b border-gray-200">
-          <button
-            onClick={handleBackToHome}
-            className="text-gray-600 hover:text-gray-900 font-semibold"
-          >
-            ← Back
-          </button>
-        </div>
+        {/* Navigation */}
+        <Navigation currentPage="prediction" onNavigate={handleNavigate} />
 
         {/* Prediction Screen Content */}
         <div className="flex-1 px-4 py-8">
@@ -80,6 +71,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
+      {/* Navigation */}
+      <Navigation currentPage="home" onNavigate={handleNavigate} />
+
       {/* Hero Section */}
       <div className="flex-1 flex items-center justify-center px-4 py-20">
         <div className="w-full max-w-2xl text-center">
