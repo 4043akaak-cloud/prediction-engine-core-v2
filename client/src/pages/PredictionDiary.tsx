@@ -9,14 +9,12 @@ import { useDiary } from "@/hooks/useDiary";
  */
 export default function PredictionDiary() {
   const [, setLocation] = useLocation();
-  const { state: diaryState, selectEntry } = useDiary();
+  const { state: diaryState } = useDiary();
 
   const { entries } = diaryState;
 
   const handleViewPrediction = (id: string) => {
-    selectEntry(id);
-    // In a full implementation, this would navigate to a detail view
-    // For now, we'll just show the entry is selected
+    setLocation(`/detail/${id}`);
   };
 
   return (
@@ -103,4 +101,3 @@ export default function PredictionDiary() {
     </div>
   );
 }
-

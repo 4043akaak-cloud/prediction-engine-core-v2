@@ -10,6 +10,7 @@ import Home from "./pages/Home";
 import PredictionInput from "./pages/PredictionInput";
 import PredictionResult from "./pages/PredictionResult";
 import PredictionDiary from "./pages/PredictionDiary";
+import PredictionDetail from "./pages/PredictionDetail";
 import NotFound from "@/pages/NotFound";
 
 function Router() {
@@ -20,6 +21,7 @@ function Router() {
       <Route path={"/predict"} component={PredictionInput} />
       <Route path={"/result"} component={PredictionResult} />
       <Route path={"/diary"} component={PredictionDiary} />
+      <Route path={"/detail/:id"} component={PredictionDetail} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
