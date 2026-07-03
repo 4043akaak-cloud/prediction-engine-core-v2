@@ -106,8 +106,12 @@ export default function PredictionResult() {
         predictionModel: currentPrediction.metadata.modelUsed,
         reasonSummary: currentPrediction.reason,
         informationSources: currentPrediction.metadata.informationSources,
-        // Recipe would be populated from the API result
-        // userFeedback, actualOutcome, evaluationResult reserved for future use
+      },
+      recipeUsage: {
+        recipeIds: currentPrediction.metadata.recipeId ? [currentPrediction.metadata.recipeId] : [],
+        selectedRecipeNames: currentPrediction.metadata.recipeId 
+          ? [getRecipesByIds([currentPrediction.metadata.recipeId])[0]?.name || 'Unknown Recipe']
+          : [],
       },
     });
     setLocation("/diary");
@@ -238,3 +242,5 @@ export default function PredictionResult() {
     </div>
   );
 }
+import { getEnabledRecipes } from "@shared/recipes";
+import { getRecipesByIds } from "@shared/recipes";

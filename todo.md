@@ -1,5 +1,39 @@
 # Project TODO
 
+## Issue #023: Prediction Recipe System
+
+### Phase 1: Recipe Type Definition & Management
+- [x] Define PredictionRecipe type (id, name, description, category, expectedEffect, version, enabled)
+- [x] Create mock recipes data (5 recipes: Trend, Sentiment, Technical, Fundamental, Hybrid)
+- [x] Design recipe storage structure (recipeIds array for multiple recipe support)
+- [x] Add helper functions (getRecipeById, getRecipesByIds, getRecipesByCategory, getEnabledRecipes)
+
+### Phase 2: PredictionDetail Recipe Section
+- [x] Add "Prediction Recipe" section to PredictionDetail
+- [x] Display recipe name, description, expected effect
+- [x] Link prediction to recipe via recipeUsage
+- [x] Hide internal algorithm details (user-facing display only)
+
+### Phase 3: Recipe List Page & Filtering
+- [x] Create RecipeList page component
+- [x] Display recipe name, category, expected effect
+- [x] Implement category filter (All/Trend/Sentiment/Technical/Fundamental/Hybrid)
+- [x] Add route to App.tsx
+
+### Phase 4: Prediction-Recipe Association
+- [x] Add recipeUsage field to DiaryEntryEnhanced (PredictionRecipeUsage)
+- [x] Implement random recipe assignment in PredictionResult
+- [x] Store recipe usage data for Learning Engine (recipeIds array)
+- [x] Support multiple recipes per prediction
+
+### Phase 5: Desktop/Mobile Confirmation
+- [x] Desktop view verification (Recipe List)
+- [x] Mobile view verification (Recipe List)
+- [x] Responsive design confirmed
+- [x] Filter functionality verified
+
+### Phase 6: Git Commit & Checkpoint
+
 ## Issue #022: Prediction Lifecycle
 
 ### Phase 1: Data Structure Design

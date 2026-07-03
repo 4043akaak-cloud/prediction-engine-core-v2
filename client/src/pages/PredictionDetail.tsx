@@ -6,6 +6,7 @@ import { useDiary } from "@/hooks/useDiary";
 import type { DiaryEntryEnhanced, OutcomeType, EvaluationType, PredictionStatus } from "@/contexts/DiaryContext";
 import type { PredictionIngredient } from "@/services/mockPrediction";
 import { formatConfidencePercent, getConfidenceBarWidth } from "@/lib/confidenceFormatter";
+import { getRecipesByIds } from "@shared/recipes";
 
 /**
  * Prediction Detail Experience
@@ -198,6 +199,25 @@ export default function PredictionDetail() {
                 )}
               </div>
             </div>
+
+            {/* Prediction Recipe Section */}
+            {entryWithLifecycle?.recipeUsage?.recipeIds && entryWithLifecycle.recipeUsage.recipeIds.length > 0 && (
+              <div className="mb-12 pb-12 border-b border-border">
+                <h2 className="text-sm font-medium text-muted-foreground mb-6">Prediction Recipe</h2>
+                <div className="space-y-4">
+                  {getRecipesByIds(entryWithLifecycle.recipeUsage.recipeIds).map((recipe) => (
+                    <div key={recipe.id} className="p-4 bg-muted rounded">
+                      <h3 className="text-base font-semibold mb-2">{recipe.name}</h3>
+                      <p className="text-sm text-foreground mb-3">{recipe.description}</p>
+                      <div className="p-3 bg-background rounded border border-border">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">Expected Effect</p>
+                        <p className="text-sm text-foreground">{recipe.expectedEffect}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* ⑤ Counter Prediction (Collapsible) */}
             <div className="mb-12">

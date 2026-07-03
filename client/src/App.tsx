@@ -12,6 +12,7 @@ import PredictionResult from "./pages/PredictionResult";
 import PredictionDiary from "./pages/PredictionDiary";
 import PredictionDetail from "./pages/PredictionDetail";
 import NotFound from "@/pages/NotFound";
+import RecipeList from "./pages/RecipeList";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -22,6 +23,7 @@ function Router() {
       <Route path={"/result"} component={PredictionResult} />
       <Route path={"/diary"} component={PredictionDiary} />
       <Route path={"/detail/:id"} component={PredictionDetail} />
+      <Route path={"/recipes"} component={RecipeList} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

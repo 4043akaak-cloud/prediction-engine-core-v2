@@ -22,6 +22,29 @@ export interface GeneratePredictionOutput {
   ingredients: PredictionIngredient[];
 }
 
+/**
+ * Map prediction type to recipe category
+ * Determines which recipe should be used for the prediction
+ */
+function getRecipeCategoryForType(predictionType: string): RecipeCategory {
+  const typeToCategory: Record<string, RecipeCategory> = {
+    general: 'trend',
+    market: 'technical',
+    event: 'fundamental',
+    timing: 'trend',
+  };
+  return typeToCategory[predictionType] || 'hybrid';
+}
+
+/**
+ * Get recipe ID for prediction type
+ */
+function getRecipeIdForType(predictionType: string): string {
+  const category = getRecipeCategoryForType(predictionType);
+  const recipes = getRecipesByCategory(category);
+  return recipes.length > 0 ? recipes[0].id : 'recipe-hybrid-01';
+}
+
 const recipesByType: Record<string, PredictionRecipeItem[]> = {
   general: [
     { name: 'Trend Analysis', strength: 'Strong' },
@@ -98,6 +121,7 @@ export async function generateMockPrediction(
       createdAt: new Date().toISOString(),
       modelUsed: 'Prediction Engine v1.0',
       informationSources: ['Market Data', 'Historical Analysis', 'Trend Indicators'],
+      recipeId: getRecipeIdForType(predictionType),
     },
   };
 
@@ -111,3 +135,4 @@ export async function generateMockPrediction(
 
   return { prediction, counterPrediction, recipe, ingredients };
 }
+import { getRecipesByCategory, type RecipeCategory } from '@shared/recipes';

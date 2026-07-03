@@ -1,4 +1,5 @@
 import React, { createContext, useState, ReactNode } from 'react';
+import type { PredictionRecipe } from '@shared/recipes';
 
 /**
  * Prediction Lifecycle Types
@@ -8,6 +9,16 @@ import React, { createContext, useState, ReactNode } from 'react';
 export type OutcomeType = 'occurred' | 'did_not_occur' | 'partially_occurred' | 'unknown';
 export type EvaluationType = 'correct' | 'partially_correct' | 'incorrect';
 export type PredictionStatus = 'pending' | 'resolved' | 'archived';
+
+/**
+ * Prediction Recipe Usage
+ * Supports multiple recipes per prediction for future Learning Engine analysis
+ * Currently uses 1 recipe, but structure supports multiple recipes
+ */
+export interface PredictionRecipeUsage {
+  recipeIds: string[];  // Array of recipe IDs used in this prediction
+  selectedRecipeNames?: string[];  // User-facing display names
+}
 
 export interface PredictionLifecycle {
   status: PredictionStatus;
@@ -123,6 +134,7 @@ export interface DiaryEntryEnhanced extends DiaryEntry {
   createdAt?: string;
   updatedAt?: string;
   modelVersion?: string;
+  recipeUsage?: PredictionRecipeUsage;
 }
 
 export interface DiaryState {

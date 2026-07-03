@@ -4,6 +4,7 @@ export interface PredictionMetadata {
   createdAt: string;
   modelUsed: string;
   informationSources: string[];
+  recipeId?: string;  // Recipe used for this prediction
 }
 
 export interface Prediction {
