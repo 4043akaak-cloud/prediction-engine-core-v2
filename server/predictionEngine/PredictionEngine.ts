@@ -1,22 +1,19 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult, IRecipe, IRecipeExecutor, IEvidenceCollector, IConfidenceCalculator, IPredictionResultBuilder } from "./types";
-import { MockRecipe } from "./RecipeInterface";
+import { RecipeRegistry } from "./RecipeRegistry";
 import { RecipeExecutor } from "./RecipeExecutor";
 import { EvidenceCollector } from "./EvidenceCollector";
 import { ConfidenceCalculator } from "./ConfidenceCalculator";
 import { PredictionResultBuilder } from "./PredictionResultBuilder";
 
 export class PredictionEngine implements IPredictionEngine {
-  private recipes: Map<string, IRecipe>;
   private recipeExecutor: IRecipeExecutor;
   private evidenceCollector: IEvidenceCollector;
   private confidenceCalculator: IConfidenceCalculator;
   private predictionResultBuilder: IPredictionResultBuilder;
+  private recipeRegistry: RecipeRegistry;
 
   constructor() {
-    this.recipes = new Map<string, IRecipe>();
-    // Register mock recipes for now
-    const mockRecipe = new MockRecipe();
-    this.recipes.set(mockRecipe.id, mockRecipe);
+    this.recipeRegistry = RecipeRegistry.getInstance();
 
     this.recipeExecutor = new RecipeExecutor();
     this.evidenceCollector = new EvidenceCollector();
@@ -28,7 +25,7 @@ export class PredictionEngine implements IPredictionEngine {
     console.log("Prediction Engine: Starting prediction process...");
 
     // 1. Select Recipe
-    const recipe = this.recipes.get(request.recipeId);
+    const recipe = this.recipeRegistry.getRecipe(request.recipeId);
     if (!recipe) {
       throw new Error(`Recipe with ID ${request.recipeId} not found.`);
     }
@@ -39,7 +36,7 @@ export class PredictionEngine implements IPredictionEngine {
     console.log("Prediction Engine: Evidence collected.", evidence);
 
     // 3. Execute Recipe
-    const recipeExecutionResult = this.recipeExecutor.execute(recipe, evidence);
+    const recipeExecutionResult = await this.recipeExecutor.execute(recipe, evidence);
     console.log("Prediction Engine: Recipe executed.", recipeExecutionResult);
 
     // 4. Calculate Confidence
