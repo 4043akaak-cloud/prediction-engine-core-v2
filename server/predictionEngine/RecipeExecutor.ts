@@ -1,8 +1,17 @@
-import { IRecipe, IRecipeExecutor, Evidence, RecipeExecutionResult } from "./types";
+import type {
+  Evidence,
+  IRecipe,
+  IRecipeExecutor,
+  RecipeExecutionResult,
+} from "./types";
 
 export class RecipeExecutor implements IRecipeExecutor {
-  execute(recipe: IRecipe, evidence: Evidence): RecipeExecutionResult {
+  async execute(
+    recipe: IRecipe,
+    evidence: Evidence,
+  ): Promise<RecipeExecutionResult> {
     console.log(`Executing recipe: ${recipe.name}`);
-    return recipe.execute(evidence);
+    return await recipe.execute(evidence);
   }
 }
+

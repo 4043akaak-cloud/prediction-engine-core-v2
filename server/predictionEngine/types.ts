@@ -8,7 +8,12 @@ export interface Evidence {
 }
 
 export interface RecipeExecutionResult {
-  rawPredictionData: any;
+  rawPredictionData: {
+    value: string;
+    factors: string[];
+    [key: string]: any;
+  };
+  factors?: string[];
 }
 
 export interface PredictionResult {
@@ -18,18 +23,17 @@ export interface PredictionResult {
   reason: string;
   recipeUsed: string;
   timestamp: number;
-  // Add other fields as needed for the final result
 }
 
 export interface IRecipe {
   id: string;
   name: string;
   description: string;
-  execute(evidence: Evidence): RecipeExecutionResult;
+  execute(evidence: Evidence): Promise<RecipeExecutionResult>;
 }
 
 export interface IRecipeExecutor {
-  execute(recipe: IRecipe, evidence: Evidence): RecipeExecutionResult;
+  execute(recipe: IRecipe, evidence: Evidence): Promise<RecipeExecutionResult>;
 }
 
 export interface IEvidenceCollector {
@@ -41,7 +45,11 @@ export interface IConfidenceCalculator {
 }
 
 export interface IPredictionResultBuilder {
-  build(request: PredictionRequest, recipeResult: RecipeExecutionResult, confidence: number): PredictionResult;
+  build(
+    request: PredictionRequest,
+    recipeResult: RecipeExecutionResult,
+    confidence: number,
+  ): PredictionResult;
 }
 
 export interface IPredictionEngine {

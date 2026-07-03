@@ -353,3 +353,36 @@
 - [x] Design consistency with PEC v1 vehicle
 - [x] No new functional features implemented
 - [x] TypeScript compilation: 0 errors
+
+## Issue #036: Verify Engine Extensibility with Multiple Recipes
+
+### Phase 1: Additional Mock Recipe Implementation
+- [ ] Create TrendRecipe implementing the existing recipe interface
+- [ ] Create StatisticalRecipe implementing the existing recipe interface
+- [ ] Ensure each recipe returns RecipeExecutionResult with value and factors
+
+### Phase 2: Recipe Registration Without Engine Logic Change
+- [ ] Register new recipes without changing PredictionEngine orchestration flow
+- [ ] Verify PredictionEngine behavior remains recipe-agnostic
+
+### Phase 3: Multi-Recipe Execution Verification
+- [ ] Execute the same PredictionRequest with MockRecipe
+- [ ] Execute the same PredictionRequest with TrendRecipe
+- [ ] Execute the same PredictionRequest with StatisticalRecipe
+- [ ] Compare outputs across recipes
+
+### Phase 4: Component Compatibility Verification
+- [ ] Verify RecipeExecutor works with all recipes implementing the interface
+- [ ] Verify ConfidenceCalculator works consistently across recipes
+- [ ] Verify PredictionResultBuilder produces consistent output shape
+- [ ] Ensure TypeScript compilation and tests pass
+
+### Phase 5: ADF Self-Review
+- [ ] Verify PredictionEngine was not modified for recipe-specific logic
+- [ ] Verify no component is coupled to a specific recipe
+- [ ] Verify Open/Closed Principle compliance
+
+### Phase 6: Git Commit & Push
+- [ ] Final self-review
+- [ ] Git commit
+- [ ] Push to GitHub
