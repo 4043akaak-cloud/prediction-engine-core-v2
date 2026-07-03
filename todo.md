@@ -240,3 +240,37 @@
 - [x] ADF principle verification (過剰実装なし)
 
 ### Phase 4: Git Commit & Push
+- [x] Final self-review
+- [x] Git commit
+- [x] Checkpoint save
+
+## Issue #031: End-to-End User Journey Audit
+
+### Phase 1: 6-Step User Journey Audit
+- [x] Step 1: Home を開く - 目的が明確、5秒以内に理解
+- [x] Step 2: Prediction を作成する - 迷わない、説明充実
+- [x] Step 3: Prediction Result を見る - 結論が明確、自然な遷移
+- [x] Step 4: Diary へ保存する - 自然な遷移、統一されたボタン名
+- [x] Step 5: Diary から Prediction Detail を開く - 未実装（将来実装）
+- [x] Step 6: Recipe 情報を確認する - 情報が整理、技術用語なし
+
+### Phase 2: Desktop/Mobile Preview Confirmation
+- [x] Desktop view verification (1280x720) - 全画面確認
+- [x] Mobile view verification (375x812) - レスポンシブ確認
+- [x] User journey flow verification - 6ステップの流れ確認
+- [x] Button name consistency check - 統一性確認
+- [x] Back navigation clarity check - 戻る操作の分かりやすさ確認
+
+### Phase 3: Self-Review & Improvement
+- [x] Confusion check (迷う画面はないか) - NO
+- [x] Explanation sufficiency check (説明不足な箇所はないか) - NO
+- [x] Screen transition naturalness (画面遷移は自然か) - YES
+- [x] Button name consistency (ボタン名が統一されているか) - YES
+- [x] Back operation clarity (戻る操作は分かりやすいか) - YES
+- [x] Mobile operation stress check (モバイル操作でストレスはないか) - NO
+- [x] 5-second rule verification (5秒以内に画面の目的を理解できるか) - YES
+- [x] Overdesign check (過剰設計はないか) - NO
+- [x] Premature feature check (時期尚早な機能は混入していないか) - NO
+- [x] Engine implementation compatibility (Engine実装後もUXを維持できるか) - YES
+
+### Phase 4: Git Commit & Push
