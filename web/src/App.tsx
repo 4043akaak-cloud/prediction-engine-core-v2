@@ -1,8 +1,9 @@
 import React from 'react'
 import PredictionResultCard from './components/PredictionResultCard'
+import PredictionDiary from './components/PredictionDiary'
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = React.useState<'home' | 'prediction'>('home')
+  const [currentScreen, setCurrentScreen] = React.useState<'home' | 'prediction' | 'diary'>('home')
   const [userQuestion, setUserQuestion] = React.useState('')
 
   const handlePredict = () => {
@@ -14,6 +15,33 @@ export default function App() {
   const handleBackToHome = () => {
     setCurrentScreen('home')
     setUserQuestion('')
+  }
+
+  const handleOpenDiary = () => {
+    setCurrentScreen('diary')
+  }
+
+  const handleBackFromDiary = () => {
+    setCurrentScreen('home')
+  }
+
+  if (currentScreen === 'diary') {
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        {/* Back Button */}
+        <div className="px-4 py-4 border-b border-gray-200">
+          <button
+            onClick={handleBackFromDiary}
+            className="text-gray-600 hover:text-gray-900 font-semibold"
+          >
+            ← Back
+          </button>
+        </div>
+
+        {/* Diary Content */}
+        <PredictionDiary />
+      </div>
+    )
   }
 
   if (currentScreen === 'prediction') {
@@ -87,6 +115,9 @@ export default function App() {
             />
             <button onClick={handlePredict} className="w-full px-6 py-4 text-lg font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">
               Predict
+            </button>
+            <button onClick={handleOpenDiary} className="w-full px-6 py-4 text-lg font-semibold text-gray-900 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+              View Diary
             </button>
           </div>
         </div>
