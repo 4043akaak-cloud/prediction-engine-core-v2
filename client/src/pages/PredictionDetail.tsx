@@ -2,7 +2,11 @@ import { useState } from "react";
 import { useLocation, useRoute } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useDiary } from "@/hooks/useDiary";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
+import { EmptyState } from "@/components/EmptyState";
 import type { DiaryEntryEnhanced, OutcomeType, EvaluationType, PredictionStatus } from "@/contexts/DiaryContext";
 import type { PredictionIngredient } from "@/services/mockPrediction";
 import { formatConfidencePercent, getConfidenceBarWidth } from "@/lib/confidenceFormatter";
@@ -12,6 +16,14 @@ import { getRecipesByIds } from "@shared/recipes";
  * Prediction Detail Experience
  * Display a single prediction with all its details
  * User-friendly display focused on understanding the prediction
+ *
+ * Display Order (Strict):
+ * 1. Prediction (Main Result)
+ * 2. Confidence
+ * 3. Reason (Why This Prediction)
+ * 4. Details (How This Prediction Was Made)
+ * 5. Counter Prediction (Collapsible)
+ * 6. Lifecycle (Outcome, Evaluation, Notes)
  */
 export default function PredictionDetail() {
   const [, setLocation] = useLocation();
@@ -25,21 +37,40 @@ export default function PredictionDetail() {
 
   if (!match) {
     return (
-      <div className="min-h-screen flex flex-col bg-background text-foreground">
-        <header className="border-b border-border">
-          <div className="container mx-auto px-4 py-4">
-            <div className="text-xl font-bold">PEC</div>
-          </div>
-        </header>
-        <main className="flex-1 flex items-center justify-center">
-          <p className="text-muted-foreground">Invalid prediction ID</p>
-        </main>
-      </div>
+      <PageContainer>
+        <PageHeader showBackButton backTo="/diary" backLabel="Back to Diary" />
+        <EmptyState
+          icon={AlertCircle}
+          title="Invalid Prediction ID"
+          description="The prediction you're looking for could not be found."
+          action={{
+            label: "Back to Diary",
+            onClick: () => setLocation("/diary"),
+          }}
+        />
+      </PageContainer>
     );
   }
 
   const predictionId = params?.id;
   const entry = diaryState.entries.find((e) => e.id === predictionId) as DiaryEntryEnhanced | undefined;
+
+  if (!entry) {
+    return (
+      <PageContainer>
+        <PageHeader showBackButton backTo="/diary" backLabel="Back to Diary" />
+        <EmptyState
+          icon={AlertCircle}
+          title="Prediction Not Found"
+          description="The prediction you're looking for could not be found."
+          action={{
+            label: "Back to Diary",
+            onClick: () => setLocation("/diary"),
+          }}
+        />
+      </PageContainer>
+    );
+  }
 
   const entryWithLifecycle = entry as any;
   const currentStatus = entryWithLifecycle?.lifecycle?.status || 'pending';
@@ -94,47 +125,15 @@ export default function PredictionDetail() {
     setShowThankYou(true);
     setTimeout(() => setShowThankYou(false), 3000);
   };
-  if (!entry) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background text-foreground">
-        <header className="border-b border-border">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="text-xl font-bold">PEC</div>
-            <button
-              onClick={() => setLocation("/diary")}
-              className="text-sm hover:text-primary"
-            >
-              ← Back to Diary
-            </button>
-          </div>
-        </header>
-        <main className="flex-1 flex items-center justify-center">
-          <p className="text-muted-foreground">Prediction not found</p>
-        </main>
-      </div>
-    );
-  }
 
   // Extract metadata from entry
   const metadata = entry.metadata || {};
-  const recipe = metadata.recipe || [];
   const ingredients = metadata.ingredients || [];
   const reasonSummary = metadata.reasonSummary || entry.question;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
-      {/* Header */}
-      <header className="border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="text-xl font-bold">PEC</div>
-          <button
-            onClick={() => setLocation("/diary")}
-            className="text-sm hover:text-primary"
-          >
-            ← Back to Diary
-          </button>
-        </div>
-      </header>
+    <PageContainer>
+      <PageHeader showBackButton backTo="/diary" backLabel="Back to Diary" />
 
       <main className="flex-1">
         <section className="container mx-auto px-4 py-12">
@@ -181,7 +180,7 @@ export default function PredictionDetail() {
               </p>
             </div>
 
-            {/* ④ Details - Prediction Recipe */}
+            {/* ④ Details - How This Prediction Was Made */}
             <div className="mb-12 pb-12 border-b border-border">
               <h2 className="text-sm font-medium text-muted-foreground mb-6">How This Prediction Was Made</h2>
               <div className="space-y-3">
@@ -220,7 +219,7 @@ export default function PredictionDetail() {
             )}
 
             {/* ⑤ Counter Prediction (Collapsible) */}
-            <div className="mb-12">
+            <div className="mb-12 pb-12 border-b border-border">
               <button
                 onClick={() => setExpandCounter(!expandCounter)}
                 className="w-full flex items-center justify-between p-4 bg-muted rounded hover:bg-muted/80 transition-colors"
@@ -334,8 +333,9 @@ export default function PredictionDetail() {
                 rows={4}
               />
             </div>
+
             {/* Action Buttons */}
-            <div className="flex gap-4 mt-12">
+            <div className="flex flex-col sm:flex-row gap-3 mb-12">
               {(outcomeType || notes) && (
                 <Button
                   onClick={handleSaveLifecycle}
@@ -355,13 +355,14 @@ export default function PredictionDetail() {
               )}
               <Button
                 onClick={() => setLocation("/predict")}
+                variant="outline"
                 className="flex-1"
               >
                 Make New Prediction
               </Button>
               <Button
-                variant="outline"
                 onClick={() => setLocation("/diary")}
+                variant="outline"
                 className="flex-1"
               >
                 Back to Diary
@@ -370,22 +371,13 @@ export default function PredictionDetail() {
 
             {/* Thank You Message */}
             {showThankYou && (
-              <div className="mt-8 p-4 bg-primary/10 border border-primary rounded text-center">
+              <div className="p-4 bg-primary/10 border border-primary rounded text-center">
                 <p className="text-sm font-medium text-primary">✓ Lifecycle data saved successfully</p>
               </div>
             )}
           </div>
         </section>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t border-border">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-xs text-muted-foreground">
-            © 2026 Prediction Engine Core. All rights reserved.
-          </div>
-        </div>
-      </footer>
-    </div>
+    </PageContainer>
   );
 }
