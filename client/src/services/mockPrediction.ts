@@ -92,7 +92,7 @@ export async function generateMockPrediction(
     question,
     predictionType,
     prediction: 'Based on current trends and analysis, this outcome is likely to occur.',
-    confidence: Math.round(confidence),
+    confidence: Math.round(confidence) / 100,
     reason: 'Multiple converging indicators support this prediction.',
     metadata: {
       createdAt: new Date().toISOString(),
@@ -103,7 +103,7 @@ export async function generateMockPrediction(
 
   const counterPrediction: CounterPrediction = {
     prediction: 'The opposite scenario is possible if conditions shift.',
-    confidence: Math.round(Math.max(30, 100 - confidence + Math.random() * 10)),
+    confidence: Math.round(Math.max(30, 100 - confidence + Math.random() * 10)) / 100,
     reason: 'While less likely, this alternative remains possible.',
   };
 

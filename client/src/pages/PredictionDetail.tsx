@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import { useDiary } from "@/hooks/useDiary";
 import type { DiaryEntryEnhanced } from "@/contexts/DiaryContext";
 import type { PredictionIngredient } from "@/services/mockPrediction";
+import { formatConfidencePercent, getConfidenceBarWidth } from "@/lib/confidenceFormatter";
 
 /**
  * Prediction Detail Experience
@@ -105,11 +106,11 @@ export default function PredictionDetail() {
                 <div className="flex-1 bg-muted rounded-full h-2">
                   <div
                     className="bg-primary h-2 rounded-full transition-all"
-                    style={{ width: `${entry.confidence * 100}%` }}
+                    style={{ width: getConfidenceBarWidth(entry.confidence) }}
                   />
                 </div>
                 <span className="text-2xl font-semibold">
-                  {Math.round(entry.confidence * 100)}%
+                  {formatConfidencePercent(entry.confidence)}
                 </span>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useDiary } from "@/hooks/useDiary";
+import { formatConfidencePercent } from "@/lib/confidenceFormatter";
 
 /**
  * Prediction Diary Experience
@@ -58,7 +59,7 @@ export default function PredictionDiary() {
                     <div className="flex justify-between items-start gap-4 mb-3">
                       <h3 className="font-semibold text-lg flex-1">{entry.question}</h3>
                       <span className="text-sm font-medium text-primary">
-                        {Math.round(entry.confidence * 100)}%
+                        {formatConfidencePercent(entry.confidence)}
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground mb-3">

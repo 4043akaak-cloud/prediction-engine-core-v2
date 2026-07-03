@@ -5,6 +5,7 @@ import { ChevronDown, Loader2 } from "lucide-react";
 import { usePrediction } from "@/hooks/usePrediction";
 import { useDiary } from "@/hooks/useDiary";
 import { generatePrediction } from "@/services/api";
+import { formatConfidencePercent, getConfidenceBarWidth } from "@/lib/confidenceFormatter";
 
 export default function PredictionResult() {
   const [, setLocation] = useLocation();
@@ -112,8 +113,6 @@ export default function PredictionResult() {
     setLocation("/diary");
   };
 
-  const confidencePercentage = Math.round(currentPrediction.confidence);
-
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <header className="border-b border-border">
@@ -141,10 +140,10 @@ export default function PredictionResult() {
               <div className="flex items-center gap-4">
                 <div className="flex-1">
                   <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${confidencePercentage}%` }} />
+                    <div className="bg-primary h-2 rounded-full transition-all" style={{ width: getConfidenceBarWidth(currentPrediction.confidence) }} />
                   </div>
                 </div>
-                <span className="text-2xl font-bold">{confidencePercentage}%</span>
+                <span className="text-2xl font-bold">{formatConfidencePercent(currentPrediction.confidence)}</span>
               </div>
             </div>
 
