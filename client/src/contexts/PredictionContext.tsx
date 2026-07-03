@@ -1,4 +1,39 @@
 import React, { createContext, useState, ReactNode } from 'react';
+import { useEffect } from 'react';
+
+const PREDICTION_STORAGE_KEY = 'pec-prediction-result';
+
+function savePredictionToStorage(prediction: Prediction | null, counterPrediction: CounterPrediction | null) {
+  if (!prediction) {
+    localStorage.removeItem(PREDICTION_STORAGE_KEY);
+    return;
+  }
+  try {
+    localStorage.setItem(PREDICTION_STORAGE_KEY, JSON.stringify({
+      prediction,
+      counterPrediction,
+      timestamp: Date.now(),
+    }));
+  } catch (err) {
+    console.error('Failed to save prediction to storage:', err);
+  }
+}
+
+function loadPredictionFromStorage(): { prediction: Prediction | null; counterPrediction: CounterPrediction | null } {
+  try {
+    const stored = localStorage.getItem(PREDICTION_STORAGE_KEY);
+    if (!stored) return { prediction: null, counterPrediction: null };
+    
+    const data = JSON.parse(stored);
+    return {
+      prediction: data.prediction || null,
+      counterPrediction: data.counterPrediction || null,
+    };
+  } catch (err) {
+    console.error('Failed to load prediction from storage:', err);
+    return { prediction: null, counterPrediction: null };
+  }
+}
 
 export interface PredictionMetadata {
   createdAt: string;
@@ -56,7 +91,19 @@ const initialState: PredictionState = {
 export const PredictionContext = createContext<PredictionContextType | undefined>(undefined);
 
 export const PredictionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [state, setState] = useState<PredictionState>(initialState);
+  const [state, setState] = useState<PredictionState>(() => {
+    const { prediction, counterPrediction } = loadPredictionFromStorage();
+    return {
+      ...initialState,
+      currentPrediction: prediction,
+      counterPrediction,
+    };
+  });
+
+  // Save to storage whenever prediction or counterPrediction changes
+  useEffect(() => {
+    savePredictionToStorage(state.currentPrediction, state.counterPrediction);
+  }, [state.currentPrediction, state.counterPrediction]);
 
   const setPrediction = (prediction: Prediction) => {
     setState((prev) => ({ ...prev, currentPrediction: prediction }));
