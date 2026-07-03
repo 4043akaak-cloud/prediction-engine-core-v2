@@ -221,3 +221,35 @@
 - [ ] Git commit
 - [ ] Push to GitHub
 - [ ] Checkpoint save
+
+## Issue #029: Design System & UI Consistency
+
+### Phase 1: Design Analysis & Rule Definition
+- [x] Analyze current design across all pages (Home, PredictionInput, PredictionResult, PredictionDiary, PredictionDetail, RecipeList)
+- [x] Identify design inconsistencies (Header, Spacing, Cards, Typography, Colors)
+- [x] Define unified design rules (Spacing scale, Card styles, Typography hierarchy, Colors)
+
+### Phase 2: Design Rule Implementation
+- [x] Create PageContainer component (min-h-screen, flex, bg-background, text-foreground)
+- [x] Create PageHeader component (border-b, container, py-4)
+- [x] Create LoadingState component (Loader2 icon, text-primary)
+- [x] Create ErrorState component (AlertCircle icon, button layout)
+- [x] Create EmptyState component (icon, title, description, action)
+- [x] Refactor PredictionResult.tsx with shared components
+- [x] Refactor PredictionInput.tsx with shared components
+- [x] Refactor Home.tsx with shared components
+- [x] Ensure TypeScript compilation: 0 errors
+
+### Phase 3: Desktop/Mobile Confirmation & Self-Review
+- [x] Desktop view verification (1280x720)
+- [x] Mobile view verification (375x812)
+- [x] Continuous operation across all pages (違和感がないか)
+- [x] First-time user guidance (初めて使うユーザーが迷わないか)
+- [x] Design consistency verification (デザインの統一感があるか)
+- [x] ADF principle verification (過剰実装なし)
+
+### Phase 4: Git Commit & Push
+- [ ] Final self-review
+- [ ] Git commit
+- [ ] Push to GitHub
+- [ ] Checkpoint save

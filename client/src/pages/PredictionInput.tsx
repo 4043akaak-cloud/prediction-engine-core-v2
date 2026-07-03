@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Info } from "lucide-react";
 import { usePrediction } from "@/hooks/usePrediction";
 import { generatePrediction } from "@/services/api";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
 
 /**
  * Prediction Input Experience
@@ -64,22 +66,11 @@ export default function PredictionInput() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
-      {/* Header */}
-      <header className="border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="text-xl font-bold">PEC</div>
-          <button
-            onClick={() => setLocation("/")}
-            className="text-sm hover:text-primary"
-          >
-            ← Back to Home
-          </button>
-        </div>
-      </header>
+    <PageContainer>
+      <PageHeader showBackButton backTo="/" backLabel="← Back to Home" />
 
       <main className="flex-1">
-        <section className="container mx-auto px-4 py-12 md:py-16">
+        <section className="container py-12 md:py-16">
           <div className="max-w-2xl">
             {/* Hero Section */}
             <div className="mb-12">
@@ -185,12 +176,12 @@ export default function PredictionInput() {
 
       {/* Footer */}
       <footer className="border-t border-border">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container py-8">
           <div className="text-xs text-muted-foreground">
             © 2026 Prediction Engine Core. All rights reserved.
           </div>
         </div>
       </footer>
-    </div>
+    </PageContainer>
   );
 }

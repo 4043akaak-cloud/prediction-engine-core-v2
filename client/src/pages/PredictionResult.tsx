@@ -1,12 +1,17 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Loader2 } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { usePrediction } from "@/hooks/usePrediction";
 import { useDiary } from "@/hooks/useDiary";
 import { generatePrediction } from "@/services/api";
 import { formatConfidencePercent, getConfidenceBarWidth } from "@/lib/confidenceFormatter";
 import { getRecipesByIds } from "@shared/recipes";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
+import { LoadingState } from "@/components/LoadingState";
+import { ErrorState } from "@/components/ErrorState";
+import { EmptyState } from "@/components/EmptyState";
 
 export default function PredictionResult() {
   const [, setLocation] = useLocation();
@@ -33,63 +38,57 @@ export default function PredictionResult() {
     }
   };
 
+  // Empty state
   if (!currentPrediction && !isLoading && !error) {
     return (
-      <div className="min-h-screen flex flex-col bg-background text-foreground">
-        <header className="border-b border-border">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="text-xl font-bold">PEC</div>
-            <button onClick={() => setLocation("/")} className="text-sm hover:text-primary">← Back to Home</button>
-          </div>
-        </header>
+      <PageContainer>
+        <PageHeader showBackButton backTo="/" backLabel="← Back to Home" />
         <main className="flex-1 flex items-center justify-center">
-          <p className="text-muted-foreground">No prediction available. Please start a new prediction.</p>
+          <EmptyState
+            title="No prediction available"
+            description="Please start a new prediction to see results here."
+            action={{
+              label: "Start Prediction",
+              onClick: () => setLocation("/predict"),
+            }}
+          />
         </main>
-      </div>
+      </PageContainer>
     );
   }
 
+  // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col bg-background text-foreground">
-        <header className="border-b border-border">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="text-xl font-bold">PEC</div>
-            <button onClick={() => setLocation("/")} className="text-sm hover:text-primary">← Back to Home</button>
-          </div>
-        </header>
+      <PageContainer>
+        <PageHeader showBackButton backTo="/" backLabel="← Back to Home" />
         <main className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <Loader2 className="animate-spin mx-auto mb-4" size={32} />
-            <p className="text-muted-foreground">Generating prediction...</p>
-          </div>
+          <LoadingState message="Generating prediction..." />
         </main>
-      </div>
+      </PageContainer>
     );
   }
 
+  // Error state
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col bg-background text-foreground">
-        <header className="border-b border-border">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="text-xl font-bold">PEC</div>
-            <button onClick={() => setLocation("/")} className="text-sm hover:text-primary">← Back to Home</button>
-          </div>
-        </header>
+      <PageContainer>
+        <PageHeader showBackButton backTo="/" backLabel="← Back to Home" />
         <main className="flex-1 flex items-center justify-center">
-          <div className="max-w-2xl text-center">
-            <div className="mb-8 p-6 bg-red-50 border border-red-200 rounded">
-              <p className="text-red-800 font-semibold mb-2">Prediction generation failed</p>
-              <p className="text-red-700 text-sm">{error}</p>
-            </div>
-            <div className="flex gap-4 justify-center">
-              <Button onClick={handleRetry}>Retry</Button>
-              <Button variant="outline" onClick={() => setLocation("/predict")}>Back to Input</Button>
-            </div>
-          </div>
+          <ErrorState
+            title="Prediction generation failed"
+            message={error}
+            action={{
+              label: "Retry",
+              onClick: handleRetry,
+            }}
+            secondaryAction={{
+              label: "Back to Input",
+              onClick: () => setLocation("/predict"),
+            }}
+          />
         </main>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -119,16 +118,11 @@ export default function PredictionResult() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <header className="border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="text-xl font-bold">PEC</div>
-          <button onClick={() => setLocation("/")} className="text-sm hover:text-primary">← Back to Home</button>
-        </div>
-      </header>
+    <PageContainer>
+      <PageHeader showBackButton backTo="/" backLabel="← Back to Home" />
 
       <main className="flex-1">
-        <section className="container mx-auto px-4 py-8 md:py-12">
+        <section className="container py-8 md:py-12">
           <div className="max-w-2xl">
             {/* ===== CONCLUSION SECTION (5-second understanding) ===== */}
             <div className="mb-12">
@@ -239,10 +233,10 @@ export default function PredictionResult() {
       </main>
 
       <footer className="border-t border-border mt-12">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container py-8">
           <div className="text-xs text-muted-foreground">© 2026 Prediction Engine Core. All rights reserved.</div>
         </div>
       </footer>
-    </div>
+    </PageContainer>
   );
 }
