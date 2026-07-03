@@ -1,11 +1,12 @@
 import React from 'react'
+import { Button, Input, Label } from './ui'
 
 interface PredictionInputExperienceProps {
   onPredict: (question: string) => void
 }
 
 export default function PredictionInputExperience({ onPredict }: PredictionInputExperienceProps) {
-  const [selectedType, setSelectedType] = React.useState('Stocks')
+  const [selectedType, setSelectedType] = React.useState('stocks')
   const [question, setQuestion] = React.useState('')
 
   const predictionTypes = ['Stocks', 'Sports', 'Lottery', 'Crypto', 'Weather']
@@ -29,43 +30,34 @@ export default function PredictionInputExperience({ onPredict }: PredictionInput
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Main Content */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-2xl space-y-12">
-          {/* Prediction Type Section */}
           <div>
-            <label className="block text-sm font-semibold text-gray-600 mb-3">
-              Prediction Type
-            </label>
+            <Label>Prediction Type</Label>
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
               className="w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-white"
             >
               {predictionTypes.map((type) => (
-                <option key={type} value={type}>
+                <option key={type} value={type.toLowerCase()}>
                   {type}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Question Section */}
           <div>
-            <label className="block text-sm font-semibold text-gray-600 mb-3">
-              Question
-            </label>
-            <input
+            <Label>Question</Label>
+            <Input
               type="text"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handlePredict()}
               placeholder="Ask anything about the future..."
-              className="w-full px-6 py-4 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
               autoFocus
             />
 
-            {/* Examples */}
             <div className="mt-6 space-y-2">
               <p className="text-sm text-gray-600 font-semibold">Examples:</p>
               <div className="space-y-2">
@@ -82,20 +74,13 @@ export default function PredictionInputExperience({ onPredict }: PredictionInput
             </div>
           </div>
 
-          {/* Predict Button */}
-          <div className="pt-4">
-            <button
+          <Button
               onClick={handlePredict}
               disabled={!question.trim()}
-              className={`w-full px-8 py-4 text-lg font-semibold rounded-lg transition-colors ${
-                question.trim()
-                  ? 'text-white bg-gray-900 hover:bg-gray-800'
-                  : 'text-gray-400 bg-gray-100 cursor-not-allowed'
-              }`}
+              className="w-full"
             >
               Predict
-            </button>
-          </div>
+            </Button>
         </div>
       </div>
     </div>
