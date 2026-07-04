@@ -26,6 +26,16 @@ export interface PredictionResult {
   reason: string;
   recipeUsed: string;
   timestamp: number;
+  metadata?: PredictionMetadata;
+}
+
+export interface PredictionMetadata {
+  recipeId: string;
+  recipeName: string;
+  executionTimestamp: number;
+  confidenceScore: number;
+  evidenceCount: number;
+  predictionVersion: string;
 }
 
 export interface IRecipe {
