@@ -63,7 +63,7 @@ export interface IRecipeExecutor {
 }
 
 export interface IEvidenceCollector {
-  collect(query: string): Evidence;
+  collect(query: string): Promise<Evidence>;
 }
 
 export interface IConfidenceCalculator {

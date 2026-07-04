@@ -36,7 +36,7 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
     console.log(`Prediction Engine: Selected recipe: ${recipe.name}`);
 
     // 2. Collect Evidence
-    const evidence = this.evidenceCollector.collect(request.query);
+    const evidence = await this.evidenceCollector.collect(request.query);
     console.log("Prediction Engine: Evidence collected.", evidence);
 
     // 3. Execute Recipe
@@ -63,7 +63,7 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
     console.log("Prediction Engine: Starting multi-recipe prediction process...");
 
     // 1. Collect Evidence (once for all recipes)
-    const evidence = this.evidenceCollector.collect(request.query);
+    const evidence = await this.evidenceCollector.collect(request.query);
     console.log("Prediction Engine: Evidence collected.", evidence);
 
     // 2. Get all available recipes
