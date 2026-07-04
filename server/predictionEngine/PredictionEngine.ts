@@ -1,11 +1,12 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult, IRecipe, IRecipeExecutor, IEvidenceCollector, IConfidenceCalculator, IPredictionResultBuilder } from "./types";
 import { IPredictionEngineMulti } from "./types";
-import { RecipeRegistry } from "./RecipeRegistry";
-import { RecipeExecutor } from "./RecipeExecutor";
-import { EvidenceCollector } from "./EvidenceCollector";
-import { ConfidenceCalculator } from "./ConfidenceCalculator";
-import { PredictionResultBuilder } from "./PredictionResultBuilder";
-import { PredictionHistory } from "./PredictionHistory";
+  import { RecipeRegistry } from "./RecipeRegistry";
+  import { RecipeExecutor } from "./RecipeExecutor";
+  import { EvidenceCollector } from "./EvidenceCollector";
+  import { ConfidenceCalculator } from "./ConfidenceCalculator";
+  import { PredictionResultBuilder } from "./PredictionResultBuilder";
+  import { PredictionHistory } from "./PredictionHistory";
+  import { PredictionHistoryRepository } from "./PredictionHistoryRepository";
 
 export class PredictionEngine implements IPredictionEngine, IPredictionEngineMulti {
   private recipeExecutor: IRecipeExecutor;
@@ -14,6 +15,7 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
   private predictionResultBuilder: IPredictionResultBuilder;
   private recipeRegistry: RecipeRegistry;
   private predictionHistory: PredictionHistory;
+  private historyRepository: PredictionHistoryRepository;
 
   constructor() {
     this.recipeRegistry = RecipeRegistry.getInstance();
@@ -23,6 +25,7 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
     this.confidenceCalculator = new ConfidenceCalculator();
     this.predictionResultBuilder = new PredictionResultBuilder();
     this.predictionHistory = new PredictionHistory();
+    this.historyRepository = PredictionHistoryRepository.getInstance();
   }
 
   public async predict(request: PredictionRequest): Promise<PredictionResult> {
@@ -54,6 +57,13 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
     // 6. Record to History
     this.predictionHistory.add(predictionResult);
     console.log("Prediction Engine: Prediction recorded to history.");
+
+    // 7. Record to History Repository
+    this.historyRepository.record(predictionResult, {
+      query: request.query,
+      recipeId: request.recipeId,
+    });
+    console.log("Prediction Engine: Prediction recorded to history repository.");
 
     console.log("Prediction Engine: Prediction process completed.");
     return predictionResult;
@@ -94,6 +104,12 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
 
         // Record to History
         this.predictionHistory.add(predictionResult);
+
+        // Record to History Repository
+        this.historyRepository.record(predictionResult, {
+          query: request.query,
+          recipeId: recipe.id,
+        });
 
         results.push(predictionResult);
       } catch (error) {
