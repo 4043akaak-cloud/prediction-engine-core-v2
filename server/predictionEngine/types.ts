@@ -30,6 +30,13 @@ export interface RecipeExecutionResult {
 // Standardized RecipeOutput (v0.1: temporary alias for RecipeExecutionResult)
 export type RecipeOutput = RecipeExecutionResult;
 
+export interface RecipeRecommendationMetadata {
+  recommendedRecipes: string[];
+  selectedRecipes: string[];
+  recommendationScore: number;
+  recommendationReason: string;
+}
+
 export interface PredictionResult {
   id: string;
   prediction: string;
@@ -40,6 +47,7 @@ export interface PredictionResult {
   metadata?: PredictionMetadata;
   evidenceList?: StandardizedEvidence[];
   explanation?: string; // Human-readable explanation of the prediction
+  recommendationMetadata?: RecipeRecommendationMetadata;
 }
 
 export interface PredictionMetadata {

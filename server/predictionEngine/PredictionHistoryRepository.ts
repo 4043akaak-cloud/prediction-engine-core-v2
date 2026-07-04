@@ -13,6 +13,9 @@ export interface PredictionHistoryRecord {
   prediction: string;
   confidence: number;
   executedRecipeNames: string[];
+  recommendedRecipes?: string[];
+  selectedRecipes?: string[];
+  recommendationScore?: number;
 }
 
 /**
@@ -43,6 +46,9 @@ export class PredictionHistoryRepository {
       prediction: result.prediction,
       confidence: result.confidence,
       executedRecipeNames: result.metadata?.recipeName ? [result.metadata.recipeName] : [],
+      recommendedRecipes: result.recommendationMetadata?.recommendedRecipes,
+      selectedRecipes: result.recommendationMetadata?.selectedRecipes,
+      recommendationScore: result.recommendationMetadata?.recommendationScore,
     };
     this.history.push(record);
   }
