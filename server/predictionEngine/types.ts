@@ -15,6 +15,7 @@ export interface StandardizedEvidence {
   confidence: number;
   timestamp: number;
   type: string;
+  weight?: number; // Evidence weight for confidence calculation (default: 1.0)
 }
 
 export interface RecipeExecutionResult {

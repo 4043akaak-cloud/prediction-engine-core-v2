@@ -30,6 +30,12 @@ export class StaticDatasetEvidenceSource implements IEvidenceSource {
     ],
   };
 
+  private weight: number = 1.0;
+
+  constructor(weight: number = 1.0) {
+    this.weight = weight;
+  }
+
   async getEvidence(query: string): Promise<StandardizedEvidence[]> {
     // Find relevant dataset entries based on query keywords
     const keywords = query.toLowerCase().split(" ");
@@ -56,10 +62,15 @@ export class StaticDatasetEvidenceSource implements IEvidenceSource {
       confidence: 0.8,
       timestamp: Date.now(),
       type: "dataset",
+      weight: this.weight,
     }));
   }
 
   getName(): string {
     return "StaticDatasetEvidenceSource";
+  }
+
+  getWeight(): number {
+    return this.weight;
   }
 }

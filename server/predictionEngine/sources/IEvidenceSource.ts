@@ -16,5 +16,10 @@ export interface IEvidenceSource {
    * Get the source name for identification.
    */
   getName(): string;
-}
 
+  /**
+   * Get the weight of this evidence source for confidence calculation.
+   * Default: 1.0
+   */
+  getWeight(): number;
+}

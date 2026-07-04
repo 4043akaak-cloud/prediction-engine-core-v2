@@ -6,6 +6,12 @@ import { v4 as uuidv4 } from 'uuid';
  * Mock evidence source for testing and development.
  */
 export class MockEvidenceSource implements IEvidenceSource {
+  private weight: number = 1.0;
+
+  constructor(weight: number = 1.0) {
+    this.weight = weight;
+  }
+
   async getEvidence(query: string): Promise<StandardizedEvidence[]> {
     return [
       {
@@ -16,6 +22,7 @@ export class MockEvidenceSource implements IEvidenceSource {
         confidence: 0.85,
         timestamp: Date.now(),
         type: "query_analysis",
+        weight: this.weight,
       },
       {
         id: uuidv4(),
@@ -25,12 +32,17 @@ export class MockEvidenceSource implements IEvidenceSource {
         confidence: 0.75,
         timestamp: Date.now(),
         type: "context",
+        weight: this.weight,
       },
     ];
   }
 
   getName(): string {
     return "MockEvidenceSource";
+  }
+
+  getWeight(): number {
+    return this.weight;
   }
 }
 
