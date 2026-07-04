@@ -1,12 +1,13 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult, IRecipe, IRecipeExecutor, IEvidenceCollector, IConfidenceCalculator, IPredictionResultBuilder } from "./types";
 import { IPredictionEngineMulti } from "./types";
-  import { RecipeRegistry } from "./RecipeRegistry";
-  import { RecipeExecutor } from "./RecipeExecutor";
-  import { EvidenceCollector } from "./EvidenceCollector";
-  import { ConfidenceCalculator } from "./ConfidenceCalculator";
-  import { PredictionResultBuilder } from "./PredictionResultBuilder";
-  import { PredictionHistory } from "./PredictionHistory";
-  import { PredictionHistoryRepository } from "./PredictionHistoryRepository";
+import { RecipeRegistry } from "./RecipeRegistry";
+import { RecipeExecutor } from "./RecipeExecutor";
+import { EvidenceCollector } from "./EvidenceCollector";
+import { ConfidenceCalculator } from "./ConfidenceCalculator";
+import { PredictionResultBuilder } from "./PredictionResultBuilder";
+import { PredictionHistory } from "./PredictionHistory";
+import { PredictionHistoryRepository } from "./PredictionHistoryRepository";
+import { RecipePerformanceTracker } from "./RecipePerformanceTracker";
 
 export class PredictionEngine implements IPredictionEngine, IPredictionEngineMulti {
   private recipeExecutor: IRecipeExecutor;
@@ -16,6 +17,7 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
   private recipeRegistry: RecipeRegistry;
   private predictionHistory: PredictionHistory;
   private historyRepository: PredictionHistoryRepository;
+  private performanceTracker: RecipePerformanceTracker;
 
   constructor() {
     this.recipeRegistry = RecipeRegistry.getInstance();
@@ -26,6 +28,7 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
     this.predictionResultBuilder = new PredictionResultBuilder();
     this.predictionHistory = new PredictionHistory();
     this.historyRepository = PredictionHistoryRepository.getInstance();
+    this.performanceTracker = new RecipePerformanceTracker();
   }
 
   public async predict(request: PredictionRequest): Promise<PredictionResult> {
@@ -64,6 +67,13 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
       recipeId: request.recipeId,
     });
     console.log("Prediction Engine: Prediction recorded to history repository.");
+
+    // 8. Update Recipe Performance Statistics
+    const historyRecord = this.historyRepository.getAll().pop();
+    if (historyRecord) {
+      this.performanceTracker.recordPrediction(historyRecord);
+      console.log("Prediction Engine: Recipe performance statistics updated.");
+    }
 
     console.log("Prediction Engine: Prediction process completed.");
     return predictionResult;
@@ -111,6 +121,12 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
           recipeId: recipe.id,
         });
 
+        // Update Recipe Performance Statistics
+        const historyRecord = this.historyRepository.getAll().pop();
+        if (historyRecord) {
+          this.performanceTracker.recordPrediction(historyRecord);
+        }
+
         results.push(predictionResult);
       } catch (error) {
         console.error(`Prediction Engine: Error executing recipe ${recipe.id}:`, error);
@@ -120,5 +136,12 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
 
     console.log(`Prediction Engine: Multi-recipe prediction process completed. Generated ${results.length} results.`);
     return results;
+  }
+
+  /**
+   * Get the RecipePerformanceTracker instance for testing and analytics.
+   */
+  public getPerformanceTracker(): RecipePerformanceTracker {
+    return this.performanceTracker;
   }
 }
