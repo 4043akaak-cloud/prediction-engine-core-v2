@@ -1,50 +1,75 @@
-import { PredictionHistoryRepository, PredictionHistoryRecord } from "./PredictionHistoryRepository";
+import { PredictionHistoryRecord } from "./PredictionHistoryRepository";
 
+/**
+ * Read-only interface for accessing prediction history.
+ * This interface ensures that analytics services can only read history,
+ * never modify it.
+ */
+export interface IReadOnlyHistoryProvider {
+  getAll(): PredictionHistoryRecord[];
+  getCount(): number;
+}
+
+/**
+ * Statistics for a single recipe.
+ */
 export interface RecipeUsageStats {
   recipeName: string;
   count: number;
   averageConfidence: number;
 }
 
+/**
+ * Analytics service for prediction history.
+ * Provides read-only access to prediction history statistics.
+ */
 export class PredictionHistoryAnalytics {
-  private repository: PredictionHistoryRepository;
+  private historyProvider: IReadOnlyHistoryProvider;
 
-  constructor(repository: PredictionHistoryRepository) {
-    this.repository = repository;
+  constructor(historyProvider: IReadOnlyHistoryProvider) {
+    this.historyProvider = historyProvider;
   }
 
   /**
    * Get the total number of predictions recorded.
    */
   getPredictionCount(): number {
-    return this.repository.getCount();
+    return this.historyProvider.getCount();
   }
 
   /**
-   * Get the average confidence score of all predictions.
+   * Get the average confidence across all predictions.
    */
   getAverageConfidence(): number {
-    const allRecords = this.repository.getAll();
-    if (allRecords.length === 0) {
+    const history = this.historyProvider.getAll();
+    if (history.length === 0) {
       return 0;
     }
-    const totalConfidence = allRecords.reduce((sum, record) => sum + record.confidence, 0);
-    return totalConfidence / allRecords.length;
+
+    const totalConfidence = history.reduce((sum, record) => sum + record.confidence, 0);
+    return totalConfidence / history.length;
   }
 
   /**
-   * Get statistics on recipe usage, including count and average confidence per recipe.
+   * Get usage statistics for each recipe.
    */
   getRecipeUsageStats(): RecipeUsageStats[] {
-    const allRecords = this.repository.getAll();
+    const history = this.historyProvider.getAll();
     const statsMap = new Map<string, { count: number; totalConfidence: number }>();
 
-    for (const record of allRecords) {
-      for (const recipeName of record.executedRecipeNames) {
-        const currentStats = statsMap.get(recipeName) || { count: 0, totalConfidence: 0 };
-        currentStats.count++;
-        currentStats.totalConfidence += record.confidence;
-        statsMap.set(recipeName, currentStats);
+    for (const record of history) {
+      const recipeNames = record.executedRecipeNames;
+      for (const recipeName of recipeNames) {
+        const existing = statsMap.get(recipeName);
+        if (existing) {
+          existing.count += 1;
+          existing.totalConfidence += record.confidence;
+        } else {
+          statsMap.set(recipeName, {
+            count: 1,
+            totalConfidence: record.confidence,
+          });
+        }
       }
     }
 
@@ -57,15 +82,17 @@ export class PredictionHistoryAnalytics {
       });
     }
 
-    return stats.sort((a, b) => b.count - a.count);
+    return stats;
   }
 
   /**
-   * Get a list of recent predictions, limited by the specified count.
+   * Get the most recent N predictions.
    */
-  getRecentPredictions(limit: number = 10): PredictionHistoryRecord[] {
-    return this.repository.getAll()
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, limit);
+  getRecentPredictions(limit: number): PredictionHistoryRecord[] {
+    const history = this.historyProvider.getAll();
+    if (limit <= 0) {
+      return [];
+    }
+    return history.slice(Math.max(0, history.length - limit));
   }
 }
