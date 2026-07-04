@@ -3,6 +3,7 @@ import { RecipeOutput } from "./types";
 import { v4 as uuidv4 } from 'uuid';
 import { RecipeRegistry } from "./RecipeRegistry";
 import { PredictionMetadata } from "./types";
+import { Evidence, StandardizedEvidence } from "./types";
 
 export class PredictionResultBuilder implements IPredictionResultBuilder {
   private recipeRegistry: RecipeRegistry;
@@ -11,7 +12,7 @@ export class PredictionResultBuilder implements IPredictionResultBuilder {
     this.recipeRegistry = RecipeRegistry.getInstance();
   }
 
-  build(request: PredictionRequest, recipeResult: RecipeExecutionResult, confidence: number): PredictionResult {
+  build(request: PredictionRequest, recipeResult: RecipeExecutionResult, confidence: number, evidence?: Evidence): PredictionResult {
     console.log("Building prediction result...");
     // Map RecipeOutput (standardized output) to PredictionResult
     // v0.1: One-to-one mapping from RecipeOutput to PredictionResult
@@ -37,6 +38,9 @@ export class PredictionResultBuilder implements IPredictionResultBuilder {
       predictionVersion: "1.0.0",
     };
 
+    // Extract standardized evidence from evidence object
+    const evidenceList: StandardizedEvidence[] = (evidence as any)?.standardizedEvidence || [];
+
     return {
       id: predictionId,
       prediction: predictionText,
@@ -45,6 +49,7 @@ export class PredictionResultBuilder implements IPredictionResultBuilder {
       recipeUsed: request.recipeId,
       timestamp: Date.now(),
       metadata,
+      evidenceList,
     };
   }
 }

@@ -7,6 +7,16 @@ export interface Evidence {
   [key: string]: any;
 }
 
+export interface StandardizedEvidence {
+  id: string;
+  source: string;
+  title: string;
+  summary: string;
+  confidence: number;
+  timestamp: number;
+  type: string;
+}
+
 export interface RecipeExecutionResult {
   rawPredictionData: {
     value: string;
@@ -27,6 +37,7 @@ export interface PredictionResult {
   recipeUsed: string;
   timestamp: number;
   metadata?: PredictionMetadata;
+  evidenceList?: StandardizedEvidence[];
 }
 
 export interface PredictionMetadata {
@@ -64,6 +75,7 @@ export interface IPredictionResultBuilder {
     request: PredictionRequest,
     recipeResult: RecipeExecutionResult,
     confidence: number,
+    evidence?: Evidence,
   ): PredictionResult;
 }
 

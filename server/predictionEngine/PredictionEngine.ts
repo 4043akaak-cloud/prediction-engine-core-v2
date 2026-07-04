@@ -45,7 +45,7 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
     console.log("Prediction Engine: Confidence calculated.", confidence);
 
     // 5. Build Prediction Result
-    const predictionResult = this.predictionResultBuilder.build(request, recipeExecutionResult, confidence);
+    const predictionResult = this.predictionResultBuilder.build(request, recipeExecutionResult, confidence, evidence);
     console.log("Prediction Engine: Prediction result built.", predictionResult);
 
     console.log("Prediction Engine: Prediction process completed.");
@@ -82,7 +82,7 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
           query: request.query,
           recipeId: recipe.id,
         };
-        const predictionResult = this.predictionResultBuilder.build(predictionRequest, recipeExecutionResult, confidence);
+        const predictionResult = this.predictionResultBuilder.build(predictionRequest, recipeExecutionResult, confidence, evidence);
         console.log(`Prediction Engine: Prediction result for ${recipe.id} built.`, predictionResult);
 
         results.push(predictionResult);
