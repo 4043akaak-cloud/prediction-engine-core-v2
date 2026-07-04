@@ -5,6 +5,7 @@ import { RecipeExecutor } from "./RecipeExecutor";
 import { EvidenceCollector } from "./EvidenceCollector";
 import { ConfidenceCalculator } from "./ConfidenceCalculator";
 import { PredictionResultBuilder } from "./PredictionResultBuilder";
+import { PredictionHistory } from "./PredictionHistory";
 
 export class PredictionEngine implements IPredictionEngine, IPredictionEngineMulti {
   private recipeExecutor: IRecipeExecutor;
@@ -12,6 +13,7 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
   private confidenceCalculator: IConfidenceCalculator;
   private predictionResultBuilder: IPredictionResultBuilder;
   private recipeRegistry: RecipeRegistry;
+  private predictionHistory: PredictionHistory;
 
   constructor() {
     this.recipeRegistry = RecipeRegistry.getInstance();
@@ -20,6 +22,7 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
     this.evidenceCollector = new EvidenceCollector();
     this.confidenceCalculator = new ConfidenceCalculator();
     this.predictionResultBuilder = new PredictionResultBuilder();
+    this.predictionHistory = new PredictionHistory();
   }
 
   public async predict(request: PredictionRequest): Promise<PredictionResult> {
@@ -47,6 +50,10 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
     // 5. Build Prediction Result
     const predictionResult = this.predictionResultBuilder.build(request, recipeExecutionResult, confidence, evidence);
     console.log("Prediction Engine: Prediction result built.", predictionResult);
+
+    // 6. Record to History
+    this.predictionHistory.add(predictionResult);
+    console.log("Prediction Engine: Prediction recorded to history.");
 
     console.log("Prediction Engine: Prediction process completed.");
     return predictionResult;
@@ -84,6 +91,9 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
         };
         const predictionResult = this.predictionResultBuilder.build(predictionRequest, recipeExecutionResult, confidence, evidence);
         console.log(`Prediction Engine: Prediction result for ${recipe.id} built.`, predictionResult);
+
+        // Record to History
+        this.predictionHistory.add(predictionResult);
 
         results.push(predictionResult);
       } catch (error) {
