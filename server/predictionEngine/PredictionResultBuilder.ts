@@ -12,6 +12,23 @@ export class PredictionResultBuilder implements IPredictionResultBuilder {
     this.recipeRegistry = RecipeRegistry.getInstance();
   }
 
+  private generateExplanation(
+    recipeMetadata: any,
+    confidence: number,
+    evidenceCount: number,
+    factors: string[]
+  ): string {
+    const confidencePercent = Math.round(confidence * 100);
+    const factorList = factors.length > 0 ? factors.join(", ") : "general analysis";
+    
+    return `This prediction was generated using the ${recipeMetadata.name} recipe ` +
+           `with a confidence score of ${confidencePercent}%. ` +
+           `The analysis considered ${evidenceCount} pieces of evidence and identified ` +
+           `the following key factors: ${factorList}. ` +
+           `This prediction is based on the recipe's analysis methodology and the ` +
+           `collected evidence from available sources.`;
+  }
+
   build(request: PredictionRequest, recipeResult: RecipeExecutionResult, confidence: number, evidence?: Evidence): PredictionResult {
     console.log("Building prediction result...");
     // Map RecipeOutput (standardized output) to PredictionResult
@@ -41,6 +58,14 @@ export class PredictionResultBuilder implements IPredictionResultBuilder {
     // Extract standardized evidence from evidence object
     const evidenceList: StandardizedEvidence[] = (evidence as any)?.standardizedEvidence || [];
 
+    // Generate human-readable explanation
+    const explanation = this.generateExplanation(
+      recipeMetadata,
+      confidence,
+      evidenceList.length,
+      recipeOutput.rawPredictionData.factors || []
+    );
+
     return {
       id: predictionId,
       prediction: predictionText,
@@ -50,6 +75,7 @@ export class PredictionResultBuilder implements IPredictionResultBuilder {
       timestamp: Date.now(),
       metadata,
       evidenceList,
+      explanation,
     };
   }
 }

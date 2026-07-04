@@ -39,6 +39,7 @@ export interface PredictionResult {
   timestamp: number;
   metadata?: PredictionMetadata;
   evidenceList?: StandardizedEvidence[];
+  explanation?: string; // Human-readable explanation of the prediction
 }
 
 export interface PredictionMetadata {
