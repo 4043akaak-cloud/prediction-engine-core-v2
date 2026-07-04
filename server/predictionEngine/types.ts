@@ -16,6 +16,9 @@ export interface RecipeExecutionResult {
   factors?: string[];
 }
 
+// Standardized RecipeOutput (v0.1: temporary alias for RecipeExecutionResult)
+export type RecipeOutput = RecipeExecutionResult;
+
 export interface PredictionResult {
   id: string;
   prediction: string;
