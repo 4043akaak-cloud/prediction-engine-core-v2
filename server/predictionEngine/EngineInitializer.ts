@@ -11,6 +11,8 @@ import { MarketDataPredictionEngine } from "./engines/MarketDataPredictionEngine
 import { AlphaVantageProvider } from "./providers/AlphaVantageProvider";
 import { LLMPredictionEngine } from "./engines/LLMPredictionEngine";
 import { MockLLMProvider } from "./providers/MockLLMProvider";
+import { NeuralPredictionEngine } from "./engines/NeuralPredictionEngine";
+import { MockNeuralProvider } from "./providers/MockNeuralProvider";
 
 /**
  * EngineInitializer
@@ -33,6 +35,7 @@ export function initializeEngines(): void {
   registry.register("search-engine", new SearchPredictionEngine(new MockSearchProvider()));
   registry.register("market-data-engine", new MarketDataPredictionEngine(new AlphaVantageProvider()));
   registry.register("llm-engine", new LLMPredictionEngine(new MockLLMProvider()));
+  registry.register("neural-engine", new NeuralPredictionEngine(new MockNeuralProvider()));
 
   // Future engines can be added here without modifying recipes or pipeline
   // registry.register("cycle-engine", new CycleAnalysisEngine());
