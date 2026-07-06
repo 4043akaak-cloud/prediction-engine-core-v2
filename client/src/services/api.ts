@@ -12,30 +12,32 @@ export async function generatePrediction(
       recipeId: "mock-recipe",
     });
 
-    // Transform PredictionResult to GeneratePredictionOutput format
-    // for compatibility with the existing UI
+    // Transform PredictionPipelineResult to GeneratePredictionOutput format
+    // PredictionPipelineResult has structure: { prediction: PredictionResult, recommendations: RecommendationResult[] }
+    const predictionResult = result.prediction;
+
     return {
       prediction: {
-        id: result.id,
+        id: predictionResult.id,
         question: input.question,
-        prediction: result.prediction,
-        confidence: result.confidence,
-        reason: result.reason,
+        prediction: predictionResult.prediction,
+        confidence: predictionResult.confidence,
+        reason: predictionResult.reason,
         predictionType: input.predictionType,
         metadata: {
-          createdAt: new Date(result.timestamp).toISOString(),
-          modelUsed: result.recipeUsed,
+          createdAt: new Date(predictionResult.timestamp).toISOString(),
+          modelUsed: predictionResult.recipeUsed,
           informationSources: [], // Evidence summary can be added here
-          recipeId: result.recipeUsed,
+          recipeId: predictionResult.recipeUsed,
         },
       },
       counterPrediction: {
         prediction: "The opposite scenario may occur based on alternative factors.",
-        confidence: 1 - result.confidence,
+        confidence: 1 - predictionResult.confidence,
         reason: "While less likely, this alternative remains possible.",
       },
       recipe: [
-        { name: result.recipeUsed, strength: 'Strong' },
+        { name: predictionResult.recipeUsed, strength: 'Strong' },
       ],
       ingredients: [
         { title: "Evidence", description: "Collected from the query" },
