@@ -30,13 +30,6 @@ export interface RecipeExecutionResult {
 // Standardized RecipeOutput (v0.1: temporary alias for RecipeExecutionResult)
 export type RecipeOutput = RecipeExecutionResult;
 
-export interface RecipeRecommendationMetadata {
-  recommendedRecipes: string[];
-  selectedRecipes: string[];
-  recommendationScore: number;
-  recommendationReason: string;
-}
-
 export interface PredictionResult {
   id: string;
   prediction: string;
@@ -47,7 +40,6 @@ export interface PredictionResult {
   metadata?: PredictionMetadata;
   evidenceList?: StandardizedEvidence[];
   explanation?: string; // Human-readable explanation of the prediction
-  recommendationMetadata?: RecipeRecommendationMetadata;
 }
 
 export interface PredictionMetadata {
@@ -95,4 +87,44 @@ export interface IPredictionEngine {
 
 export interface IPredictionEngineMulti {
   predictMultiple(request: PredictionRequest): Promise<PredictionResult[]>;
+}
+
+// ReasoningResult Contract v1.0
+export interface ReasoningResult {
+  explanation: string;
+  confidenceAdjustment: number;
+  appliedRules: string[];
+  reasoning: {
+    [key: string]: any;
+  };
+}
+
+// IReasoningEngine Contract v1.0
+export interface IReasoningEngine {
+  reason(
+    prediction: string,
+    confidence: number,
+    evidence: StandardizedEvidence[],
+    recipeResult: RecipeExecutionResult,
+  ): Promise<ReasoningResult>;
+}
+
+// ReasoningResult Contract v1.0
+export interface ReasoningResult {
+  explanation: string;
+  confidenceAdjustment: number;
+  appliedRules: string[];
+  reasoning: {
+    [key: string]: any;
+  };
+}
+
+// IReasoningEngine Contract v1.0
+export interface IReasoningEngine {
+  reason(
+    prediction: string,
+    confidence: number,
+    evidence: StandardizedEvidence[],
+    recipeResult: RecipeExecutionResult,
+  ): Promise<ReasoningResult>;
 }

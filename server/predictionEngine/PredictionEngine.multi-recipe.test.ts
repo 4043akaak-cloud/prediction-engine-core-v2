@@ -1,16 +1,98 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { PredictionEngine } from "./PredictionEngine";
 import { PredictionRequest } from "./types";
+import { RecipeRegistry } from "./RecipeRegistry";
 
 describe("PredictionEngine Multiple Recipe Selection", () => {
-  let engine: PredictionEngine;
+  it("should verify all registered recipes are available", () => {
+    const registry = RecipeRegistry.getInstance();
+    const allMetadata = registry.getAllRecipeMetadata();
 
-  beforeEach(() => {
-    engine = new PredictionEngine();
+    expect(allMetadata).toHaveLength(3);
+    expect(allMetadata.map((m) => m.id)).toContain("mock-recipe");
+    expect(allMetadata.map((m) => m.id)).toContain("trend-recipe");
+    expect(allMetadata.map((m) => m.id)).toContain("statistical-recipe");
   });
 
-  it("should demonstrate recipe switching with automatic recommendations", async () => {
-    const query = "What will happen next?";
+  it("should execute MockRecipe independently", async () => {
+    const engine = new PredictionEngine();
+    const request: PredictionRequest = {
+      query: "Will the market go up?",
+      recipeId: "mock-recipe",
+    };
+
+    const result = await engine.predict(request);
+
+    expect(result.recipeUsed).toBe("mock-recipe");
+    expect(result.prediction).toContain("Mock Prediction");
+    expect(result.confidence).toBeGreaterThan(0);
+    expect(result.confidence).toBeLessThanOrEqual(1);
+  });
+
+  it("should execute TrendRecipe independently", async () => {
+    const engine = new PredictionEngine();
+    const request: PredictionRequest = {
+      query: "What is the trend direction?",
+      recipeId: "trend-recipe",
+    };
+
+    const result = await engine.predict(request);
+
+    expect(result.recipeUsed).toBe("trend-recipe");
+    expect(result.prediction).toBeDefined();
+    expect(result.prediction.length).toBeGreaterThan(0);
+    expect(result.confidence).toBeGreaterThan(0);
+    expect(result.reason).toContain("trend-recipe");
+  });
+
+  it("should execute StatisticalRecipe independently", async () => {
+    const engine = new PredictionEngine();
+    const request: PredictionRequest = {
+      query: "What is the statistical probability?",
+      recipeId: "statistical-recipe",
+    };
+
+    const result = await engine.predict(request);
+
+    expect(result.recipeUsed).toBe("statistical-recipe");
+    expect(result.prediction).toBeDefined();
+    expect(result.prediction.length).toBeGreaterThan(0);
+    expect(result.confidence).toBeGreaterThan(0);
+    expect(result.reason).toContain("statistical-recipe");
+  });
+
+  it("should correctly identify selected recipe in PredictionResult", async () => {
+    const engine = new PredictionEngine();
+
+    // Test each recipe
+    const recipes = ["mock-recipe", "trend-recipe", "statistical-recipe"];
+
+    for (const recipeId of recipes) {
+      const request: PredictionRequest = {
+        query: "Test query",
+        recipeId,
+      };
+
+      const result = await engine.predict(request);
+
+      // Verify recipe identification
+      expect(result.recipeUsed).toBe(recipeId);
+
+      // Verify all required fields are present
+      expect(result.id).toBeDefined();
+      expect(result.prediction).toBeDefined();
+      expect(result.confidence).toBeDefined();
+      expect(result.reason).toBeDefined();
+      expect(result.timestamp).toBeDefined();
+
+      // Verify recipe is mentioned in reason
+      expect(result.reason).toContain(recipeId);
+    }
+  });
+
+  it("should demonstrate recipe switching without engine modification", async () => {
+    const engine = new PredictionEngine();
+    const query = "Test query for recipe switching";
 
     // Execute with MockRecipe
     const mockResult = await engine.predict({
@@ -30,23 +112,19 @@ describe("PredictionEngine Multiple Recipe Selection", () => {
       recipeId: "statistical-recipe",
     });
 
-    // Verify that recommendations were generated
-    expect(mockResult.recommendationMetadata).toBeDefined();
-    expect(trendResult.recommendationMetadata).toBeDefined();
-    expect(statisticalResult.recommendationMetadata).toBeDefined();
+    // Verify different recipes were used
+    expect(mockResult.recipeUsed).toBe("mock-recipe");
+    expect(trendResult.recipeUsed).toBe("trend-recipe");
+    expect(statisticalResult.recipeUsed).toBe("statistical-recipe");
 
-    // Verify that selectedRecipes contains the actually used recipe
-    expect(mockResult.recommendationMetadata?.selectedRecipes).toContain(mockResult.recipeUsed);
-    expect(trendResult.recommendationMetadata?.selectedRecipes).toContain(trendResult.recipeUsed);
-    expect(statisticalResult.recommendationMetadata?.selectedRecipes).toContain(statisticalResult.recipeUsed);
-
-    // Verify recommendation scores are valid (0-100)
-    expect(mockResult.recommendationMetadata?.recommendationScore).toBeGreaterThanOrEqual(0);
-    expect(mockResult.recommendationMetadata?.recommendationScore).toBeLessThanOrEqual(100);
-    expect(trendResult.recommendationMetadata?.recommendationScore).toBeGreaterThanOrEqual(0);
-    expect(trendResult.recommendationMetadata?.recommendationScore).toBeLessThanOrEqual(100);
-    expect(statisticalResult.recommendationMetadata?.recommendationScore).toBeGreaterThanOrEqual(0);
-    expect(statisticalResult.recommendationMetadata?.recommendationScore).toBeLessThanOrEqual(100);
+    // Verify different predictions (recipes produce different outputs)
+    const predictions = [
+      mockResult.prediction,
+      trendResult.prediction,
+      statisticalResult.prediction,
+    ];
+    const uniquePredictions = new Set(predictions);
+    expect(uniquePredictions.size).toBe(3);
 
     // Verify confidence scores are valid
     const confidences = [
@@ -54,81 +132,49 @@ describe("PredictionEngine Multiple Recipe Selection", () => {
       trendResult.confidence,
       statisticalResult.confidence,
     ];
-    confidences.forEach((confidence) => {
-      expect(confidence).toBeGreaterThanOrEqual(0);
-      expect(confidence).toBeLessThanOrEqual(1);
+    // Each recipe should produce a valid confidence value (0-1)
+    confidences.forEach((conf) => {
+      expect(conf).toBeGreaterThan(0);
+      expect(conf).toBeLessThanOrEqual(1);
     });
 
-    // Verify history was recorded with recommendation metadata
-    const tracker = engine.getPerformanceTracker();
-    const mockStats = tracker.getRecipeStats(mockResult.recipeUsed);
-    const trendStats = tracker.getRecipeStats(trendResult.recipeUsed);
-    const statisticalStats = tracker.getRecipeStats(statisticalResult.recipeUsed);
-
-    expect(mockStats?.executionCount).toBeGreaterThanOrEqual(1);
-    expect(trendStats?.executionCount).toBeGreaterThanOrEqual(1);
-    expect(statisticalStats?.executionCount).toBeGreaterThanOrEqual(1);
+    console.log("Recipe Switching Verification:");
+    console.log(`- MockRecipe: confidence=${mockResult.confidence}`);
+    console.log(`- TrendRecipe: confidence=${trendResult.confidence}`);
+    console.log(`- StatisticalRecipe: confidence=${statisticalResult.confidence}`);
   });
 
-  it("should automatically select highest priority recipe based on recommendations", async () => {
-    const query = "What will happen next?";
+  it("should retrieve recipe metadata for each recipe", () => {
+    const registry = RecipeRegistry.getInstance();
 
-    // First prediction establishes baseline
-    const firstResult = await engine.predict({
-      query,
-      recipeId: "mock-recipe",
-    });
+    const mockMetadata = registry.getRecipeMetadata("mock-recipe");
+    expect(mockMetadata).toBeDefined();
+    expect(mockMetadata?.name).toBe("Mock Prediction Recipe");
+    expect(mockMetadata?.version).toBeDefined();
+    expect(mockMetadata?.category).toBeDefined();
 
-    // Second prediction should have recommendations
-    const secondResult = await engine.predict({
-      query,
-      recipeId: "trend-recipe",
-    });
+    const trendMetadata = registry.getRecipeMetadata("trend-recipe");
+    expect(trendMetadata).toBeDefined();
+    expect(trendMetadata?.name).toBe("Trend Analysis Recipe");
 
-    // Verify that a recipe was selected
-    expect(secondResult.recipeUsed).toBeDefined();
-    expect(secondResult.recommendationMetadata?.selectedRecipes).toBeDefined();
-    expect(secondResult.recommendationMetadata?.selectedRecipes?.length).toBeGreaterThan(0);
-
-    // Verify that the selected recipe is in the recommended list
-    const selectedRecipe = secondResult.recipeUsed;
-    const recommendedRecipes = secondResult.recommendationMetadata?.recommendedRecipes || [];
-    expect(recommendedRecipes).toContain(selectedRecipe);
+    const statisticalMetadata = registry.getRecipeMetadata("statistical-recipe");
+    expect(statisticalMetadata).toBeDefined();
+    expect(statisticalMetadata?.name).toBe("Statistical Analysis Recipe");
   });
 
-  it("should include recommendation reason in explanation", async () => {
-    const query = "What will happen next?";
+  it("should handle invalid recipe ID gracefully", async () => {
+    const engine = new PredictionEngine();
+    const request: PredictionRequest = {
+      query: "Test query",
+      recipeId: "non-existent-recipe",
+    };
 
-    const result = await engine.predict({
-      query,
-      recipeId: "mock-recipe",
-    });
-
-    expect(result.explanation).toBeDefined();
-    expect(result.recommendationMetadata?.recommendationReason).toBeDefined();
-
-    // Verify explanation mentions recommendation engine
-    if (result.explanation) {
-      expect(result.explanation).toContain("recommendation engine");
+    try {
+      await engine.predict(request);
+      expect.fail("Should have thrown an error for invalid recipe");
+    } catch (error) {
+      expect(error).toBeDefined();
+      expect(String(error)).toContain("not found");
     }
-  });
-
-  it("should track recipe performance across multiple predictions", async () => {
-    const query = "What will happen next?";
-
-    // Execute multiple predictions
-    for (let i = 0; i < 3; i++) {
-      await engine.predict({
-        query,
-        recipeId: "mock-recipe",
-      });
-    }
-
-    const tracker = engine.getPerformanceTracker();
-    const stats = tracker.getRecipeStats("mock-recipe");
-
-    expect(stats?.executionCount).toBeGreaterThanOrEqual(1);
-    expect(stats?.averageConfidence).toBeGreaterThanOrEqual(0);
-    expect(stats?.averageConfidence).toBeLessThanOrEqual(1);
   });
 });

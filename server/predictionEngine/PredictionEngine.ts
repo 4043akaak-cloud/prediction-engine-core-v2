@@ -8,9 +8,6 @@ import { PredictionResultBuilder } from "./PredictionResultBuilder";
 import { PredictionHistory } from "./PredictionHistory";
 import { PredictionHistoryRepository } from "./PredictionHistoryRepository";
 import { RecipePerformanceTracker } from "./RecipePerformanceTracker";
-import { RecipeRecommendationEngine } from "./RecipeRecommendationEngine";
-import { PredictionHistoryAnalytics } from "./PredictionHistoryAnalytics";
-import { RecipeEvolutionEngine } from "./RecipeEvolutionEngine";
 
 export class PredictionEngine implements IPredictionEngine, IPredictionEngineMulti {
   private recipeExecutor: IRecipeExecutor;
@@ -21,7 +18,6 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
   private predictionHistory: PredictionHistory;
   private historyRepository: PredictionHistoryRepository;
   private performanceTracker: RecipePerformanceTracker;
-  private recommendationEngine: RecipeRecommendationEngine;
 
   constructor() {
     this.recipeRegistry = RecipeRegistry.getInstance();
@@ -33,91 +29,46 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
     this.predictionHistory = new PredictionHistory();
     this.historyRepository = PredictionHistoryRepository.getInstance();
     this.performanceTracker = new RecipePerformanceTracker();
-
-    // Initialize recommendation engine
-    const analytics = new PredictionHistoryAnalytics(this.historyRepository);
-    const evolutionEngine = new RecipeEvolutionEngine(this.performanceTracker, analytics, this.historyRepository);
-    this.recommendationEngine = new RecipeRecommendationEngine(this.performanceTracker, analytics, evolutionEngine);
   }
 
   public async predict(request: PredictionRequest): Promise<PredictionResult> {
     console.log("Prediction Engine: Starting prediction process...");
 
-    // 1. Get Recipe Recommendations
-    const recommendations = this.recommendationEngine.recommendRecipes({
-      query: request.query,
-      recipeId: request.recipeId,
-    });
-    console.log(`Prediction Engine: Generated ${recommendations.length} recipe recommendations.`);
-
-    // 2. Select the highest priority recipe
-    let recipe: IRecipe | null = null;
-    let selectedRecipeId = request.recipeId;
-    let recommendationScore = 0;
-    let recommendationReason = "";
-
-    if (recommendations.length > 0) {
-      const topRecommendation = recommendations[0];
-      selectedRecipeId = topRecommendation.recipeId;
-      recommendationScore = topRecommendation.score;
-      recommendationReason = topRecommendation.explanation;
-      recipe = this.recipeRegistry.getRecipe(selectedRecipeId) || null;
-      console.log(`Prediction Engine: Selected recommended recipe: ${selectedRecipeId} (score: ${recommendationScore})`);
-    } else {
-      recipe = this.recipeRegistry.getRecipe(request.recipeId) || null;
-      console.log(`Prediction Engine: No recommendations available, using requested recipe: ${request.recipeId}`);
-    }
-
+    // 1. Select Recipe
+    const recipe = this.recipeRegistry.getRecipe(request.recipeId);
     if (!recipe) {
-      throw new Error(`Recipe with ID ${selectedRecipeId} not found.`);
+      throw new Error(`Recipe with ID ${request.recipeId} not found.`);
     }
+    console.log(`Prediction Engine: Selected recipe: ${recipe.name}`);
 
-    // 3. Collect Evidence
+    // 2. Collect Evidence
     const evidence = await this.evidenceCollector.collect(request.query);
     console.log("Prediction Engine: Evidence collected.", evidence);
 
-    // 4. Execute Recipe
+    // 3. Execute Recipe
     const recipeExecutionResult = await this.recipeExecutor.execute(recipe, evidence);
     console.log("Prediction Engine: Recipe executed.", recipeExecutionResult);
 
-    // 5. Calculate Confidence
+    // 4. Calculate Confidence
     const confidence = this.confidenceCalculator.calculate(recipeExecutionResult, evidence);
     console.log("Prediction Engine: Confidence calculated.", confidence);
 
-    // 6. Build Prediction Result
-    const predictionRequest: PredictionRequest = {
-      query: request.query,
-      recipeId: selectedRecipeId,
-    };
-    const predictionResult = this.predictionResultBuilder.build(predictionRequest, recipeExecutionResult, confidence, evidence);
-
-    // 7. Add Recommendation Metadata
-    predictionResult.recommendationMetadata = {
-      recommendedRecipes: recommendations.map((r) => r.recipeId),
-      selectedRecipes: [selectedRecipeId],
-      recommendationScore,
-      recommendationReason,
-    };
-
-    // 8. Update Explanation with Recommendation Info
-    if (predictionResult.explanation) {
-      predictionResult.explanation += ` [Selected via recommendation engine with score ${recommendationScore}/100]`;
-    }
-
+    // 5. Build Prediction Result
+    const predictionResult = this.predictionResultBuilder.build(request, recipeExecutionResult, confidence, evidence);
     console.log("Prediction Engine: Prediction result built.", predictionResult);
 
-    // 9. Record to History
+    // 6. Record to History
     this.predictionHistory.add(predictionResult);
     console.log("Prediction Engine: Prediction recorded to history.");
 
-    // 10. Record to History Repository
+    // 7. Record to History Repository
     this.historyRepository.record(predictionResult, {
       query: request.query,
-      recipeId: selectedRecipeId,
+      recipeId: request.recipeId,
     });
     console.log("Prediction Engine: Prediction recorded to history repository.");
 
-    // 11. Update Recipe Performance Statistics
+    // 8. Update Recipe Performance Statistics
     const historyRecord = this.historyRepository.getAll().pop();
     if (historyRecord) {
       this.performanceTracker.recordPrediction(historyRecord);
@@ -192,12 +143,5 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
    */
   public getPerformanceTracker(): RecipePerformanceTracker {
     return this.performanceTracker;
-  }
-
-  /**
-   * Get the RecipeRecommendationEngine instance for testing and analytics.
-   */
-  public getRecommendationEngine(): RecipeRecommendationEngine {
-    return this.recommendationEngine;
   }
 }
