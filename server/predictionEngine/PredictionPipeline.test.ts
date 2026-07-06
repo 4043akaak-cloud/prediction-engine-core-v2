@@ -7,6 +7,7 @@ import {
   PredictionRequest,
   PredictionResult,
   RecommendationResult,
+  IMultiRecipeEnsembleEngine,
 } from "./types";
 import { PredictionHistoryRepository } from "./PredictionHistoryRepository";
 import { RecipePerformanceTracker } from "./RecipePerformanceTracker";
@@ -20,6 +21,7 @@ describe("PredictionPipeline", () => {
   let mockHistoryRepository: PredictionHistoryRepository;
   let mockPerformanceTracker: RecipePerformanceTracker;
   let mockPredictionHistory: PredictionHistory;
+  let mockEnsembleEngine: IMultiRecipeEnsembleEngine;
 
   beforeEach(() => {
     // Mock engines
@@ -83,6 +85,21 @@ describe("PredictionPipeline", () => {
       clear: vi.fn(),
     } as any;
 
+    mockEnsembleEngine = {
+      ensemble: vi.fn().mockResolvedValue({
+        id: "ensemble-pred-1",
+        prediction: "Test prediction",
+        confidence: 0.85,
+        reason: "Ensemble of 1 predictions (confidence weighted)",
+        recipeUsed: "ensemble:recipe-1",
+        timestamp: Date.now(),
+        metadata: {
+          ensembleStrategy: "confidence-weighted",
+          componentCount: 1,
+        },
+      } as PredictionResult),
+    };
+
     pipeline = new PredictionPipeline(
       mockReasoningEngine,
       mockPredictionEngine,
@@ -90,6 +107,7 @@ describe("PredictionPipeline", () => {
       mockRecommendationEngine,
       mockPerformanceTracker,
       mockPredictionHistory,
+      mockEnsembleEngine,
     );
   });
 
@@ -108,7 +126,7 @@ describe("PredictionPipeline", () => {
       expect(result).toHaveProperty("metadata");
 
       // Verify prediction
-      expect(result.prediction.id).toBe("pred-1");
+      expect(result.prediction.id).toBe("ensemble-pred-1");
       expect(result.prediction.prediction).toBe("Test prediction");
       expect(result.prediction.confidence).toBe(0.85);
 
@@ -132,11 +150,13 @@ describe("PredictionPipeline", () => {
 
       // Verify call order
       expect(mockPredictionEngine.predict).toHaveBeenCalledWith(request);
+      expect(mockEnsembleEngine.ensemble).toHaveBeenCalled();
       expect(mockHistoryRepository.record).toHaveBeenCalled();
       expect(mockRecommendationEngine.recommend).toHaveBeenCalled();
 
       // Verify all were called exactly once in sequence
       expect(mockPredictionEngine.predict).toHaveBeenCalledTimes(1);
+      expect(mockEnsembleEngine.ensemble).toHaveBeenCalledTimes(1);
       expect(mockHistoryRepository.record).toHaveBeenCalledTimes(1);
       expect(mockRecommendationEngine.recommend).toHaveBeenCalledTimes(1);
     });
@@ -164,7 +184,7 @@ describe("PredictionPipeline", () => {
 
       expect(mockHistoryRepository.record).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: "pred-1",
+          id: "ensemble-pred-1",
           prediction: "Test prediction",
         }),
         request,
@@ -184,6 +204,20 @@ describe("PredictionPipeline", () => {
 
       await expect(pipeline.execute(request)).rejects.toThrow(
         "Prediction failed",
+      );
+    });
+
+    it("should fail fast if ensemble engine fails", async () => {
+      const error = new Error("Ensemble failed");
+      (mockEnsembleEngine.ensemble as any).mockRejectedValueOnce(error);
+
+      const request: PredictionRequest = {
+        query: "Test query",
+        recipeId: "recipe-1",
+      };
+
+      await expect(pipeline.execute(request)).rejects.toThrow(
+        "Ensemble failed",
       );
     });
 
@@ -216,7 +250,7 @@ describe("PredictionPipeline", () => {
 
       // Should still return prediction
       expect(result.prediction).toBeDefined();
-      expect(result.prediction.id).toBe("pred-1");
+      expect(result.prediction.id).toBe("ensemble-pred-1");
 
       // But recommendations should be empty
       expect(result.recommendations).toEqual([]);
@@ -261,15 +295,11 @@ describe("PredictionPipeline", () => {
 
       const result = await pipeline.execute(request);
 
-      // Verify PredictionResult is unchanged
-      expect(result.prediction).toEqual({
-        id: "pred-1",
-        prediction: "Test prediction",
-        confidence: 0.85,
-        reason: "Test reason",
-        recipeUsed: "recipe-1",
-        timestamp: expect.any(Number),
-      });
+      // Verify PredictionResult is ensemble result
+      expect(result.prediction.id).toBe("ensemble-pred-1");
+      expect(result.prediction.prediction).toBe("Test prediction");
+      expect(result.prediction.confidence).toBe(0.85);
+      expect(result.prediction.recipeUsed).toContain("ensemble:");
 
       // Verify recommendations are RecommendationResult[]
       expect(Array.isArray(result.recommendations)).toBe(true);
@@ -284,7 +314,7 @@ describe("PredictionPipeline", () => {
       expect(result.metadata).toHaveProperty("pipelineVersion");
     });
 
-    it("should not modify PredictionResult", async () => {
+    it("should return ensembled prediction", async () => {
       const request: PredictionRequest = {
         query: "Test query",
         recipeId: "recipe-1",
@@ -292,25 +322,13 @@ describe("PredictionPipeline", () => {
 
       const result = await pipeline.execute(request);
 
-      // PredictionResult should be exactly as returned by PredictionEngine
-      expect(result.prediction).toEqual({
-        id: "pred-1",
-        prediction: "Test prediction",
-        confidence: 0.85,
-        reason: "Test reason",
-        recipeUsed: "recipe-1",
-        timestamp: expect.any(Number),
-      });
+      // PredictionResult should be ensemble result
+      expect(result.prediction.id).toBe("ensemble-pred-1");
+      expect(result.prediction.recipeUsed).toContain("ensemble:");
+      expect(result.prediction.metadata?.ensembleStrategy).toBe(
+        "confidence-weighted",
+      );
 
-      // No additional fields should be added
-      expect(Object.keys(result.prediction)).toEqual([
-        "id",
-        "prediction",
-        "confidence",
-        "reason",
-        "recipeUsed",
-        "timestamp",
-      ]);
     });
   });
 
@@ -384,7 +402,7 @@ describe("PredictionPipeline", () => {
       expect(mockHistoryRepository.record).toHaveBeenCalledTimes(1);
       expect(mockHistoryRepository.record).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: "pred-1",
+          id: "ensemble-pred-1",
           prediction: "Test prediction",
         }),
         request,

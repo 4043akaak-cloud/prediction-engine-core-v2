@@ -21,6 +21,7 @@ This document describes the complete architecture of Prediction Engine Core v1. 
 |-----------|------|-----------------|-------|
 | ReasoningEngine | Engine | Generate reasoning and adjust confidence | Coordinator (Pipeline) |
 | PredictionEngine | Engine | Generate predictions using recipes | Coordinator (Pipeline) |
+| MultiRecipeEnsembleEngine | Engine | Combine predictions from multiple recipes | Coordinator (Pipeline) |
 | PredictionPipeline | Coordinator | Orchestrate all engines | Application |
 | RecommendationEngine | Engine | Recommend recipes based on performance | Coordinator (Pipeline) |
 | RecipeEvolutionEngine | Engine | Evaluate recipe maturity and evolution | Coordinator (Pipeline) |
@@ -69,10 +70,27 @@ This document describes the complete architecture of Prediction Engine Core v1. 
 
 | Aspect | Details |
 |--------|---------|
+| **Responsibility** | Combine predictions from multiple recipes to improve accuracy |
+| **Input** | PredictionResult[], EnsembleStrategy |
+| **Output** | PredictionResult (ensembled) |
+| **Dependencies** | None (pure logic) |
+| **Owner** | PredictionPipeline (called via coordinator) |
+| **Contract** | IMultiRecipeEnsembleEngine.ensemble() - FROZEN |
+| **Algorithm** | ALGORITHM_SPECIFICATION_V1.md Section 5 |
+| **Strategies** | confidence-weighted (primary), majority-voting (secondary) |
+| **What It Does** | Combine predictions, calculate ensemble confidence, return result |
+| **What It CANNOT Do** | Store data, modify predictions, access database, call other engines |
+
+---
+
+### 3.5. PredictionPipeline
+
+| Aspect | Details |
+|--------|---------|
 | **Responsibility** | Orchestrate all engines into a single prediction workflow |
 | **Input** | PredictionRequest { query, recipeId } |
 | **Output** | PredictionPipelineResult { prediction, recommendations, metadata } |
-| **Dependencies** | ReasoningEngine, PredictionEngine, RecommendationEngine, PredictionHistoryRepository, RecipePerformanceTracker |
+| **Dependencies** | ReasoningEngine, PredictionEngine, MultiRecipeEnsembleEngine, RecommendationEngine, PredictionHistoryRepository, RecipePerformanceTracker |
 | **Owner** | Application (called by API endpoints) |
 | **Contract** | execute(request) → Promise<PredictionPipelineResult> |
 | **Pattern** | Coordinator (Orchestrator) - No business logic |
@@ -82,10 +100,11 @@ This document describes the complete architecture of Prediction Engine Core v1. 
 **Pipeline Execution Flow:**
 ```
 Step 1: Call PredictionEngine.predict()
-Step 2: Call PredictionHistoryRepository.record()
-Step 3: Call RecommendationEngine.recommend()
-Step 4: Assemble PredictionPipelineResult
-Step 5: Return result
+Step 2: Call MultiRecipeEnsembleEngine.ensemble()
+Step 3: Call PredictionHistoryRepository.record()
+Step 4: Call RecommendationEngine.recommend()
+Step 5: Assemble PredictionPipelineResult
+Step 6: Return result
 ```
 
 ---

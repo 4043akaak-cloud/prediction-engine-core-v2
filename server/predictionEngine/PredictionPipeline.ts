@@ -10,6 +10,7 @@ import {
 import { PredictionHistoryRepository } from "./PredictionHistoryRepository";
 import { RecipePerformanceTracker } from "./RecipePerformanceTracker";
 import { PredictionHistory } from "./PredictionHistory";
+import { IMultiRecipeEnsembleEngine } from "./types";
 
 /**
  * PredictionPipeline v1
@@ -24,6 +25,7 @@ import { PredictionHistory } from "./PredictionHistory";
  * Pipeline Flow:
  * 1. ReasoningEngine.reason() → adjust confidence
  * 2. PredictionEngine.predict() → generate prediction
+ * 2.5. MultiRecipeEnsembleEngine.ensemble() → ensemble multiple predictions [NEW]
  * 3. PredictionHistoryRepository.record() → persist history
  * 4. RecommendationEngine.recommend() → generate recommendations
  * 5. Assemble PredictionPipelineResult
@@ -36,6 +38,7 @@ export class PredictionPipeline {
     private recommendationEngine: IRecommendationEngine,
     private performanceTracker: RecipePerformanceTracker,
     private predictionHistory: PredictionHistory,
+    private ensembleEngine: IMultiRecipeEnsembleEngine,
   ) {}
 
   /**
@@ -53,13 +56,20 @@ export class PredictionPipeline {
       // Note: PredictionEngine ONLY generates predictions, does NOT record history
       const predictionResult = await this.predictionEngine.predict(request);
 
-      // Step 2: Record prediction to history
+      // Step 2: Ensemble predictions (if multiple recipes available)
+      // Note: Ensemble is optional - if only single prediction, no ensemble needed
+      const ensembledResult = await this.ensembleEngine.ensemble(
+        [predictionResult],
+        "confidence-weighted",
+      );
+
+      // Step 3: Record prediction to history
       // SOLE RESPONSIBILITY: Pipeline owns all history recording
       // Record to in-memory history (for testing and analytics)
-      this.predictionHistory.add(predictionResult);
+      this.predictionHistory.add(ensembledResult);
 
       // Record to repository (persistent storage)
-      this.historyRepository.record(predictionResult, request);
+      this.historyRepository.record(ensembledResult, request);
 
       // Update recipe performance statistics (critical for recommendations)
       const historyRecord = this.historyRepository.getAll().pop();
@@ -67,7 +77,7 @@ export class PredictionPipeline {
         this.performanceTracker.recordPrediction(historyRecord);
       }
 
-      // Step 3: Generate recommendations
+      // Step 4: Generate recommendations
       // Uses query and performance history updated in Step 2 (after history recording)
       let recommendations: RecommendationResult[] = [];
       try {
@@ -83,11 +93,11 @@ export class PredictionPipeline {
         recommendations = [];
       }
 
-      // Step 4: Assemble final result
+      // Step 5: Assemble final result
       const executionTime = Date.now() - startTime;
 
       return {
-        prediction: predictionResult,
+        prediction: ensembledResult,
         recommendations,
         metadata: {
           executionTime,

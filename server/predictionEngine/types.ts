@@ -51,6 +51,17 @@ export interface PredictionMetadata {
   predictionVersion: string;
 }
 
+// EnsembleStrategy Contract v1.0 (Issue 006)
+export type EnsembleStrategy = "confidence-weighted" | "majority-voting";
+
+// IMultiRecipeEnsembleEngine Contract v1.0 (Issue 006)
+export interface IMultiRecipeEnsembleEngine {
+  ensemble(
+    predictions: PredictionResult[],
+    strategy?: EnsembleStrategy,
+  ): Promise<PredictionResult>;
+}
+
 export interface IRecipe {
   id: string;
   name: string;
