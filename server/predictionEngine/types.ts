@@ -154,3 +154,19 @@ export interface IRecommendationEngine {
     options?: RecommendationOptions,
   ): Promise<RecommendationResult[]>;
 }
+
+// LearningResult Contract v1.0 (CONTRACT_FREEZE.md)
+export interface LearningResult {
+  success: boolean;
+  updatedRecipes: string[];
+  recommendationsUpdated: boolean;
+  metadata?: Record<string, unknown>; // Extensible Area for future features
+}
+
+// ILearningEngine Contract v1.0 (CONTRACT_FREEZE.md)
+export interface ILearningEngine {
+  learn(
+    predictionId: string,
+    actualResult: unknown,
+  ): Promise<LearningResult>;
+}
