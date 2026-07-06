@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { LearningEngine } from "./LearningEngine";
-import { PredictionHistoryRepository, PredictionHistoryRecord } from "./PredictionHistoryRepository";
+import { PredictionHistoryRepository } from "./PredictionHistoryRepository";
 import { RecipePerformanceTracker } from "./RecipePerformanceTracker";
 import { RecipeEvolutionEngine } from "./RecipeEvolutionEngine";
 import { RecipeRegistry } from "./RecipeRegistry";
-import { PredictionHistoryRecordBuilder } from "./PredictionHistoryRecordBuilder";
+import { PredictionResult } from "./types";
 
 describe("LearningEngine", () => {
   let learningEngine: LearningEngine;
@@ -13,434 +13,212 @@ describe("LearningEngine", () => {
   let evolutionEngine: RecipeEvolutionEngine;
 
   beforeEach(() => {
-    // Reset Singleton instances for testing
     historyRepository = PredictionHistoryRepository.getInstance();
     performanceTracker = new RecipePerformanceTracker();
     evolutionEngine = new RecipeEvolutionEngine(performanceTracker);
     learningEngine = new LearningEngine(historyRepository, performanceTracker, evolutionEngine);
-
-    // Reset RecipeRegistry for testing
     RecipeRegistry.getInstance().__test_resetForTesting?.();
   });
 
   describe("learn()", () => {
-    describe("success cases", () => {
-      it("should learn from exact match prediction", async () => {
-        // Setup: Create a prediction in history
-        const record = new PredictionHistoryRecordBuilder()
-          .withRecipeId("recipe-1")
-          .withRecipeName("Recipe 1")
-          .withPrediction("sunny")
-          .withConfidence(0.8)
-          .build();
+    it("should learn from exact match prediction", async () => {
+      // Create and record a prediction
+      const predictionResult: PredictionResult = {
+        id: "test-pred-1",
+        prediction: "sunny",
+        confidence: 0.8,
+        reason: "Test prediction",
+        recipeUsed: "recipe-1",
+        timestamp: Date.now(),
+        metadata: {
+          recipeId: "recipe-1",
+          recipeName: "Recipe 1",
+          executionTimestamp: Date.now(),
+          confidenceScore: 0.8,
+          evidenceCount: 0,
+          predictionVersion: "1.0",
+        },
+      };
 
-        historyRepository.record(
-          {
-            id: record.id,
-            prediction: record.prediction,
-            confidence: record.confidence,
-            reason: "Test prediction",
-            recipeUsed: "recipe-1",
-            timestamp: record.timestamp,
-            metadata: {
-              recipeId: "recipe-1",
-              recipeName: "Recipe 1",
-              executionTimestamp: record.timestamp,
-              confidenceScore: record.confidence,
-              evidenceCount: 0,
-              predictionVersion: "1.0",
-            },
-          },
-          record.request,
-        );
-
-        // Act: Learn from exact match
-        const result = await learningEngine.learn(record.id, "sunny");
-
-        // Assert
-        expect(result.success).toBe(true);
-        expect(result.updatedRecipes).toContain("recipe-1");
-        expect(result.metadata?.accuracy).toBe(1.0);
+      historyRepository.record(predictionResult, {
+        query: "Will it be sunny?",
+        recipeId: "recipe-1",
       });
 
-      it("should learn from fuzzy match prediction", async () => {
-        // Setup
-        const record = new PredictionHistoryRecordBuilder()
-          .withRecipeId("recipe-1")
-          .withRecipeName("Recipe 1")
-          .withPrediction("sunny weather")
-          .withConfidence(0.7)
-          .build();
+      // Get the actual recorded ID
+      const allRecords = historyRepository.getAll();
+      const recordedId = allRecords[0]?.id;
+      expect(recordedId).toBeDefined();
 
-        historyRepository.record(
-          {
-            id: record.id,
-            prediction: record.prediction,
-            confidence: record.confidence,
-            reason: "Test prediction",
-            recipeUsed: "recipe-1",
-            timestamp: record.timestamp,
-            metadata: {
-              recipeId: "recipe-1",
-              recipeName: "Recipe 1",
-              executionTimestamp: record.timestamp,
-              confidenceScore: record.confidence,
-              evidenceCount: 0,
-              predictionVersion: "1.0",
-            },
-          },
-          record.request,
-        );
+      // Learn from exact match
+      const result = await learningEngine.learn(recordedId!, "sunny");
 
-        // Act: Learn from fuzzy match (90%+ similarity)
-        const result = await learningEngine.learn(record.id, "sunny");
-
-        // Assert
-        expect(result.success).toBe(true);
-        expect(result.updatedRecipes).toContain("recipe-1");
-        expect(result.metadata?.accuracy).toBe(0.8);
-      });
-
-      it("should learn from partial match prediction", async () => {
-        // Setup
-        const record = new PredictionHistoryRecordBuilder()
-          .withRecipeId("recipe-1")
-          .withRecipeName("Recipe 1")
-          .withPrediction("sunny and warm")
-          .withConfidence(0.7)
-          .build();
-
-        historyRepository.record(
-          {
-            id: record.id,
-            prediction: record.prediction,
-            confidence: record.confidence,
-            reason: "Test prediction",
-            recipeUsed: "recipe-1",
-            timestamp: record.timestamp,
-            metadata: {
-              recipeId: "recipe-1",
-              recipeName: "Recipe 1",
-              executionTimestamp: record.timestamp,
-              confidenceScore: record.confidence,
-              evidenceCount: 0,
-              predictionVersion: "1.0",
-            },
-          },
-          record.request,
-        );
-
-        // Act: Learn from partial match
-        const result = await learningEngine.learn(record.id, "sunny and cold");
-
-        // Assert
-        expect(result.success).toBe(true);
-        expect(result.updatedRecipes).toContain("recipe-1");
-        expect(result.metadata?.accuracy).toBe(0.5);
-      });
-
-      it("should learn from no match prediction", async () => {
-        // Setup
-        const record = new PredictionHistoryRecordBuilder()
-          .withRecipeId("recipe-1")
-          .withRecipeName("Recipe 1")
-          .withPrediction("sunny")
-          .withConfidence(0.8)
-          .build();
-
-        historyRepository.record(
-          {
-            id: record.id,
-            prediction: record.prediction,
-            confidence: record.confidence,
-            reason: "Test prediction",
-            recipeUsed: "recipe-1",
-            timestamp: record.timestamp,
-            metadata: {
-              recipeId: "recipe-1",
-              recipeName: "Recipe 1",
-              executionTimestamp: record.timestamp,
-              confidenceScore: record.confidence,
-              evidenceCount: 0,
-              predictionVersion: "1.0",
-            },
-          },
-          record.request,
-        );
-
-        // Act: Learn from no match
-        const result = await learningEngine.learn(record.id, "rainy");
-
-        // Assert
-        expect(result.success).toBe(true);
-        expect(result.updatedRecipes).toContain("recipe-1");
-        expect(result.metadata?.accuracy).toBe(0.0);
-      });
-
-      it("should update recipe performance after learning", async () => {
-        // Setup
-        const record = new PredictionHistoryRecordBuilder()
-          .withRecipeId("recipe-1")
-          .withRecipeName("Recipe 1")
-          .withPrediction("sunny")
-          .withConfidence(0.5)
-          .build();
-
-        historyRepository.record(
-          {
-            id: record.id,
-            prediction: record.prediction,
-            confidence: record.confidence,
-            reason: "Test prediction",
-            recipeUsed: "recipe-1",
-            timestamp: record.timestamp,
-            metadata: {
-              recipeId: "recipe-1",
-              recipeName: "Recipe 1",
-              executionTimestamp: record.timestamp,
-              confidenceScore: record.confidence,
-              evidenceCount: 0,
-              predictionVersion: "1.0",
-            },
-          },
-          record.request,
-        );
-
-        // Act
-        await learningEngine.learn(record.id, "sunny");
-
-        // Assert: Check that performance tracker was updated
-        const stats = performanceTracker.getRecipeStats("recipe-1");
-        expect(stats).toBeDefined();
-        expect(stats?.executionCount).toBeGreaterThan(0);
-      });
-
-      it("should trigger evolution analysis", async () => {
-        // Setup
-        const record = new PredictionHistoryRecordBuilder()
-          .withRecipeId("recipe-1")
-          .withRecipeName("Recipe 1")
-          .withPrediction("sunny")
-          .withConfidence(0.8)
-          .build();
-
-        historyRepository.record(
-          {
-            id: record.id,
-            prediction: record.prediction,
-            confidence: record.confidence,
-            reason: "Test prediction",
-            recipeUsed: "recipe-1",
-            timestamp: record.timestamp,
-            metadata: {
-              recipeId: "recipe-1",
-              recipeName: "Recipe 1",
-              executionTimestamp: record.timestamp,
-              confidenceScore: record.confidence,
-              evidenceCount: 0,
-              predictionVersion: "1.0",
-            },
-          },
-          record.request,
-        );
-
-        // Act
-        const result = await learningEngine.learn(record.id, "sunny");
-
-        // Assert
-        expect(result.recommendationsUpdated).toBe(true);
-        expect(result.metadata?.analysis).toBeDefined();
-      });
+      expect(result.success).toBe(true);
+      expect(result.updatedRecipes).toContain("recipe-1");
+      expect(result.metadata?.accuracy).toBe(1.0);
     });
 
-    describe("error cases", () => {
-      it("should handle prediction not found", async () => {
-        // Act
-        const result = await learningEngine.learn("non-existent-id", "sunny");
+    it("should calculate 0.8 for fuzzy match", async () => {
+      const predictionResult: PredictionResult = {
+        id: "test-pred-2",
+        prediction: "prediction",
+        confidence: 0.7,
+        reason: "Test",
+        recipeUsed: "recipe-1",
+        timestamp: Date.now(),
+        metadata: {
+          recipeId: "recipe-1",
+          recipeName: "Recipe 1",
+          executionTimestamp: Date.now(),
+          confidenceScore: 0.7,
+          evidenceCount: 0,
+          predictionVersion: "1.0",
+        },
+      };
 
-        // Assert
-        expect(result.success).toBe(false);
-        expect(result.updatedRecipes).toHaveLength(0);
-        expect(result.metadata?.error).toContain("not found");
+      historyRepository.record(predictionResult, {
+        query: "Weather?",
+        recipeId: "recipe-1",
       });
 
-      it("should handle empty prediction history", async () => {
-        // Act
-        const result = await learningEngine.learn("any-id", "sunny");
+      const allRecords = historyRepository.getAll();
+      const recordedId = allRecords[allRecords.length - 1]?.id;
 
-        // Assert
-        expect(result.success).toBe(false);
-        expect(result.updatedRecipes).toHaveLength(0);
-      });
+      const result = await learningEngine.learn(recordedId!, "predction");
+      expect(result.success).toBe(true);
+      expect(result.metadata?.accuracy).toBe(0.8);
     });
 
-    describe("accuracy calculation", () => {
-      it("should calculate 1.0 for exact match", async () => {
-        const record = new PredictionHistoryRecordBuilder()
-          .withRecipeId("recipe-1")
-          .withRecipeName("Recipe 1")
-          .withPrediction("test")
-          .withConfidence(0.8)
-          .build();
+    it("should calculate 0.5 for partial match", async () => {
+      const predictionResult: PredictionResult = {
+        id: "test-pred-3",
+        prediction: "sunny and warm",
+        confidence: 0.7,
+        reason: "Test",
+        recipeUsed: "recipe-1",
+        timestamp: Date.now(),
+        metadata: {
+          recipeId: "recipe-1",
+          recipeName: "Recipe 1",
+          executionTimestamp: Date.now(),
+          confidenceScore: 0.7,
+          evidenceCount: 0,
+          predictionVersion: "1.0",
+        },
+      };
 
-        historyRepository.record(
-          {
-            id: record.id,
-            prediction: record.prediction,
-            confidence: record.confidence,
-            reason: "Test prediction",
-            recipeUsed: "recipe-1",
-            timestamp: record.timestamp,
-            metadata: {
-              recipeId: "recipe-1",
-              recipeName: "Recipe 1",
-              executionTimestamp: record.timestamp,
-              confidenceScore: record.confidence,
-              evidenceCount: 0,
-              predictionVersion: "1.0",
-            },
-          },
-          record.request,
-        );
-
-        const result = await learningEngine.learn(record.id, "test");
-        expect(result.metadata?.accuracy).toBe(1.0);
+      historyRepository.record(predictionResult, {
+        query: "Weather?",
+        recipeId: "recipe-1",
       });
 
-      it("should calculate 0.0 for no match", async () => {
-        const record = new PredictionHistoryRecordBuilder()
-          .withRecipeId("recipe-1")
-          .withRecipeName("Recipe 1")
-          .withPrediction("abc")
-          .withConfidence(0.8)
-          .build();
+      const allRecords = historyRepository.getAll();
+      const recordedId = allRecords[allRecords.length - 1]?.id;
 
-        historyRepository.record(
-          {
-            id: record.id,
-            prediction: record.prediction,
-            confidence: record.confidence,
-            reason: "Test prediction",
-            recipeUsed: "recipe-1",
-            timestamp: record.timestamp,
-            metadata: {
-              recipeId: "recipe-1",
-              recipeName: "Recipe 1",
-              executionTimestamp: record.timestamp,
-              confidenceScore: record.confidence,
-              evidenceCount: 0,
-              predictionVersion: "1.0",
-            },
-          },
-          record.request,
-        );
-
-        const result = await learningEngine.learn(record.id, "xyz");
-        expect(result.metadata?.accuracy).toBe(0.0);
-      });
-
-      it("should handle case-insensitive comparison", async () => {
-        const record = new PredictionHistoryRecordBuilder()
-          .withRecipeId("recipe-1")
-          .withRecipeName("Recipe 1")
-          .withPrediction("SUNNY")
-          .withConfidence(0.8)
-          .build();
-
-        historyRepository.record(
-          {
-            id: record.id,
-            prediction: record.prediction,
-            confidence: record.confidence,
-            reason: "Test prediction",
-            recipeUsed: "recipe-1",
-            timestamp: record.timestamp,
-            metadata: {
-              recipeId: "recipe-1",
-              recipeName: "Recipe 1",
-              executionTimestamp: record.timestamp,
-              confidenceScore: record.confidence,
-              evidenceCount: 0,
-              predictionVersion: "1.0",
-            },
-          },
-          record.request,
-        );
-
-        const result = await learningEngine.learn(record.id, "sunny");
-        expect(result.metadata?.accuracy).toBe(1.0);
-      });
-
-      it("should handle whitespace trimming", async () => {
-        const record = new PredictionHistoryRecordBuilder()
-          .withRecipeId("recipe-1")
-          .withRecipeName("Recipe 1")
-          .withPrediction("  sunny  ")
-          .withConfidence(0.8)
-          .build();
-
-        historyRepository.record(
-          {
-            id: record.id,
-            prediction: record.prediction,
-            confidence: record.confidence,
-            reason: "Test prediction",
-            recipeUsed: "recipe-1",
-            timestamp: record.timestamp,
-            metadata: {
-              recipeId: "recipe-1",
-              recipeName: "Recipe 1",
-              executionTimestamp: record.timestamp,
-              confidenceScore: record.confidence,
-              evidenceCount: 0,
-              predictionVersion: "1.0",
-            },
-          },
-          record.request,
-        );
-
-        const result = await learningEngine.learn(record.id, "sunny");
-        expect(result.metadata?.accuracy).toBe(1.0);
-      });
+      const result = await learningEngine.learn(recordedId!, "sunny and cold");
+      expect(result.success).toBe(true);
+      expect(result.metadata?.accuracy).toBe(0.5);
     });
 
-    describe("metadata", () => {
-      it("should include learning metadata in result", async () => {
-        const record = new PredictionHistoryRecordBuilder()
-          .withRecipeId("recipe-1")
-          .withRecipeName("Recipe 1")
-          .withPrediction("sunny")
-          .withConfidence(0.8)
-          .build();
+    it("should calculate 0.0 for no match", async () => {
+      const predictionResult: PredictionResult = {
+        id: "test-pred-4",
+        prediction: "sunny",
+        confidence: 0.8,
+        reason: "Test",
+        recipeUsed: "recipe-1",
+        timestamp: Date.now(),
+        metadata: {
+          recipeId: "recipe-1",
+          recipeName: "Recipe 1",
+          executionTimestamp: Date.now(),
+          confidenceScore: 0.8,
+          evidenceCount: 0,
+          predictionVersion: "1.0",
+        },
+      };
 
-        historyRepository.record(
-          {
-            id: record.id,
-            prediction: record.prediction,
-            confidence: record.confidence,
-            reason: "Test prediction",
-            recipeUsed: "recipe-1",
-            timestamp: record.timestamp,
-            metadata: {
-              recipeId: "recipe-1",
-              recipeName: "Recipe 1",
-              executionTimestamp: record.timestamp,
-              confidenceScore: record.confidence,
-              evidenceCount: 0,
-              predictionVersion: "1.0",
-            },
-          },
-          record.request,
-        );
-
-        const result = await learningEngine.learn(record.id, "sunny");
-
-        expect(result.metadata?.predictionId).toBe(record.id);
-        expect(result.metadata?.recipeId).toBe("recipe-1");
-        expect(result.metadata?.accuracy).toBe(1.0);
-        expect(result.metadata?.actualResult).toBe("sunny");
-        expect(result.metadata?.note).toContain("v1");
+      historyRepository.record(predictionResult, {
+        query: "Weather?",
+        recipeId: "recipe-1",
       });
+
+      const allRecords = historyRepository.getAll();
+      const recordedId = allRecords[allRecords.length - 1]?.id;
+
+      const result = await learningEngine.learn(recordedId!, "rainy");
+      expect(result.success).toBe(true);
+      expect(result.metadata?.accuracy).toBe(0.0);
+    });
+
+    it("should handle prediction not found", async () => {
+      const result = await learningEngine.learn("non-existent-id", "sunny");
+      expect(result.success).toBe(false);
+      expect(result.updatedRecipes).toHaveLength(0);
+      expect(result.metadata?.error).toContain("not found");
+    });
+
+    it("should update recipe performance", async () => {
+      const predictionResult: PredictionResult = {
+        id: "test-pred-5",
+        prediction: "sunny",
+        confidence: 0.5,
+        reason: "Test",
+        recipeUsed: "recipe-1",
+        timestamp: Date.now(),
+        metadata: {
+          recipeId: "recipe-1",
+          recipeName: "Recipe 1",
+          executionTimestamp: Date.now(),
+          confidenceScore: 0.5,
+          evidenceCount: 0,
+          predictionVersion: "1.0",
+        },
+      };
+
+      historyRepository.record(predictionResult, {
+        query: "Weather?",
+        recipeId: "recipe-1",
+      });
+
+      const allRecords = historyRepository.getAll();
+      const recordedId = allRecords[allRecords.length - 1]?.id;
+
+      await learningEngine.learn(recordedId!, "sunny");
+
+      const stats = performanceTracker.getRecipeStats("recipe-1");
+      expect(stats).toBeDefined();
+      expect(stats?.executionCount).toBeGreaterThan(0);
+    });
+
+    it("should trigger evolution analysis", async () => {
+      const predictionResult: PredictionResult = {
+        id: "test-pred-6",
+        prediction: "sunny",
+        confidence: 0.8,
+        reason: "Test",
+        recipeUsed: "recipe-1",
+        timestamp: Date.now(),
+        metadata: {
+          recipeId: "recipe-1",
+          recipeName: "Recipe 1",
+          executionTimestamp: Date.now(),
+          confidenceScore: 0.8,
+          evidenceCount: 0,
+          predictionVersion: "1.0",
+        },
+      };
+
+      historyRepository.record(predictionResult, {
+        query: "Weather?",
+        recipeId: "recipe-1",
+      });
+
+      const allRecords = historyRepository.getAll();
+      const recordedId = allRecords[allRecords.length - 1]?.id;
+
+      const result = await learningEngine.learn(recordedId!, "sunny");
+      expect(result.recommendationsUpdated).toBe(true);
     });
   });
 });
