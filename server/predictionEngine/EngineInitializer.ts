@@ -1,39 +1,28 @@
 import { EngineRegistry } from "./EngineRegistry";
 import { TrendPredictionEngine } from "./engines/TrendPredictionEngine";
-import { PatternPredictionEngine } from "./engines/PatternPredictionEngine";
 import { StatisticalPredictionEngine } from "./engines/StatisticalPredictionEngine";
+import { PatternPredictionEngine } from "./engines/PatternPredictionEngine";
+import { CausalPredictionEngine } from "./engines/CausalPredictionEngine";
 
 /**
  * EngineInitializer
- * 
- * Registers all specialist engines in the EngineRegistry.
- * 
- * This is the ONLY place where engines are instantiated and registered.
- * 
- * Adding a new engine:
- * 1. Create NewPredictionEngine class
- * 2. Import it here
- * 3. Call registry.register("new-engine-id", new NewPredictionEngine())
- * 4. Done - no other changes needed
- * 
- * This satisfies the Open/Closed Principle:
- * - Open for extension (add new engines)
- * - Closed for modification (existing engines unchanged)
+ *
+ * Single registration point for all specialist engines.
+ * Add new engines here to activate them in production.
+ *
+ * No hardcoding. No if/else chains. Just register and go.
  */
 export function initializeEngines(): void {
   const registry = EngineRegistry.getInstance();
 
-  // Register TrendPredictionEngine
+  // Register all specialist engines
   registry.register("trend-engine", new TrendPredictionEngine());
-
-  // Register PatternPredictionEngine
-  registry.register("pattern-engine", new PatternPredictionEngine());
-
-  // Register StatisticalPredictionEngine
   registry.register("statistical-engine", new StatisticalPredictionEngine());
+  registry.register("pattern-engine", new PatternPredictionEngine());
+  registry.register("causal-engine", new CausalPredictionEngine());
 
-  // Future engines can be registered here:
-  // registry.register("neural-engine", new NeuralPredictionEngine());
-  // registry.register("llm-engine", new LLMPredictionEngine());
-  // registry.register("finance-engine", new FinancePredictionEngine());
+  // Future engines can be added here without modifying recipes or pipeline
+  // registry.register("cycle-engine", new CycleAnalysisEngine());
+  // registry.register("seasonality-engine", new SeasonalityEngine());
+  // registry.register("ai-engine", new AIReasoningEngine());
 }
