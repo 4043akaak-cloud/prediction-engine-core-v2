@@ -26,6 +26,8 @@ This document formally freezes the public interface contracts for Prediction Eng
 
 **Enforcement:** All implementation must conform to these contracts. Any deviation requires ARB approval.
 
+**Related Document:** `ALGORITHM_SPECIFICATION_V1.md` contains detailed algorithm definitions, scoring formulas, and implementation details that are NOT frozen and can be freely evolved.
+
 ---
 
 ## Frozen Contracts (10 Total)
@@ -796,58 +798,36 @@ export interface IReasoningEngine {
 
 **Requirement:** ReasoningEngine MUST implement at least 5 reasoning rules
 
-**v1 Baseline Rules:**
+**Requirement Details:** See `ALGORITHM_SPECIFICATION_V1.md` for detailed rule definitions and algorithms
 
-1. **ConfidenceThresholdRule**
-   - Purpose: Adjust confidence based on threshold
-   - Logic: If confidence > 0.8, increase adjustment; if < 0.3, decrease
-   - Output: Confidence adjustment factor
+**v1 Baseline Rules (Summary):**
+1. ConfidenceThresholdRule
+2. HistoricalPerformanceRule
+3. EvidenceWeightRule
+4. FactorConsistencyRule
+5. EvidenceSourceDiversityRule
 
-2. **HistoricalPerformanceRule**
-   - Purpose: Adjust based on recipe's historical performance
-   - Logic: Use RecipePerformanceTracker metrics
-   - Output: Confidence adjustment based on accuracy history
-
-3. **EvidenceWeightRule**
-   - Purpose: Adjust based on evidence quality and weight
-   - Logic: Analyze evidence weights and sources
-   - Output: Confidence adjustment based on evidence quality
-
-4. **FactorConsistencyRule**
-   - Purpose: Check consistency of contributing factors
-   - Logic: Analyze factor alignment with prediction
-   - Output: Confidence adjustment based on factor consistency
-
-5. **EvidenceSourceDiversityRule**
-   - Purpose: Adjust based on evidence source diversity
-   - Logic: Count unique evidence sources
-   - Output: Confidence adjustment based on source diversity
-
-**v1.5+ Additional Rules:**
-- Temporal consistency rule
-- Pattern recognition rule
-- Anomaly detection rule
-- Correlation analysis rule
+**Note:** Detailed algorithms, scoring formulas, and rule implementations are documented in `ALGORITHM_SPECIFICATION_V1.md`, not in this Contract document.
 
 ### Evolution Strategy
 
 **v1 (Current):**
-- 5 basic reasoning rules
-- Rule-based reasoning
-- Simple confidence adjustment
+- Minimum 5 reasoning rules (required by contract)
+- Rule-based reasoning strategy
+- Confidence adjustment mechanism
 
 **v1.5 (Planned):**
-- 8+ reasoning rules
-- Enhanced rule logic
-- Better explanation generation
+- Additional reasoning rules (algorithm evolution)
+- Enhanced rule logic (algorithm evolution)
+- Better explanation generation (algorithm evolution)
 
 **v2+ (Future):**
-- Probabilistic reasoning
-- Bayesian networks
-- ML-based reasoning
-- LLM-assisted reasoning
+- Probabilistic reasoning (algorithm evolution)
+- Bayesian networks (algorithm evolution)
+- ML-based reasoning (algorithm evolution)
+- LLM-assisted reasoning (algorithm evolution)
 
-**Constraint:** External interface remains stable. Internal reasoning strategy can be completely replaced.
+**Constraint:** External interface remains stable (CONTRACT_FREEZE.md). Internal reasoning strategy is completely replaceable (ALGORITHM_SPECIFICATION_V1.md).
 
 ---
 
