@@ -1433,3 +1433,371 @@ No circular dependencies.
 ---
 
 ## 5. Comparison: v1 vs Future Versions
+ ## 5. MultiRecipeEnsemble v1 Algorithm
+
+### 5.1 Overview
+
+**Purpose:** Combine predictions from multiple recipes to improve accuracy and confidence
+
+**Baseline Strategies:** 2 core ensemble strategies (v1 minimum)
+
+**Output:** PredictionResult (combined prediction with ensemble confidence)
+
+**Key Principle:** Ensemble improves accuracy by combining diverse prediction approaches
+
+---
+
+### 5.2 Ensemble Strategies (v1)
+
+#### Strategy 1: Confidence Weighted (PRIMARY)
+
+**Purpose:** Weight predictions by their confidence scores
+
+**Algorithm:**
+```
+ensemble(predictions: PredictionResult[], strategy: 'confidence-weighted'):
+  
+  // Step 1: Validate input
+  IF predictions.length == 0 THEN
+    RETURN error("No predictions to ensemble")
+  END IF
+  
+  IF predictions.length == 1 THEN
+    RETURN predictions[0]  // Single prediction, no ensemble needed
+  END IF
+  
+  // Step 2: Calculate total confidence
+  total_confidence = sum(prediction.confidence for each prediction)
+  
+  // Step 3: Calculate weighted average confidence
+  ensemble_confidence = total_confidence / predictions.length
+  
+  // Step 4: Select prediction with highest confidence
+  // (represents the most confident approach)
+  ensemble_prediction = max(predictions, by: confidence)
+  
+  // Step 5: Build ensemble result
+  ensemble_result = {
+    prediction: ensemble_prediction.prediction,
+    confidence: ensemble_confidence,
+    reason: "Ensemble of " + predictions.length + " predictions (confidence weighted)",
+    recipeUsed: "ensemble:" + ensemble_prediction.recipeUsed,
+    metadata: {
+      ensembleStrategy: "confidence-weighted",
+      componentCount: predictions.length,
+      componentConfidences: [prediction.confidence for each prediction],
+      selectedRecipe: ensemble_prediction.recipeUsed,
+      selectedConfidence: ensemble_prediction.confidence
+    }
+  }
+  
+  RETURN ensemble_result
+```
+
+**Confidence Calculation:**
+- Average of all component confidences
+- Range: 0-1 (normalized)
+- Interpretation: Overall ensemble confidence
+
+**Prediction Selection:**
+- Highest confidence prediction is selected
+- Rationale: Most confident recipe likely most accurate
+
+**When to Use:**
+- Default strategy for v1
+- When confidence scores are reliable
+- When recipe diversity is important
+
+**Pros:**
+- Uses confidence information
+- Favors high-confidence predictions
+- Simple to implement
+- Mathematically sound
+
+**Cons:**
+- Ignores prediction diversity
+- May be biased toward single recipe
+- Requires good confidence calibration
+
+---
+
+#### Strategy 2: Majority Voting (SECONDARY)
+
+**Purpose:** Democratic combination of predictions
+
+**Algorithm:**
+```
+ensemble(predictions: PredictionResult[], strategy: 'majority-voting'):
+  
+  // Step 1: Validate input
+  IF predictions.length == 0 THEN
+    RETURN error("No predictions to ensemble")
+  END IF
+  
+  IF predictions.length == 1 THEN
+    RETURN predictions[0]  // Single prediction, no ensemble needed
+  END IF
+  
+  // Step 2: Count votes for each prediction
+  vote_counts = {}
+  FOR each prediction IN predictions:
+    key = prediction.prediction  // Group by prediction text
+    vote_counts[key] = vote_counts[key] + 1
+  END FOR
+  
+  // Step 3: Find prediction with most votes
+  max_votes = max(vote_counts.values())
+  ensemble_prediction_text = key where vote_counts[key] == max_votes
+  
+  // Step 4: Calculate ensemble confidence
+  // Confidence = percentage of votes for winning prediction
+  ensemble_confidence = max_votes / predictions.length
+  
+  // Step 5: Get full prediction object for winning prediction
+  winning_prediction = first(prediction where prediction.prediction == ensemble_prediction_text)
+  
+  // Step 6: Build ensemble result
+  ensemble_result = {
+    prediction: ensemble_prediction_text,
+    confidence: ensemble_confidence,
+    reason: "Ensemble of " + predictions.length + " predictions (majority voting)",
+    recipeUsed: "ensemble:" + winning_prediction.recipeUsed,
+    metadata: {
+      ensembleStrategy: "majority-voting",
+      componentCount: predictions.length,
+      votes: vote_counts,
+      winningVotes: max_votes,
+      winningPercentage: (max_votes / predictions.length) * 100,
+      selectedRecipe: winning_prediction.recipeUsed
+    }
+  }
+  
+  RETURN ensemble_result
+```
+
+**Confidence Calculation:**
+- Percentage of votes for winning prediction
+- Range: 0-1 (normalized)
+- Interpretation: Agreement level among recipes
+
+**Prediction Selection:**
+- Prediction with most votes wins
+- Rationale: Democratic approach, robust to outliers
+
+**When to Use:**
+- When predictions are discrete/categorical
+- When outlier robustness is important
+- When recipe diversity is important
+
+**Pros:**
+- Simple to understand
+- Robust to outliers
+- Democratic approach
+- Works with categorical predictions
+
+**Cons:**
+- Ignores confidence scores
+- Ties are problematic (use first occurrence)
+- May miss nuanced differences
+
+---
+
+### 5.3 Strategy Selection
+
+**Algorithm:**
+```
+selectStrategy(predictions: PredictionResult[], options?: EnsembleOptions):
+  
+  // Step 1: Check for explicit strategy in options
+  IF options.strategy is specified THEN
+    RETURN options.strategy
+  END IF
+  
+  // Step 2: Use default strategy (Confidence Weighted)
+  RETURN "confidence-weighted"
+```
+
+**Default Strategy:** confidence-weighted
+
+**Supported Strategies:**
+- confidence-weighted (primary)
+- majority-voting (secondary)
+
+**Future Strategies (v1.5+):**
+- weighted-average (requires weight tuning)
+- best-confidence (simple, but not true ensemble)
+- dynamic-selection (ML-based)
+
+---
+
+### 5.4 Result Aggregation
+
+**Algorithm:**
+```
+aggregateResults(predictions: PredictionResult[]):
+  
+  // Step 1: Collect metadata
+  metadata = {
+    ensembleSize: predictions.length,
+    componentRecipes: [prediction.recipeUsed for each prediction],
+    componentConfidences: [prediction.confidence for each prediction],
+    averageConfidence: sum(confidences) / predictions.length,
+    minConfidence: min(confidences),
+    maxConfidence: max(confidences),
+    confidenceSpread: max(confidences) - min(confidences)
+  }
+  
+  // Step 2: Collect evidence
+  aggregated_evidence = []
+  FOR each prediction IN predictions:
+    IF prediction.evidenceList exists THEN
+      aggregated_evidence.push(prediction.evidenceList)
+    END IF
+  END FOR
+  
+  // Step 3: Combine factors
+  combined_factors = []
+  FOR each prediction IN predictions:
+    IF prediction.metadata.factors exists THEN
+      combined_factors.push(prediction.metadata.factors)
+    END IF
+  END FOR
+  
+  RETURN {
+    metadata: metadata,
+    evidence: aggregated_evidence,
+    factors: combined_factors
+  }
+```
+
+**Metadata Collected:**
+- Ensemble size (number of predictions)
+- Component recipes (which recipes were used)
+- Component confidences (individual confidence scores)
+- Average confidence (mean of all confidences)
+- Min/max confidence (range)
+- Confidence spread (diversity indicator)
+
+---
+
+### 5.5 Error Handling
+
+**Algorithm:**
+```
+ensemble(predictions: PredictionResult[], strategy?: string):
+  
+  // Error Case 1: Empty predictions
+  IF predictions.length == 0 THEN
+    RETURN error("Cannot ensemble empty predictions")
+  END IF
+  
+  // Error Case 2: Single prediction
+  IF predictions.length == 1 THEN
+    RETURN predictions[0]  // Return as-is
+  END IF
+  
+  // Error Case 3: Invalid strategy
+  IF strategy not in ["confidence-weighted", "majority-voting"] THEN
+    RETURN error("Unknown ensemble strategy: " + strategy)
+  END IF
+  
+  // Error Case 4: Null/undefined predictions
+  FOR each prediction IN predictions:
+    IF prediction is NULL THEN
+      RETURN error("Null prediction in ensemble")
+    END IF
+  END FOR
+  
+  // Normal execution
+  RETURN executeStrategy(predictions, strategy)
+```
+
+---
+
+### 5.6 Dependency Injection
+
+**Constructor:**
+
+```typescript
+constructor(
+  private recipeRegistry: RecipeRegistry,
+  private performanceTracker: RecipePerformanceTracker
+)
+```
+
+**Dependencies:**
+- RecipeRegistry: For recipe metadata
+- RecipePerformanceTracker: For performance statistics (future)
+
+**No dependencies on:**
+- PredictionPipeline
+- Other engines
+- Database
+
+---
+
+### 5.7 Integration with Pipeline
+
+**Pipeline Execution Flow (Updated):**
+
+```
+Step 1: Call PredictionEngine.predict()
+Step 2: Call MultiRecipeEnsembleEngine.ensemble() [NEW]
+Step 3: Call PredictionHistoryRepository.record()
+Step 4: Call RecommendationEngine.recommend()
+Step 5: Assemble PredictionPipelineResult
+```
+
+**Pipeline Responsibility:**
+- Call ensemble engine (coordination only)
+- Select strategy (if needed)
+- Handle ensemble errors
+- Pass ensemble result to history
+
+**Ensemble Engine Responsibility:**
+- Implement ensemble algorithm
+- Combine predictions
+- Calculate ensemble confidence
+- Return ensemble result
+
+---
+
+### 5.8 Testing Strategy
+
+**Unit Tests:**
+- Test Confidence Weighted strategy
+- Test Majority Voting strategy
+- Test strategy selection
+- Test error handling
+- Test metadata aggregation
+
+**Integration Tests:**
+- Test ensemble in pipeline
+- Test with multiple recipes
+- Test with varying confidences
+- Test with edge cases
+
+**Error Tests:**
+- Test empty predictions
+- Test single prediction
+- Test invalid strategy
+- Test null predictions
+
+---
+
+### 5.9 Future Improvements (v1.5+)
+
+**Planned Enhancements:**
+- Weighted Average strategy (requires weight tuning)
+- Dynamic strategy selection (ML-based)
+- Performance-based weighting
+- Hierarchical ensemble (ensemble of ensembles)
+- Ensemble optimization
+- Confidence calibration
+- Diversity metrics
+
+**Note:** Ensemble strategies can be completely replaced without changing CONTRACT_FREEZE.md
+
+---
+
+## 6. Comparison: v1 vs Future Versions
