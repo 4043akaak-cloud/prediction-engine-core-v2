@@ -23,13 +23,18 @@ export class StatisticalRecipe implements IRecipe {
       recipeId: this.id,
     });
 
+    // Extract factors from metadata or create default
+    const factors = engineResult.metadata?.evidenceCount 
+      ? [`Evidence count: ${engineResult.metadata.evidenceCount}`]
+      : [];
+
     return {
       rawPredictionData: {
         value: engineResult.prediction,
-        factors: engineResult.metadata.factors || [],
+        factors,
         analysisType: "statistical",
       },
-      factors: engineResult.metadata.factors || [],
+      factors,
     };
   }
 }
