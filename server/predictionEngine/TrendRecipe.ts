@@ -3,31 +3,33 @@ import type {
   IRecipe,
   RecipeExecutionResult,
 } from "./types";
+import { EngineRegistry } from "./EngineRegistry";
 
 export class TrendRecipe implements IRecipe {
   id = "trend-recipe";
   name = "Trend Analysis Recipe";
   description =
-    "Analyzes directional patterns in mock evidence to produce a trend-oriented prediction.";
+    "Delegates to TrendPredictionEngine for directional pattern analysis.";
   version = "1.0.0";
   category = "trend";
+  private engineId: string = "trend-engine";
 
   async execute(evidence: Evidence): Promise<RecipeExecutionResult> {
-    const prediction = `Based on current trends, '${evidence.query}' is likely to continue in its present direction.`;
-
-    const factors = [
-      "historical_direction",
-      "current_momentum",
-      "pattern_consistency",
-    ];
+    const registry = EngineRegistry.getInstance();
+    const engine = registry.get(this.engineId);
+    
+    const engineResult = await engine.predict({
+      query: evidence.query,
+      recipeId: this.id,
+    });
 
     return {
       rawPredictionData: {
-        value: prediction,
-        factors,
+        value: engineResult.prediction,
+        factors: engineResult.metadata.factors || [],
         analysisType: "trend",
       },
-      factors,
+      factors: engineResult.metadata.factors || [],
     };
   }
 }

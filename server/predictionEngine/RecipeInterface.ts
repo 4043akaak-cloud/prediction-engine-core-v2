@@ -1,23 +1,33 @@
-import { IRecipe, Evidence, RecipeExecutionResult } from "./types";
+import type {
+  Evidence,
+  IRecipe,
+  RecipeExecutionResult,
+} from "./types";
+import { EngineRegistry } from "./EngineRegistry";
 
 export class MockRecipe implements IRecipe {
   id: string = "mock-recipe";
   name: string = "Mock Prediction Recipe";
-  description: string = "This is a mock recipe for testing purposes.";
+  description: string = "Mock recipe that delegates to PatternPredictionEngine.";
   version: string = "1.0.0";
   category: string = "mock";
+  private engineId: string = "pattern-engine";
 
   async execute(evidence: Evidence): Promise<RecipeExecutionResult> {
-    console.log("Executing MockRecipe with evidence:", evidence);
-    const predictionValue = `Mock Prediction for '${evidence.query}' based on some mock data.`;
-    const factors = ["mock_factor_1", "mock_factor_2"];
+    const registry = EngineRegistry.getInstance();
+    const engine = registry.get(this.engineId);
+    
+    const engineResult = await engine.predict({
+      query: evidence.query,
+      recipeId: this.id,
+    });
 
     return {
       rawPredictionData: {
-        value: predictionValue,
-        factors,
+        value: engineResult.prediction,
+        factors: engineResult.metadata.factors || [],
       },
-      factors,
+      factors: engineResult.metadata.factors || [],
     };
   }
 }

@@ -3,31 +3,33 @@ import type {
   IRecipe,
   RecipeExecutionResult,
 } from "./types";
+import { EngineRegistry } from "./EngineRegistry";
 
 export class StatisticalRecipe implements IRecipe {
   id = "statistical-recipe";
   name = "Statistical Analysis Recipe";
   description =
-    "Applies statistical methods to mock evidence to generate a probability-based prediction.";
+    "Delegates to StatisticalPredictionEngine for probability-based prediction.";
   version = "1.0.0";
   category = "statistical";
+  private engineId: string = "statistical-engine";
 
   async execute(evidence: Evidence): Promise<RecipeExecutionResult> {
-    const prediction = `Statistically, there is a high probability that \'${evidence.query}\' will exhibit a certain behavior.`;
-
-    const factors = [
-      "data_variance",
-      "mean_reversion",
-      "standard_deviation",
-    ];
+    const registry = EngineRegistry.getInstance();
+    const engine = registry.get(this.engineId);
+    
+    const engineResult = await engine.predict({
+      query: evidence.query,
+      recipeId: this.id,
+    });
 
     return {
       rawPredictionData: {
-        value: prediction,
-        factors,
+        value: engineResult.prediction,
+        factors: engineResult.metadata.factors || [],
         analysisType: "statistical",
       },
-      factors,
+      factors: engineResult.metadata.factors || [],
     };
   }
 }

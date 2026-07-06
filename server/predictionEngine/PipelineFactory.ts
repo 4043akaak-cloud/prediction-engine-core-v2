@@ -8,6 +8,7 @@ import { RecipePerformanceTracker } from "./RecipePerformanceTracker";
 import { PredictionHistory } from "./PredictionHistory";
 import { RecipeEvolutionEngine } from "./RecipeEvolutionEngine";
 import { RecipeRegistry } from "./RecipeRegistry";
+import { initializeEngines } from "./EngineInitializer";
 
 /**
   * PipelineFactory
@@ -19,14 +20,17 @@ import { RecipeRegistry } from "./RecipeRegistry";
   * - Single instance of PredictionPipeline
   * - All dependencies are properly initialized
   * - Clean separation of concerns
+  * - Specialist engines are registered
   */
-
 let pipelineInstance: PredictionPipeline | null = null;
 
 export function getPredictionPipeline(): PredictionPipeline {
   if (pipelineInstance) {
     return pipelineInstance;
   }
+
+  // Initialize all specialist engines
+  initializeEngines();
 
   // Initialize all dependencies
   const predictionEngine = new PredictionEngine();
