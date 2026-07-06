@@ -273,6 +273,212 @@ final_explanation = explanation_parts.join(". ")
 
 ## 2. RecommendationEngine v1 Algorithm
 
+---
+
+## 2.0 RecipeEvolutionEngine v1 Algorithm
+
+### 2.0.1 Overview
+
+**Purpose:** Analyze recipe performance trends and generate evolution recommendations
+
+**Input:** Recipe performance statistics from RecipePerformanceTracker
+
+**Output:** RecipeAnalysis with trend, recommendation, and reasoning
+
+---
+
+### 2.0.2 Performance Trend Calculation
+
+**Algorithm:**
+```
+calculatePerformanceTrend(stats):
+  // Insufficient data: need at least 2 executions for trend analysis
+  IF stats.executionCount < 2 THEN
+    RETURN "stable"  // Default to stable when insufficient data
+  END IF
+  
+  // Use average confidence as proxy for trend
+  // (v1.5+ can implement sliding window analysis for true trend detection)
+  IF stats.averageConfidence >= 0.75 THEN
+    RETURN "improving"
+  ELSE IF stats.averageConfidence < 0.50 THEN
+    RETURN "declining"
+  ELSE
+    RETURN "stable"
+  END IF
+```
+
+**Boundaries:**
+- executionCount < 2 → "stable" (insufficient data)
+- averageConfidence >= 0.75 → "improving"
+- averageConfidence < 0.50 → "declining"
+- 0.50 ≤ averageConfidence < 0.75 → "stable"
+
+**Range:** "improving" | "stable" | "declining"
+
+---
+
+### 2.0.3 Evolution Recommendation Algorithm
+
+**Purpose:** Generate actionable recommendations based on recipe maturity and performance
+
+**Design:** State Machine with three sequential stages (Fatal → Maturity → Performance)
+
+**Principle:** Critical failures override maturity considerations; new recipes can be deprecated if critically broken
+
+**Algorithm:**
+```
+generateRecommendation(stats, trend):
+  // ========================================
+  // STAGE 1: FATAL CHECK
+  // ========================================
+  // Critical failures must be caught first, regardless of maturity
+  // A recipe with very low confidence is broken and should be deprecated
+  
+  IF stats.averageConfidence < 0.30 THEN
+    RETURN "DEPRECATE"  // Critically broken recipe
+  END IF
+  
+  // ========================================
+  // STAGE 2: MATURITY CHECK
+  // ========================================
+  // New recipes (< 3 executions) are always experimental
+  // This prevents premature judgment of new recipes
+  
+  IF stats.executionCount < 3 THEN
+    RETURN "EXPERIMENT"
+  END IF
+  
+  // ========================================
+  // STAGE 3: PERFORMANCE CHECK
+  // ========================================
+  // Established recipes (>= 3 executions) are evaluated by performance
+  
+  // High performers: KEEP
+  // Criteria: High confidence (>= 0.75) AND good execution history (>= 5)
+  IF stats.averageConfidence >= 0.75 AND stats.executionCount >= 5 THEN
+    RETURN "KEEP"
+  END IF
+  
+  // Moderate performers: IMPROVE
+  // Criteria: Moderate confidence (>= 0.50) AND decent execution history (>= 3)
+  IF stats.averageConfidence >= 0.50 AND stats.executionCount >= 3 THEN
+    RETURN "IMPROVE"
+  END IF
+  
+  // Declining performers: IMPROVE (with caution)
+  // Criteria: Declining trend with low confidence should be monitored
+  IF trend == "declining" AND stats.averageConfidence < 0.50 THEN
+    RETURN "IMPROVE"  // Monitor and improve
+  END IF
+  
+  // Default: IMPROVE for all other established recipes
+  RETURN "EXPERIMENT"
+```
+
+**State Machine Stages:**
+
+| Stage | Name | Purpose | Decision |
+|-------|------|---------|----------|
+| 1 | Fatal Check | Catch critically broken recipes | conf < 0.30 → DEPRECATE |
+| 2 | Maturity Check | Protect new recipes from judgment | exec < 3 → EXPERIMENT |
+| 3 | Performance Check | Evaluate established recipes | conf/exec thresholds → KEEP/IMPROVE/EXPERIMENT |
+
+**Recommendation Levels (State Machine Output):**
+| Level | Criteria | Action | Use Case |
+|-------|----------|--------|----------|
+| DEPRECATE | conf < 0.30 | Avoid | Critically broken recipes |
+| EXPERIMENT | exec < 3 | Try | New recipes (protected from judgment) |
+| KEEP | conf >= 0.75 + exec >= 5 | Prioritize | Proven, reliable recipes |
+| IMPROVE | conf >= 0.50 + exec >= 3 | Monitor | Established, moderate performance |
+| IMPROVE | declining + conf < 0.50 | Monitor | Declining recipes (needs attention) |
+| EXPERIMENT | else | Evaluate | Other established recipes |
+
+**Decision Tree (State Machine Flow):**
+```
+STAGE 1: FATAL CHECK
+  ├─ conf < 0.30? → DEPRECATE ✓ (STOP - critically broken)
+  └─ else → continue to STAGE 2
+
+STAGE 2: MATURITY CHECK
+  ├─ exec < 3? → EXPERIMENT ✓ (STOP - new recipe)
+  └─ else → continue to STAGE 3
+
+STAGE 3: PERFORMANCE CHECK (established recipes only)
+  ├─ conf >= 0.75 AND exec >= 5? → KEEP ✓
+  ├─ conf >= 0.50 AND exec >= 3? → IMPROVE ✓
+  ├─ declining AND conf < 0.50? → IMPROVE ✓
+  └─ else → EXPERIMENT (default)
+```
+
+**Range:** "KEEP" | "IMPROVE" | "EXPERIMENT" | "DEPRECATE"
+
+---
+
+### 2.0.4 Reasoning Generation
+
+**Algorithm:**
+```
+generateReasoning(stats, trend, recommendation):
+  reasoning_parts = []
+  
+  // Add execution count insight
+  IF stats.executionCount == 0 THEN
+    reasoning_parts.push("This recipe has never been executed.")
+  ELSE IF stats.executionCount < 3 THEN
+    reasoning_parts.push("This recipe has been executed {count} time(s) (limited data).")
+  ELSE
+    reasoning_parts.push("This recipe has been executed {count} times.")
+  END IF
+  
+  // Add confidence insight
+  confidence_percent = round(stats.averageConfidence × 100)
+  reasoning_parts.push("Average confidence: {confidence_percent}%.")
+  
+  // Add trend insight
+  SWITCH trend:
+    CASE "improving":
+      reasoning_parts.push("Performance is improving.")
+    CASE "stable":
+      reasoning_parts.push("Performance is stable.")
+    CASE "declining":
+      reasoning_parts.push("Performance is declining.")
+  END SWITCH
+  
+  // Add recommendation insight
+  SWITCH recommendation:
+    CASE "KEEP":
+      reasoning_parts.push("This recipe is performing well and should be prioritized.")
+    CASE "EXPERIMENT":
+      reasoning_parts.push("This recipe shows promise and is worth experimenting with.")
+    CASE "IMPROVE":
+      reasoning_parts.push("This recipe has potential but needs improvement before prioritizing.")
+    CASE "DEPRECATE":
+      reasoning_parts.push("This recipe is underperforming and should be avoided.")
+  END SWITCH
+  
+  RETURN reasoning_parts.join(" ")
+```
+
+---
+
+### 2.0.5 Future Improvements (v1.5+)
+
+**Planned Enhancements:**
+- Sliding window analysis for true trend detection (not just current confidence)
+- Time-series analysis for seasonal patterns
+- Anomaly detection for outlier executions
+- ML-based maturity scoring
+- User preference integration
+- A/B testing for recipe variants
+- Automated recipe versioning
+
+**Note:** Trend and recommendation algorithms can be completely replaced without changing CONTRACT_FREEZE.md
+
+---
+
+## 2. RecommendationEngine v1 Algorithm
+
 ### 2.1 Overview
 
 **Purpose:** Recommend recipes based on query and historical performance

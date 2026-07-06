@@ -128,3 +128,29 @@ export interface IReasoningEngine {
     recipeResult: RecipeExecutionResult,
   ): Promise<ReasoningResult>;
 }
+
+// RecommendationResult Contract v1.0 (CONTRACT_FREEZE.md)
+export interface RecommendationResult {
+  recipeId: string;
+  score: number; // 0-1 (normalized)
+  reason: string;
+  metadata?: {
+    [key: string]: any;
+  };
+}
+
+// RecommendationOptions Contract v1.0 (CONTRACT_FREEZE.md)
+export interface RecommendationOptions {
+  limit?: number;
+  minScore?: number;
+  categories?: string[];
+  [key: string]: any;
+}
+
+// IRecommendationEngine Contract v1.0 (CONTRACT_FREEZE.md)
+export interface IRecommendationEngine {
+  recommend(
+    query: string,
+    options?: RecommendationOptions,
+  ): Promise<RecommendationResult[]>;
+}

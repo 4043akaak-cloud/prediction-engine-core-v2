@@ -33,6 +33,34 @@ export class RecipeRegistry {
     this.recipes.set(recipe.id, recipe);
   }
 
+  /**
+   * @internal Test-only API for resetting registry state between tests.
+   * 
+   * IMPORTANT: This method is ONLY for testing purposes and should NEVER be used
+   * in production code. It violates the Singleton pattern and is provided solely
+   * for test isolation.
+   * 
+   * Usage:
+   * ```typescript
+   * beforeEach(() => {
+   *   RecipeRegistry.getInstance().resetForTesting();
+   * });
+   * ```
+   */
+  public resetForTesting(): void {
+    this.recipes.clear();
+  }
+
+  /**
+   * @internal Test-only API for registering recipes in tests.
+   * 
+   * IMPORTANT: This method is ONLY for testing purposes and should NEVER be used
+   * in production code.
+   */
+  public registerRecipeForTesting(recipe: IRecipe): void {
+    this.recipes.set(recipe.id, recipe);
+  }
+
   public getRecipe(id: string): IRecipe | undefined {
     return this.recipes.get(id);
   }
