@@ -1,4 +1,4 @@
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -24,6 +24,8 @@ import Tools from "./pages/Tools";
 import Learn from "./pages/Learn";
 import SignIn from "./pages/SignIn";
 import GitHub from "./pages/GitHub";
+import AdminPanel from "./pages/AdminPanel";
+import AdminUsers from "./pages/AdminUsers";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -45,6 +47,8 @@ function Router() {
       <Route path={"/learn"} component={Learn} />
       <Route path={"/signin"} component={SignIn} />
       <Route path={"/github"} component={GitHub} />
+      <Route path={"/admin"} component={AdminPanel} />
+      <Route path={"/admin/users"} component={AdminUsers} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

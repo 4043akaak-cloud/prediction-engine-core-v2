@@ -524,3 +524,54 @@
 - [ ] Final self-review
 - [ ] Git commit
 - [ ] Checkpoint save
+## Issue #012: Authentication & User Accounts
+
+### Phase 1: Lightweight Review
+- [x] Apply 5-check Lightweight Review process
+- [x] Verify no contract changes required
+- [x] Verify no architecture drift risk
+- [x] Verify acceptable implementation cost (8-12 hours)
+- [x] Verify single responsibility (auth + RBAC)
+- [x] Verify no STOP conditions
+
+### Phase 2: Backend Implementation
+- [x] Add getAllUsers() helper to server/db.ts
+- [x] Add updateUserRole() helper to server/db.ts
+- [x] Create usersRouter with users.list procedure (admin only)
+- [x] Create usersRouter with users.updateRole procedure (admin only)
+- [x] Register users router in appRouter
+- [x] Implement adminProcedure middleware (already existed)
+- [x] Ensure TypeScript compilation: 0 errors
+
+### Phase 3: Testing
+- [x] Create comprehensive test suite for users router (7 tests)
+- [x] Test users.list procedure (admin access)
+- [x] Test users.updateRole procedure (admin access)
+- [x] Test RBAC enforcement (non-admin rejection)
+- [x] Test error handling (user not found)
+- [x] All tests PASS: 198/198 ✓
+
+### Phase 4: Frontend Implementation
+- [x] Create AdminPanel.tsx page (role-based access)
+- [x] Create AdminUsers.tsx page (user management UI)
+- [x] Add admin routes to App.tsx (/admin, /admin/users)
+- [x] Implement role-based access control (redirect non-admins)
+- [x] Add user list display with role badges
+- [x] Add role update functionality (Make Admin/Make User)
+- [x] Implement loading and error states
+- [x] Ensure TypeScript compilation: 0 errors
+
+### Phase 5: Verification
+- [x] All tests PASS: 198/198
+- [x] TypeScript: 0 errors
+- [x] Contract Freeze maintained (no frozen contracts modified)
+- [x] Architecture Drift: None (auth is separate layer)
+- [x] adminProcedure middleware working correctly
+- [x] Role-based access control enforced
+- [x] User management procedures functional
+- [x] Frontend admin pages accessible only to admins
+
+### Phase 6: Git Commit & Checkpoint
+- [ ] Final self-review
+- [ ] Git commit
+- [ ] Checkpoint save

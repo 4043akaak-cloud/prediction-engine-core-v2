@@ -90,3 +90,47 @@ export async function getUserByOpenId(openId: string) {
 }
 
 // TODO: add feature queries here as your schema grows.
+
+/**
+ * Get all users (admin only)
+ */
+export async function getAllUsers() {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get users: database not available");
+    return [];
+  }
+
+  try {
+    const result = await db.select().from(users);
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to get all users:", error);
+    throw error;
+  }
+}
+
+/**
+ * Update user role (admin only)
+ */
+export async function updateUserRole(userId: number, role: "user" | "admin") {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update user: database not available");
+    return undefined;
+  }
+
+  try {
+    const result = await db
+      .update(users)
+      .set({ role })
+      .where(eq(users.id, userId));
+
+    // Return the updated user
+    const updated = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    return updated.length > 0 ? updated[0] : undefined;
+  } catch (error) {
+    console.error("[Database] Failed to update user role:", error);
+    throw error;
+  }
+}
