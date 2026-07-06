@@ -1208,3 +1208,228 @@ learn(feedbackBatch) → LearningResult:
 
 **Last Updated:** 2026-07-06  
 **Next Review:** After v1 implementation complete
+## 4. PredictionPipeline v1 Algorithm
+
+### 4.0 Overview
+
+**Purpose:** Orchestrate all PEC engines into a single prediction workflow.
+
+**Responsibility:** Coordinator only - no business logic.
+
+**Key Principle:** PredictionPipeline does NOT contain algorithms. It only coordinates existing engines.
+
+---
+
+### 4.1 Pipeline Architecture
+
+**Design Pattern:** Coordinator (Orchestrator)
+
+**Responsibility:**
+- Receive PredictionRequest
+- Execute engines in correct order
+- Transform DTOs between engines
+- Record prediction history
+- Assemble final result
+
+**Non-Responsibility:**
+- ✗ Business logic (delegated to engines)
+- ✗ Data persistence (delegated to Repository)
+- ✗ Algorithm implementation (delegated to engines)
+
+---
+
+### 4.2 Execution Flow
+
+**Pipeline Sequence:**
+
+```
+Step 1: Receive PredictionRequest
+  Input: { query: string, recipeId: string }
+  
+Step 2: ReasoningEngine.reason()
+  Input: { query, recipeId }
+  Output: ReasoningResult { explanation, confidenceAdjustment, appliedRules }
+  Purpose: Generate reasoning and adjust confidence
+  
+Step 3: PredictionEngine.predict()
+  Input: { query, recipeId, reasoningResult }
+  Output: PredictionResult { prediction, confidence, reason, ... }
+  Purpose: Generate prediction using recipe
+  
+Step 4: PredictionHistoryRepository.record()
+  Input: PredictionResult
+  Output: void
+  Purpose: Persist prediction to history
+  Side Effect: Updates RecipePerformanceTracker
+  
+Step 5: RecommendationEngine.recommend()
+  Input: query (string)
+  Output: RecommendationResult[] { recipeId, score, reason }
+  Purpose: Recommend recipes based on query and performance history
+  Note: Uses RecipePerformanceTracker updated in Step 4
+  
+Step 6: Assemble PredictionPipelineResult
+  Input: PredictionResult + RecommendationResult[]
+  Output: PredictionPipelineResult
+  Purpose: Combine prediction and recommendations
+  
+Step 7: Return PredictionPipelineResult
+  Output: { prediction: PredictionResult, recommendations: RecommendationResult[] }
+```
+
+---
+
+### 4.3 Execution Order Rationale
+
+**Why this order?**
+
+1. **ReasoningEngine first**
+   - Adjusts confidence before prediction
+   - Improves prediction quality
+   - Provides context for PredictionEngine
+
+2. **PredictionEngine second**
+   - Uses adjusted confidence from ReasoningEngine
+   - Generates the core prediction
+   - Output is ready for history recording
+
+3. **History recording third**
+   - Persists prediction immediately
+   - Updates RecipePerformanceTracker
+   - Makes statistics available for recommendations
+
+4. **RecommendationEngine last**
+   - Uses latest statistics from history
+   - Recommends recipes based on current performance
+   - Cannot run before history update (would use stale data)
+
+**Alternative orders considered:**
+- ✗ RecommendationEngine before history: Uses stale statistics
+- ✗ RecommendationEngine parallel: Adds complexity, no benefit
+- ✗ LearningEngine in pipeline: Learning is user-triggered (future design)
+
+---
+
+### 4.4 PredictionPipelineResult Contract
+
+**Definition:**
+
+```typescript
+interface PredictionPipelineResult {
+  // Core prediction (unchanged from PredictionResult)
+  prediction: PredictionResult;
+  
+  // Recommended recipes for this query
+  recommendations: RecommendationResult[];
+  
+  // Optional metadata
+  metadata?: {
+    executionTime?: number;  // Pipeline execution time in ms
+    pipelineVersion?: string; // Pipeline version (e.g., "1.0")
+    [key: string]: unknown;
+  };
+}
+```
+
+**Important:**
+- PredictionResult is NOT modified
+- PredictionResult Contract remains frozen
+- Recommendations are separate from prediction
+- Pipeline result is a composition, not a modification
+
+---
+
+### 4.5 Error Handling
+
+**Pipeline Error Strategy:**
+
+```
+IF ReasoningEngine fails:
+  RETURN error (reasoning is critical)
+
+IF PredictionEngine fails:
+  RETURN error (prediction is core)
+
+IF PredictionHistoryRepository fails:
+  RETURN error (history is critical for learning)
+
+IF RecommendationEngine fails:
+  RETURN result with empty recommendations (non-critical)
+  Log warning for debugging
+```
+
+**Rationale:**
+- Prediction is critical → fail fast
+- Recommendations are optional → degrade gracefully
+
+---
+
+### 4.6 Dependency Injection
+
+**Constructor:**
+
+```typescript
+constructor(
+  reasoningEngine: IReasoningEngine,
+  predictionEngine: IPredictionEngine,
+  historyRepository: PredictionHistoryRepository,
+  recommendationEngine: IRecommendationEngine
+)
+```
+
+**Dependency Graph:**
+
+```
+PredictionPipeline
+  ├── ReasoningEngine (no dependencies on Pipeline)
+  ├── PredictionEngine (no dependencies on Pipeline)
+  ├── PredictionHistoryRepository (no dependencies on Pipeline)
+  └── RecommendationEngine (no dependencies on Pipeline)
+
+No circular dependencies.
+```
+
+---
+
+### 4.7 Extensibility
+
+**Future Integration Points:**
+
+1. **LearningEngine Integration (Future)**
+   - Currently: Learning is user-triggered (separate workflow)
+   - Future: May integrate feedback loop
+   - Design: Separate issue (not in v1)
+
+2. **Caching Layer (Future)**
+   - Currently: No caching
+   - Future: May add recommendation caching
+   - Design: Separate issue (not in v1)
+
+3. **Async Recommendations (Future)**
+   - Currently: Recommendations are synchronous
+   - Future: May make async for performance
+   - Design: Separate issue (not in v1)
+
+---
+
+### 4.8 Testing Strategy
+
+**Unit Tests:**
+- Test each step independently
+- Mock dependencies
+- Verify DTO transformation
+
+**Integration Tests:**
+- Test full pipeline execution
+- Verify engine interaction
+- Verify history recording
+- Verify recommendations
+
+**Error Tests:**
+- Test error handling for each engine
+- Verify graceful degradation
+- Verify error messages
+
+---
+
+## 5. Comparison: v1 vs Future Versions

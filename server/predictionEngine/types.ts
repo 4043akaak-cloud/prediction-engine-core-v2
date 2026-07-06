@@ -170,3 +170,21 @@ export interface ILearningEngine {
     actualResult: unknown,
   ): Promise<LearningResult>;
 }
+
+// PredictionPipelineResult Contract v1.0 (Issue 005)
+// Combines PredictionResult with recommendations
+// PredictionResult is NOT modified - this is a composition
+export interface PredictionPipelineResult {
+  // Core prediction (unchanged from PredictionResult)
+  prediction: PredictionResult;
+
+  // Recommended recipes for this query
+  recommendations: RecommendationResult[];
+
+  // Optional metadata
+  metadata?: {
+    executionTime?: number; // Pipeline execution time in ms
+    pipelineVersion?: string; // Pipeline version (e.g., "1.0")
+    [key: string]: unknown;
+  };
+}

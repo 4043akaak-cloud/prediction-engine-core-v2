@@ -5,9 +5,6 @@ import { RecipeExecutor } from "./RecipeExecutor";
 import { EvidenceCollector } from "./EvidenceCollector";
 import { ConfidenceCalculator } from "./ConfidenceCalculator";
 import { PredictionResultBuilder } from "./PredictionResultBuilder";
-import { PredictionHistory } from "./PredictionHistory";
-import { PredictionHistoryRepository } from "./PredictionHistoryRepository";
-import { RecipePerformanceTracker } from "./RecipePerformanceTracker";
 
 export class PredictionEngine implements IPredictionEngine, IPredictionEngineMulti {
   private recipeExecutor: IRecipeExecutor;
@@ -15,9 +12,6 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
   private confidenceCalculator: IConfidenceCalculator;
   private predictionResultBuilder: IPredictionResultBuilder;
   private recipeRegistry: RecipeRegistry;
-  private predictionHistory: PredictionHistory;
-  private historyRepository: PredictionHistoryRepository;
-  private performanceTracker: RecipePerformanceTracker;
 
   constructor() {
     this.recipeRegistry = RecipeRegistry.getInstance();
@@ -26,9 +20,6 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
     this.evidenceCollector = new EvidenceCollector();
     this.confidenceCalculator = new ConfidenceCalculator();
     this.predictionResultBuilder = new PredictionResultBuilder();
-    this.predictionHistory = new PredictionHistory();
-    this.historyRepository = PredictionHistoryRepository.getInstance();
-    this.performanceTracker = new RecipePerformanceTracker();
   }
 
   public async predict(request: PredictionRequest): Promise<PredictionResult> {
@@ -57,24 +48,6 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
     const predictionResult = this.predictionResultBuilder.build(request, recipeExecutionResult, confidence, evidence);
     console.log("Prediction Engine: Prediction result built.", predictionResult);
 
-    // 6. Record to History
-    this.predictionHistory.add(predictionResult);
-    console.log("Prediction Engine: Prediction recorded to history.");
-
-    // 7. Record to History Repository
-    this.historyRepository.record(predictionResult, {
-      query: request.query,
-      recipeId: request.recipeId,
-    });
-    console.log("Prediction Engine: Prediction recorded to history repository.");
-
-    // 8. Update Recipe Performance Statistics
-    const historyRecord = this.historyRepository.getAll().pop();
-    if (historyRecord) {
-      this.performanceTracker.recordPrediction(historyRecord);
-      console.log("Prediction Engine: Recipe performance statistics updated.");
-    }
-
     console.log("Prediction Engine: Prediction process completed.");
     return predictionResult;
   }
@@ -94,7 +67,7 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
     const results: PredictionResult[] = [];
     for (const recipe of allRecipes) {
       try {
-        console.log(`Prediction Engine: Executing recipe: ${recipe.name}`);
+        console.log(`Prediction Engine: Executing recipe: ${recipe.id}`);
 
         // Execute Recipe
         const recipeExecutionResult = await this.recipeExecutor.execute(recipe, evidence);
@@ -112,21 +85,6 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
         const predictionResult = this.predictionResultBuilder.build(predictionRequest, recipeExecutionResult, confidence, evidence);
         console.log(`Prediction Engine: Prediction result for ${recipe.id} built.`, predictionResult);
 
-        // Record to History
-        this.predictionHistory.add(predictionResult);
-
-        // Record to History Repository
-        this.historyRepository.record(predictionResult, {
-          query: request.query,
-          recipeId: recipe.id,
-        });
-
-        // Update Recipe Performance Statistics
-        const historyRecord = this.historyRepository.getAll().pop();
-        if (historyRecord) {
-          this.performanceTracker.recordPrediction(historyRecord);
-        }
-
         results.push(predictionResult);
       } catch (error) {
         console.error(`Prediction Engine: Error executing recipe ${recipe.id}:`, error);
@@ -136,12 +94,5 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
 
     console.log(`Prediction Engine: Multi-recipe prediction process completed. Generated ${results.length} results.`);
     return results;
-  }
-
-  /**
-   * Get the RecipePerformanceTracker instance for testing and analytics.
-   */
-  public getPerformanceTracker(): RecipePerformanceTracker {
-    return this.performanceTracker;
   }
 }
