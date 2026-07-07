@@ -28,6 +28,8 @@ import EngineLibrary from "./pages/EngineLibrary";
 import EngineDetail from "./pages/EngineDetail";
 import CategoryDetail from "./pages/CategoryDetail";
 import AdminPanel from "./pages/AdminPanel";
+import RecipeBuilder from "./pages/RecipeBuilder";
+import RecipesList from "./pages/RecipesList";
 import AdminUsers from "./pages/AdminUsers";
 
 function Router() {
