@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, tinyint } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -26,3 +26,35 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
 // TODO: Add your tables here
+/**
+ * Recipes table - stores user-created prediction recipes
+ */
+export const recipes = mysqlTable("recipes", {
+  id: varchar("id", { length: 36 }).primaryKey(), // UUID
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 100 }),
+  version: varchar("version", { length: 20 }).default("1.0.0").notNull(),
+  status: mysqlEnum("status", ["draft", "ready", "archived"]).default("draft").notNull(),
+  isPublic: tinyint("isPublic").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Recipe = typeof recipes.$inferSelect;
+export type InsertRecipe = typeof recipes.$inferInsert;
+
+/**
+ * Recipe engines junction table - maps engines to recipes with weights
+ */
+export const recipeEngines = mysqlTable("recipe_engines", {
+  id: varchar("id", { length: 36 }).primaryKey(), // UUID
+  recipeId: varchar("recipeId", { length: 36 }).notNull(),
+  engineId: varchar("engineId", { length: 100 }).notNull(),
+  weight: mysqlEnum("weight", ["high", "medium", "low"]).default("medium").notNull(),
+  position: int("position").default(0).notNull(),
+});
+
+export type RecipeEngine = typeof recipeEngines.$inferSelect;
+export type InsertRecipeEngine = typeof recipeEngines.$inferInsert;

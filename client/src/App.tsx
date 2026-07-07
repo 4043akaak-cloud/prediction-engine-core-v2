@@ -52,6 +52,8 @@ function Router() {
       <Route path={"/github"} component={GitHub} />
       <Route path={"/engines"} component={EngineLibrary} />
       <Route path={"/engines/category/:name"} component={CategoryDetail} />
+  <Route path={"/recipes/create"} component={RecipeBuilder} />
+  <Route path={"/recipes"} component={RecipesList} />
       <Route path={"/engines/:id"} component={EngineDetail} />
       <Route path={"/admin"} component={AdminPanel} />
       <Route path={"/admin/users"} component={AdminUsers} />
