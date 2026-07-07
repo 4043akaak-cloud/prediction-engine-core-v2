@@ -156,8 +156,7 @@ export default function CategoryDetail() {
  */
 function CategoryEngineCard({ engine }: { engine: Engine }) {
   return (
-    <Link href={`/engines/${engine.id}`}>
-      <a>
+    <a href={`/engines/${engine.id}`}>
         <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
@@ -189,7 +188,6 @@ function CategoryEngineCard({ engine }: { engine: Engine }) {
             </div>
           </CardContent>
         </Card>
-      </a>
-    </Link>
+    </a>
   );
 }

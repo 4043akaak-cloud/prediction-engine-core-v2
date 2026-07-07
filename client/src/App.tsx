@@ -51,8 +51,8 @@ function Router() {
       <Route path={"/signin"} component={SignIn} />
       <Route path={"/github"} component={GitHub} />
       <Route path={"/engines"} component={EngineLibrary} />
-      <Route path={"/engines/:id"} component={EngineDetail} />
       <Route path={"/engines/category/:name"} component={CategoryDetail} />
+      <Route path={"/engines/:id"} component={EngineDetail} />
       <Route path={"/admin"} component={AdminPanel} />
       <Route path={"/admin/users"} component={AdminUsers} />
       <Route path={"/404"} component={NotFound} />

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Info } from "lucide-react";
 import { usePrediction } from "@/hooks/usePrediction";
 import { generatePrediction } from "@/services/api";
+import { trpc } from "@/lib/trpc";
 import { PageContainer } from "@/components/PageContainer";
 import { PageHeader } from "@/components/PageHeader";
 
@@ -22,6 +23,9 @@ export default function PredictionInput() {
 
   const { isLoading } = state;
 
+  // Create the mutation hook in the component (complies with React Hook rules)
+  const predictMutation = trpc.prediction.predict.useMutation();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -37,11 +41,14 @@ export default function PredictionInput() {
     setLoading(true);
 
     try {
-      // Call the Prediction Engine API (currently using mock)
-      const result = await generatePrediction({
-        question,
-        predictionType,
-      });
+      // Call the Prediction Engine API with the mutation function
+      const result = await generatePrediction(
+        {
+          question,
+          predictionType,
+        },
+        predictMutation.mutateAsync
+      );
 
       // Store the prediction and counter prediction in context
       setPrediction(result.prediction);

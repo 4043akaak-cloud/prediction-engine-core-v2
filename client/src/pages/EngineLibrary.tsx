@@ -184,8 +184,7 @@ export default function EngineLibrary() {
  */
 function EngineCard({ engine }: { engine: Engine }) {
   return (
-    <Link href={`/engines/${engine.id}`}>
-      <a>
+    <a href={`/engines/${engine.id}`}>
         <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
@@ -221,6 +220,5 @@ function EngineCard({ engine }: { engine: Engine }) {
           </CardContent>
         </Card>
       </a>
-    </Link>
   );
 }

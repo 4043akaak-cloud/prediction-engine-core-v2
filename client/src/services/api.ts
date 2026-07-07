@@ -1,13 +1,25 @@
 import { generateMockPrediction, GeneratePredictionInput, GeneratePredictionOutput } from './mockPrediction';
-import { trpc } from "@/lib/trpc";
 
+/**
+ * Type for the mutation function passed from component
+ * This allows the hook to be called in the component, not in this service
+ */
+export type PredictionMutationFn = (input: { query: string; recipeId: string }) => Promise<any>;
+
+/**
+ * Generate prediction using the provided mutation function
+ * 
+ * This function is called from React components where useMutation() is available
+ * The mutation function is passed as a parameter to comply with React Hook rules
+ */
 export async function generatePrediction(
-  input: GeneratePredictionInput
+  input: GeneratePredictionInput,
+  mutationFn: PredictionMutationFn
 ): Promise<GeneratePredictionOutput> {
   try {
     // Call the real PredictionEngine through tRPC
     // Default to mock-recipe for the demo
-    const result = await trpc.prediction.predict.useMutation().mutateAsync({
+    const result = await mutationFn({
       query: input.question,
       recipeId: "mock-recipe",
     });
