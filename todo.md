@@ -154,3 +154,14 @@ This roadmap is organized into 6 major phases reflecting PEC v1 Blueprint:
 - **Scalability:** Verified support for 5+ independent engines without refactoring
 - **Extensibility:** New engines integrate via standard IPredictionEngine contract
 - **Quality:** TypeScript strict mode, comprehensive test coverage, clear documentation
+
+## Phase 2: Search & Filtering (COMPLETE)
+- [x] Recipe search API with query, engineId, and sortBy
+- [x] SearchInput component with 300ms debounce
+- [x] SortSelector component for flexible sorting
+- [x] NoResults component for empty states
+- [x] RecipesList enhanced with search and sort
+- [x] EngineLibrary enhanced with search, category filter, and sort
+- [x] Added /engines route to App.tsx
+- [x] All tests passing (379/379)
+- [x] 0 TypeScript errors

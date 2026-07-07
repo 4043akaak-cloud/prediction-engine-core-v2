@@ -45,6 +45,7 @@ function Router() {
       <Route path={"/select-recipe"} component={RecipeSelector} />
       <Route path={"/recipe-builder"} component={RecipeBuilder} />
       <Route path={"/recipes"} component={RecipesList} />
+      <Route path={"/engines"} component={EngineLibrary} />
       <Route path={"/engines/:id"} component={EngineDetail} />
       <Route path={"/admin"} component={AdminPanel} />
       <Route path={"/admin/users"} component={AdminUsers} />
