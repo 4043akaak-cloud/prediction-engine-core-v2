@@ -23,10 +23,7 @@ export class PatternPredictionEngine implements IPredictionEngine {
         confidenceScore: confidence,
         evidenceCount: patterns.evidenceCount,
         predictionVersion: "1.0",
-        patternMethod: patterns.method,
-        patternType: patterns.primaryPattern,
-        patternStrength: patterns.strength,
-      } as any,
+        } as any,
     };
   }
 

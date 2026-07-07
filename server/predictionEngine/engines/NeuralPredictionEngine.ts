@@ -65,7 +65,7 @@ export class NeuralPredictionEngine implements IPredictionEngine {
         reason,
         explanation,
         metadata: {
-          engine: "neural-engine",
+          recipeId: "neural-recipe",
           recipeName: "Neural Learning Recipe",
           executionTimestamp: Date.now(),
           confidenceScore: confidence,
@@ -83,7 +83,7 @@ export class NeuralPredictionEngine implements IPredictionEngine {
         reason: "Neural learning provider failed",
         explanation: `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
         metadata: {
-          engine: "neural-engine",
+          recipeId: "neural-recipe",
           recipeName: "Neural Learning Recipe",
           executionTimestamp: Date.now(),
           confidenceScore: 0.0,

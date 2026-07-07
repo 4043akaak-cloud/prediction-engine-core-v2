@@ -23,10 +23,7 @@ export class TrendPredictionEngine implements IPredictionEngine {
         confidenceScore: confidence,
         evidenceCount: trend.evidenceCount,
         predictionVersion: "1.0",
-        trendMethod: trend.method,
-        trendStrength: trend.strength,
-        trendDirection: trend.direction,
-      } as any,
+        } as any,
     };
   }
 

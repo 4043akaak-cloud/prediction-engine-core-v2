@@ -199,3 +199,15 @@ export interface PredictionPipelineResult {
     [key: string]: unknown;
   };
 }
+
+// EngineMetadata Contract v1.0 (ENGINE_SPECIFICATION_STANDARD.md)
+// Metadata for all Prediction Engines
+export interface EngineMetadata {
+  name: string;           // Unique engine name (e.g., "TrendPredictionEngine")
+  category: string;       // One of the 7 categories or "Learning Family"
+  role: string;           // Nickname/personality (e.g., "The Observer")
+  description: string;    // Brief explanation of what the engine does
+  input: string;          // Description of expected input format
+  output: string;         // Description of output format
+  version: string;        // Semantic version (e.g., "1.0.0")
+}

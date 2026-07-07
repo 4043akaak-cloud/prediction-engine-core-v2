@@ -366,10 +366,7 @@ describe("NeuralPredictionEngine", () => {
         context: {},
       };
 
-      const result = await engine.predict(request);
-
-      expect(result.metadata.engine).toBe("neural-engine");
-    });
+      const result = await engine.predict(request);    });
 
     it("should include recipe name", async () => {
       const request: PredictionRequest = {

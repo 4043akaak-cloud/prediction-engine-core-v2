@@ -23,9 +23,7 @@ export class StatisticalPredictionEngine implements IPredictionEngine {
         confidenceScore: confidence,
         evidenceCount: analysis.evidenceCount,
         predictionVersion: "1.0",
-        statisticalMethod: analysis.method,
-        sampleSize: analysis.sampleSize,
-      } as any,
+        } as any,
     };
   }
 

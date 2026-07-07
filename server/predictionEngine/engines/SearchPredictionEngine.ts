@@ -38,7 +38,7 @@ export class SearchPredictionEngine implements IPredictionEngine {
     const metadata: PredictionMetadata = {
       recipeId: 'search-recipe',
       recipeName: 'Search Recipe',
-      executionTimestamp: timestamp,
+      executionTimestamp: Date.now(),
       confidenceScore: confidence,
       evidenceCount: evidence.length,
       predictionVersion: '1.0.0',
@@ -46,10 +46,9 @@ export class SearchPredictionEngine implements IPredictionEngine {
 
     return {
       prediction,
-      metadata,
+      confidence,
       reason: this.generateReason(evidence, factors, searchResults),
-      predictionId,
-      timestamp,
+      metadata,
     };
   }
 
