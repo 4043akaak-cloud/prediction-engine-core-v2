@@ -1,6 +1,7 @@
 export interface PredictionRequest {
   query: string;
   recipeId: string;
+  recipeName?: string;
 }
 
 export interface Evidence {
@@ -48,166 +49,17 @@ export interface PredictionMetadata {
   executionTimestamp: number;
   confidenceScore: number;
   evidenceCount: number;
-  predictionVersion: string;
+  pipelineVersion?: string;
+  executionTime?: number;
 }
 
-// EnsembleStrategy Contract v1.0 (Issue 006)
-export type EnsembleStrategy = "confidence-weighted" | "majority-voting";
-
-// IMultiRecipeEnsembleEngine Contract v1.0 (Issue 006)
-export interface IMultiRecipeEnsembleEngine {
-  ensemble(
-    predictions: PredictionResult[],
-    strategy?: EnsembleStrategy,
-  ): Promise<PredictionResult>;
-}
-
-export interface IRecipe {
-  id: string;
-  name: string;
-  description: string;
-  version: string;
-  category: string;
-  execute(evidence: Evidence): Promise<RecipeExecutionResult>;
-}
-
-export interface IRecipeExecutor {
-  execute(recipe: IRecipe, evidence: Evidence): Promise<RecipeExecutionResult>;
-}
-
-export interface IEvidenceCollector {
-  collect(query: string): Promise<Evidence>;
-}
-
-export interface IConfidenceCalculator {
-  calculate(recipeResult: RecipeExecutionResult, evidence: Evidence): number;
-}
-
-export interface IPredictionResultBuilder {
-  build(
-    request: PredictionRequest,
-    recipeResult: RecipeExecutionResult,
-    confidence: number,
-    evidence?: Evidence,
-  ): PredictionResult;
-}
-
-export interface IPredictionEngine {
-  predict(request: PredictionRequest): Promise<PredictionResult>;
-}
-
-export interface IPredictionEngineMulti {
-  predictMultiple(request: PredictionRequest): Promise<PredictionResult[]>;
-}
-
-// ReasoningResult Contract v1.0
-export interface ReasoningResult {
-  explanation: string;
-  confidenceAdjustment: number;
-  appliedRules: string[];
-  reasoning: {
-    [key: string]: any;
-  };
-}
-
-// IReasoningEngine Contract v1.0
-export interface IReasoningEngine {
-  reason(
-    prediction: string,
-    confidence: number,
-    evidence: StandardizedEvidence[],
-    recipeResult: RecipeExecutionResult,
-  ): Promise<ReasoningResult>;
-}
-
-// ReasoningResult Contract v1.0
-export interface ReasoningResult {
-  explanation: string;
-  confidenceAdjustment: number;
-  appliedRules: string[];
-  reasoning: {
-    [key: string]: any;
-  };
-}
-
-// IReasoningEngine Contract v1.0
-export interface IReasoningEngine {
-  reason(
-    prediction: string,
-    confidence: number,
-    evidence: StandardizedEvidence[],
-    recipeResult: RecipeExecutionResult,
-  ): Promise<ReasoningResult>;
-}
-
-// RecommendationResult Contract v1.0 (CONTRACT_FREEZE.md)
 export interface RecommendationResult {
   recipeId: string;
-  score: number; // 0-1 (normalized)
+  score: number;
   reason: string;
-  metadata?: {
-    [key: string]: any;
-  };
 }
 
-// RecommendationOptions Contract v1.0 (CONTRACT_FREEZE.md)
-export interface RecommendationOptions {
-  limit?: number;
-  minScore?: number;
-  categories?: string[];
-  [key: string]: any;
-}
-
-// IRecommendationEngine Contract v1.0 (CONTRACT_FREEZE.md)
-export interface IRecommendationEngine {
-  recommend(
-    query: string,
-    options?: RecommendationOptions,
-  ): Promise<RecommendationResult[]>;
-}
-
-// LearningResult Contract v1.0 (CONTRACT_FREEZE.md)
-export interface LearningResult {
-  success: boolean;
-  updatedRecipes: string[];
-  recommendationsUpdated: boolean;
-  metadata?: Record<string, unknown>; // Extensible Area for future features
-}
-
-// ILearningEngine Contract v1.0 (CONTRACT_FREEZE.md)
-export interface ILearningEngine {
-  learn(
-    predictionId: string,
-    actualResult: unknown,
-  ): Promise<LearningResult>;
-}
-
-// PredictionPipelineResult Contract v1.0 (Issue 005)
-// Combines PredictionResult with recommendations
-// PredictionResult is NOT modified - this is a composition
 export interface PredictionPipelineResult {
-  // Core prediction (unchanged from PredictionResult)
   prediction: PredictionResult;
-
-  // Recommended recipes for this query
   recommendations: RecommendationResult[];
-
-  // Optional metadata
-  metadata?: {
-    executionTime?: number; // Pipeline execution time in ms
-    pipelineVersion?: string; // Pipeline version (e.g., "1.0")
-    [key: string]: unknown;
-  };
-}
-
-// EngineMetadata Contract v1.0 (ENGINE_SPECIFICATION_STANDARD.md)
-// Metadata for all Prediction Engines
-export interface EngineMetadata {
-  name: string;           // Unique engine name (e.g., "TrendPredictionEngine")
-  category: string;       // One of the 7 categories or "Learning Family"
-  role: string;           // Nickname/personality (e.g., "The Observer")
-  description: string;    // Brief explanation of what the engine does
-  input: string;          // Description of expected input format
-  output: string;         // Description of output format
-  version: string;        // Semantic version (e.g., "1.0.0")
 }

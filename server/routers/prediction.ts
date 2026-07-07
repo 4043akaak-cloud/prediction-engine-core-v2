@@ -11,6 +11,9 @@ import { z } from "zod";
  * IMPORTANT: This router does NOT contain business logic.
  * All prediction logic is delegated to PredictionPipeline.
  * PredictionPipeline is the sole orchestrator and execution entry point.
+ * 
+ * Recipe resolution is handled by RecipeRegistry (the single Recipe Provider).
+ * Router is completely decoupled from recipe sources.
  */
 
 // Get pipeline instance (factory handles all DI)
@@ -21,12 +24,17 @@ export const predictionRouter = router({
     .input(z.object({
       query: z.string(),
       recipeId: z.string(),
+      recipeName: z.string().optional(),
     }))
     .mutation(async ({ input }) => {
+      console.log(`[Prediction Router] Predict called with recipeId: ${input.recipeId}`);
+      
       const request: PredictionRequest = {
         query: input.query,
         recipeId: input.recipeId,
+        recipeName: input.recipeName,
       };
+      
       return await pipeline.execute(request);
     }),
 

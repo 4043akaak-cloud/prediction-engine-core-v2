@@ -59,6 +59,8 @@ export default function Home() {
       updateRecipeCache(recipeIds);
       // Check if current selection is still valid
       clearStaleRecipeSelection();
+    }
+  }, [recipesQuery.data, updateRecipeCache, clearStaleRecipeSelection]);
 
   // Auto-select Starter Recipe if it's the only one available
   useEffect(() => {
@@ -72,8 +74,6 @@ export default function Home() {
       setSelectedRecipe(starterRecipe);
     }
   }, [recipesQuery.data, state.selectedRecipe, isCreatingStarter, setSelectedRecipe]);
-    }
-  }, [recipesQuery.data, updateRecipeCache, clearStaleRecipeSelection]);
 
   const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuestion(e.target.value);
@@ -128,168 +128,172 @@ export default function Home() {
 
   return (
     <PageContainer>
-      {/* Header with Navigation */}
-      <header className="border-b border-border">
-        <div className="container flex items-center justify-between py-4">
-          <div className="text-xl font-bold">PEC</div>
-          
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex gap-8">
-            <button onClick={() => setLocation("/diary")} className="text-sm hover:text-primary transition-colors">Predictions</button>
-            <button onClick={() => setLocation("/tools")} className="text-sm hover:text-primary transition-colors">Tools</button>
-            <button onClick={() => setLocation("/learn")} className="text-sm hover:text-primary transition-colors">Learn</button>
-          </nav>
-          
-          {/* Header Actions */}
-          <div className="hidden md:flex items-center gap-4">
-            <button className="text-sm hover:text-primary transition-colors">Theme</button>
-            <Button variant="outline" size="sm" onClick={() => setLocation("/signin")}>Sign In</Button>
-          </div>
-          
-          {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-        
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <nav className="md:hidden border-t border-border p-4 flex flex-col gap-4">
-            <button onClick={() => { setLocation("/diary"); setMobileMenuOpen(false); }} className="text-sm hover:text-primary transition-colors">Predictions</button>
-            <button onClick={() => { setLocation("/tools"); setMobileMenuOpen(false); }} className="text-sm hover:text-primary transition-colors">Tools</button>
-            <button onClick={() => { setLocation("/learn"); setMobileMenuOpen(false); }} className="text-sm hover:text-primary transition-colors">Learn</button>
-            <Button variant="outline" size="sm" className="w-full" onClick={() => { setLocation("/signin"); setMobileMenuOpen(false); }}>Sign In</Button>
-          </nav>
-        )}
-      </header>
-
-      <main className="flex-1">
-        {/* Hero Section - Integrated Prediction Flow */}
-        <section className="container py-20 md:py-24">
-          <div className="max-w-2xl">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Prediction Engine Core</h1>
-            <p className="text-lg text-muted-foreground mb-8">
-              Prediction Engine Core is a tool to reduce uncertainty about the future.
-            </p>
-            <p className="text-2xl font-semibold mb-12">Predict Better. Decide Better.</p>
+      <div className="min-h-screen flex flex-col bg-background text-foreground">
+        {/* Header */}
+        <header className="border-b border-border">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="text-xl font-bold">PEC</div>
             
-            {/* Question Input - Editable, no navigation */}
-            <div className="flex flex-col gap-4 mb-12">
-              <input
-                type="text"
-                placeholder="What would you like to predict?"
-                value={question}
-                onChange={handleQuestionChange}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    handleGeneratePrediction();
-                  }
-                }}
-                className="border border-border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-              />
-              <Button
-                onClick={() => handleGeneratePrediction()}
-                disabled={!question.trim() || isGenerating || isCreatingStarter}
-                className="w-full md:w-auto"
-              >
-                {isCreatingStarter ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Preparing...
-                  </>
-                ) : isGenerating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  "Start Prediction"
-                )}
-              </Button>
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex gap-8">
+              <button onClick={() => setLocation("/diary")} className="text-sm hover:text-primary">Predictions</button>
+              <a href="#" className="text-sm hover:text-primary">Tools</a>
+              <a href="#" className="text-sm hover:text-primary">Learn</a>
+            </nav>
+            
+            {/* Header Actions */}
+            <div className="hidden md:flex items-center gap-4">
+              <button className="text-sm">Theme</button>
+              {isAuthenticated ? (
+                <Button variant="outline" size="sm" onClick={logout}>Sign Out</Button>
+              ) : (
+                <Button variant="outline" size="sm">Sign In</Button>
+              )}
             </div>
+            
+            {/* Mobile Menu Button */}
+            <button 
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
-        </section>
+          
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <nav className="md:hidden border-t border-border p-4 flex flex-col gap-4">
+              <button onClick={() => { setLocation("/diary"); setMobileMenuOpen(false); }} className="text-sm hover:text-primary">Predictions</button>
+              <a href="#" className="text-sm">Tools</a>
+              <a href="#" className="text-sm">Learn</a>
+              {isAuthenticated ? (
+                <Button variant="outline" size="sm" className="w-full" onClick={logout}>Sign Out</Button>
+              ) : (
+                <Button variant="outline" size="sm" className="w-full">Sign In</Button>
+              )}
+            </nav>
+          )}
+        </header>
 
-        {/* Your Predictions Section - Simplified */}
-        <section className="container py-20 md:py-24 border-t border-border">
-          <div className="border border-border rounded-lg p-8 min-h-40 flex items-center justify-center hover:bg-muted/30 transition-colors">
-            <div className="text-center">
-              <h2 className="text-xl font-semibold mb-4">Your Predictions</h2>
-              <p className="text-sm text-muted-foreground mb-6">View your prediction history</p>
-              <Button variant="outline" size="sm" onClick={() => setLocation("/diary")}>
-                View Diary
-              </Button>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      {/* Recipe Selection Dialog - Integrated into flow */}
-      <Dialog open={showRecipeSelector} onOpenChange={setShowRecipeSelector}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Select a Recipe</DialogTitle>
-            <DialogDescription>
-              Choose a prediction recipe to use for: "{question}"
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {recipesQuery.isLoading || isCreatingStarter ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : recipesQuery.data && recipesQuery.data.length > 0 ? (
-              recipesQuery.data.map((recipe) => (
-                <Button
-                  key={recipe.id}
-                  variant="outline"
-                  className="w-full justify-start text-left h-auto py-3"
-                  onClick={() => handleRecipeSelect(recipe.id)}
+        <main className="flex-1">
+          {/* Hero Section */}
+          <section className="container mx-auto px-4 py-20">
+            <div className="max-w-2xl">
+              <h1 className="text-4xl font-bold mb-4">Prediction Engine Core</h1>
+              <p className="text-lg mb-8">
+                Prediction Engine Core is a tool to reduce uncertainty about the future.
+              </p>
+              <p className="text-2xl font-semibold mb-12">Predict Better. Decide Better.</p>
+              
+              {/* Question Input */}
+              <div className="flex flex-col gap-4 mb-12">
+                <input
+                  type="text"
+                  placeholder="What would you like to predict?"
+                  value={question}
+                  onChange={handleQuestionChange}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      handleGeneratePrediction();
+                    }
+                  }}
+                  className="border border-border rounded px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <Button 
+                  onClick={() => handleGeneratePrediction()}
+                  disabled={!question.trim() || isGenerating || isCreatingStarter}
+                  className="w-full md:w-auto"
                 >
-                  <div className="flex-1">
-                    <div className="font-medium">{recipe.name}</div>
-                    {recipe.description && (
-                      <div className="text-xs text-muted-foreground mt-1">{recipe.description}</div>
-                    )}
-                  </div>
-                </Button>
-              ))
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>No recipes available. Create one to get started.</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-4"
-                  onClick={() => setLocation("/recipe-builder")}
-                >
-                  Create Recipe
+                  {isCreatingStarter ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Preparing...
+                    </>
+                  ) : isGenerating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    "Start Prediction"
+                  )}
                 </Button>
               </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+            </div>
+          </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border">
-        <div className="container py-12">
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-8">
-            <button onClick={() => setLocation("/about")} className="text-sm hover:text-primary transition-colors">About</button>
-            <button onClick={() => setLocation("/privacy")} className="text-sm hover:text-primary transition-colors">Privacy</button>
-            <button onClick={() => setLocation("/terms")} className="text-sm hover:text-primary transition-colors">Terms</button>
-            <button onClick={() => setLocation("/contact")} className="text-sm hover:text-primary transition-colors">Contact</button>
-            <button onClick={() => setLocation("/github")} className="text-sm hover:text-primary transition-colors">GitHub</button>
-            <div className="text-sm text-muted-foreground">v0.1</div>
+          {/* Your Predictions Section */}
+          <section className="container mx-auto px-4 py-20 border-t border-border">
+            <div className="border border-border rounded p-8 min-h-40 flex items-center justify-center">
+              <div className="text-center">
+                <h2 className="text-xl font-semibold mb-4">Your Predictions</h2>
+                <p className="text-sm text-muted-foreground mb-4">View your prediction history</p>
+                <Button variant="outline" size="sm" onClick={() => setLocation("/diary")}>
+                  View Diary
+                </Button>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t border-border">
+          <div className="container mx-auto px-4 py-12">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-8">
+              <a href="#" className="text-sm hover:text-primary">About</a>
+              <a href="#" className="text-sm hover:text-primary">Privacy</a>
+              <a href="#" className="text-sm hover:text-primary">Terms</a>
+              <a href="#" className="text-sm hover:text-primary">Contact</a>
+              <a href="#" className="text-sm hover:text-primary">GitHub</a>
+              <div className="text-sm text-muted-foreground">v0.1</div>
+            </div>
+            <div className="text-xs text-muted-foreground border-t border-border pt-8">
+              © 2026 Prediction Engine Core. All rights reserved.
+            </div>
           </div>
-          <div className="text-xs text-muted-foreground border-t border-border pt-8">
-            © 2026 Prediction Engine Core. All rights reserved.
-          </div>
-        </div>
-      </footer>
+        </footer>
+
+        {/* Recipe Selection Dialog */}
+        <Dialog open={showRecipeSelector} onOpenChange={setShowRecipeSelector}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Select Recipe</DialogTitle>
+              <DialogDescription>
+                Choose a recipe to use for your prediction ({recipesQuery.data?.length || 0} available)
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {recipesQuery.isLoading ? (
+                <div className="text-center py-4">Loading recipes...</div>
+              ) : recipesQuery.data && recipesQuery.data.length > 0 ? (
+                recipesQuery.data.map((recipe) => (
+                  <button
+                    key={recipe.id}
+                    
+                    className="w-full justify-start text-left h-auto py-4 px-4 hover:bg-accent hover:text-accent-foreground border border-border rounded"
+                    onClick={() => handleRecipeSelect(recipe.id)}
+                  >
+                    <div>
+                      <div className="font-medium">{recipe.name}</div>
+                      <div className="text-sm text-muted-foreground">{recipe.description}</div>
+                      {recipe.category && (
+                        <div className="text-xs text-muted-foreground mt-1">{recipe.category}</div>
+                      )}
+                    </div>
+                  </button>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-sm text-muted-foreground mb-4">No recipes available</p>
+                  <Button variant="outline" size="sm" onClick={() => setLocation("/recipe-builder")}>
+                    Create Recipe
+                  </Button>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
     </PageContainer>
   );
 }

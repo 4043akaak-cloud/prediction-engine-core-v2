@@ -21,6 +21,7 @@ import { initializeEngines } from "./EngineInitializer";
   * - All dependencies are properly initialized
   * - Clean separation of concerns
   * - Specialist engines are registered
+  * - RecipeRegistry is initialized with database connection
   */
 let pipelineInstance: PredictionPipeline | null = null;
 
@@ -31,6 +32,22 @@ export function getPredictionPipeline(): PredictionPipeline {
 
   // Initialize all specialist engines
   initializeEngines();
+
+  // Initialize RecipeRegistry with database connection
+  // This allows RecipeRegistry to load user-created recipes from the database
+  const initializeRegistry = async () => {
+    try {
+      const { getDb } = await import("../db");
+      const db = await getDb();
+      if (db) {
+        await RecipeRegistry.getInstance().initializeDatabase(db);
+        console.log("[PipelineFactory] RecipeRegistry initialized with database connection");
+      }
+    } catch (err) {
+      console.error("[PipelineFactory] Failed to initialize RecipeRegistry database:", err);
+    }
+  };
+  initializeRegistry();
 
   // Initialize all dependencies
   const predictionEngine = new PredictionEngine();

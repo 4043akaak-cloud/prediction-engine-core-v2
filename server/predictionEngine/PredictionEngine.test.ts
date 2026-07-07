@@ -72,12 +72,12 @@ describe("PredictionEngine Integration with RecipePerformanceTracker", () => {
   });
 
   it("should track statistics for predictMultiple", async () => {
-    const request: PredictionRequest = {
+    const requests: PredictionRequest[] = [{
       query: "Will the stock market go up?",
       recipeId: "mock-recipe",
-    };
+    }];
 
-    const results = await engine.predictMultiple(request);
+    const results = await engine.predictMultiple(requests);
 
     expect(results.length).toBeGreaterThan(0);
   });

@@ -15,6 +15,9 @@ export default function AdminUsers() {
   const [, setLocation] = useLocation();
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
+
+  // Get utils for cache invalidation
+  const utils = trpc.useUtils();
   // Fetch users list
   const { data: users, isLoading, error } = trpc.users.list.useQuery(undefined, {
     enabled: isAuthenticated && user?.role === "admin",
@@ -25,7 +28,7 @@ export default function AdminUsers() {
     onSuccess: () => {
       setSelectedUserId(null);
       // Invalidate users list to refresh
-      trpc.useUtils().users.list.invalidate();
+      utils.users.list.invalidate();
     },
   });
 

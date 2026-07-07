@@ -29,7 +29,7 @@ export class PredictionResultBuilder implements IPredictionResultBuilder {
            `collected evidence from available sources.`;
   }
 
-  build(request: PredictionRequest, recipeResult: RecipeExecutionResult, confidence: number, evidence?: Evidence): PredictionResult {
+  async build(request: PredictionRequest, recipeResult: RecipeExecutionResult, confidence: number, evidence?: Evidence): Promise<PredictionResult> {
     console.log("Building prediction result...");
     // Map RecipeOutput (standardized output) to PredictionResult
     // v0.1: One-to-one mapping from RecipeOutput to PredictionResult
@@ -39,11 +39,21 @@ export class PredictionResultBuilder implements IPredictionResultBuilder {
     const predictionText = recipeOutput.rawPredictionData.value || "No prediction generated.";
     const reasonText = `This prediction is based on the ${request.recipeId} recipe and collected evidence. Key factors include: ${recipeOutput.rawPredictionData.factors.join(", ")}.`;
 
-    // Get recipe metadata for metadata generation
-    const recipeMetadata = this.recipeRegistry.getRecipeMetadata(request.recipeId);
-    if (!recipeMetadata) {
-      throw new Error(`Recipe metadata not found for ID ${request.recipeId}`);
+    // Get recipe using RecipeRegistry (single Recipe Provider)
+    // RecipeRegistry handles hardcoded recipes, database recipes, cache, and future sources
+    const recipe = await this.recipeRegistry.getRecipeAsync(request.recipeId);
+    if (!recipe) {
+      throw new Error(`Recipe not found for ID ${request.recipeId}`);
     }
+
+    // Build recipe metadata from the recipe object
+    const recipeMetadata = {
+      id: recipe.id,
+      name: recipe.name,
+      description: recipe.description,
+      version: recipe.version,
+      category: recipe.category,
+    };
 
     // Build prediction metadata
     const metadata: PredictionMetadata = {

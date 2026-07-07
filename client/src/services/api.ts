@@ -4,7 +4,7 @@ import { generateMockPrediction, GeneratePredictionInput, GeneratePredictionOutp
  * Type for the mutation function passed from component
  * This allows the hook to be called in the component, not in this service
  */
-export type PredictionMutationFn = (input: { query: string; recipeId: string }) => Promise<any>;
+export type PredictionMutationFn = (input: { query: string; recipeId: string; recipeName?: string }) => Promise<any>;
 
 /**
  * Extended input type for generatePrediction
@@ -27,11 +27,13 @@ export async function generatePrediction(
   try {
     // Use provided recipe or default to mock-recipe
     const recipeId = input.recipeId || "mock-recipe";
+    const recipeName = input.recipeName || "Unknown Recipe";
 
     // Call the real PredictionEngine through tRPC
     const result = await mutationFn({
       query: input.question,
       recipeId,
+      recipeName,
     });
 
     // Transform PredictionPipelineResult to GeneratePredictionOutput format
