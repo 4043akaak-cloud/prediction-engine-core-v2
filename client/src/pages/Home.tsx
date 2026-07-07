@@ -1,22 +1,88 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Menu, X, Loader2 } from "lucide-react";
+import { useState, useContext } from "react";
 import { useLocation } from "wouter";
 import { PageContainer } from "@/components/PageContainer";
+import { trpc } from "@/lib/trpc";
+import { PredictionContext } from "@/contexts/PredictionContext";
+import { usePrediction } from "@/hooks/usePrediction";
+import { generatePrediction } from "@/services/api";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 /**
- * PEC Homepage
- * Follows PEC_MASTER_BLUEPRINT.md
- * Landing page with navigation and feature overview
+ * PEC Homepage - UX Refinement
+ * Integrated prediction flow: Question → Recipe Selection → Generate → Result
+ * No unnecessary page transitions
  */
 export default function Home() {
-  // The userAuth hooks provides authentication state
-  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
-  let { user, loading, error, isAuthenticated, logout } = useAuth();
-
+  const { user, loading, error, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [, setLocation] = useLocation();
+  const [question, setQuestion] = useState("");
+  const [showRecipeSelector, setShowRecipeSelector] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const { state, setPrediction, setCounterPrediction, setLoading, setError, setLastInput, setSelectedRecipe } = usePrediction();
+  const predictMutation = trpc.prediction.predict.useMutation();
+  const recipesQuery = trpc.recipes.search.useQuery({ query: "" });
+
+  const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuestion(e.target.value);
+  };
+
+  const handleRecipeSelect = async (recipeId: string) => {
+    const recipe = (recipesQuery.data || []).find((r) => r.id === recipeId);
+    if (recipe) {
+      setSelectedRecipe(recipe);
+      setShowRecipeSelector(false);
+      // Auto-generate prediction if question is already filled
+      if (question.trim()) {
+        await handleGeneratePrediction(recipe);
+      }
+    }
+  };
+
+  const handleGeneratePrediction = async (recipe = state.selectedRecipe) => {
+    if (!question.trim()) return;
+    if (!recipe) {
+      setShowRecipeSelector(true);
+      return;
+    }
+
+    setLastInput({ question, predictionType: "general" });
+    setError(null);
+    setIsGenerating(true);
+    setLoading(true);
+
+    try {
+      const result = await generatePrediction(
+        {
+          question,
+          predictionType: "general",
+          recipeId: recipe.id,
+          recipeName: recipe.name,
+        },
+        predictMutation.mutateAsync
+      );
+
+      setPrediction(result.prediction);
+      setCounterPrediction(result.counterPrediction);
+      setLoading(false);
+      setIsGenerating(false);
+      setLocation("/result");
+    } catch (err) {
+      setLoading(false);
+      setIsGenerating(false);
+      setError(err instanceof Error ? err.message : "Failed to generate prediction");
+    }
+  };
 
   return (
     <PageContainer>
@@ -59,7 +125,7 @@ export default function Home() {
       </header>
 
       <main className="flex-1">
-        {/* Hero Section */}
+        {/* Hero Section - Integrated Prediction Flow */}
         <section className="container py-20 md:py-24">
           <div className="max-w-2xl">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">Prediction Engine Core</h1>
@@ -68,71 +134,98 @@ export default function Home() {
             </p>
             <p className="text-2xl font-semibold mb-12">Predict Better. Decide Better.</p>
             
-            {/* Question Input */}
+            {/* Question Input - Editable, no navigation */}
             <div className="flex flex-col gap-4 mb-12">
               <input
                 type="text"
                 placeholder="What would you like to predict?"
-                readOnly
-                className="border border-border rounded-lg px-4 py-3 text-base cursor-pointer hover:bg-muted/50 transition-colors"
-                onClick={() => setLocation("/predict")}
+                value={question}
+                onChange={handleQuestionChange}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    handleGeneratePrediction();
+                  }
+                }}
+                className="border border-border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
               />
-              <Button onClick={() => setLocation("/predict")} className="w-full md:w-auto">
-                Start Prediction
+              <Button
+                onClick={() => handleGeneratePrediction()}
+                disabled={!question.trim() || isGenerating}
+                className="w-full md:w-auto"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  "Start Prediction"
+                )}
               </Button>
             </div>
           </div>
         </section>
 
-        {/* Feature Overview Section */}
+        {/* Your Predictions Section - Simplified */}
         <section className="container py-20 md:py-24 border-t border-border">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Prediction Types */}
-            <div className="border border-border rounded-lg p-8 min-h-40 flex items-center justify-center hover:bg-muted/30 transition-colors">
-              <div className="text-center">
-                <h2 className="text-xl font-semibold mb-4">Prediction Types</h2>
-                <p className="text-sm text-muted-foreground mb-6">Choose from various prediction categories</p>
-                <Button variant="outline" size="sm" onClick={() => setLocation("/predict")}>
-                  Explore
-                </Button>
-              </div>
-            </div>
-            
-            {/* Your Predictions */}
-            <div className="border border-border rounded-lg p-8 min-h-40 flex items-center justify-center hover:bg-muted/30 transition-colors">
-              <div className="text-center">
-                <h2 className="text-xl font-semibold mb-4">Your Predictions</h2>
-                <p className="text-sm text-muted-foreground mb-6">View your prediction history</p>
-                <Button variant="outline" size="sm" onClick={() => setLocation("/diary")}>
-                  View Diary
-                </Button>
-              </div>
-            </div>
-            
-            {/* Insights (Coming Soon) */}
-            <div className="border border-border rounded-lg p-8 min-h-40 flex items-center justify-center hover:bg-muted/30 transition-colors">
-              <div className="text-center">
-                <h2 className="text-xl font-semibold mb-4">Insights</h2>
-                <p className="text-sm text-muted-foreground mb-6">Discover prediction insights</p>
-                <Button variant="outline" size="sm" disabled>
-                  Coming Soon
-                </Button>
-              </div>
-            </div>
-            
-            {/* Trending Topics (Coming Soon) */}
-            <div className="border border-border rounded-lg p-8 min-h-40 flex items-center justify-center hover:bg-muted/30 transition-colors">
-              <div className="text-center">
-                <h2 className="text-xl font-semibold mb-4">Trending Topics</h2>
-                <p className="text-sm text-muted-foreground mb-6">See what others are predicting</p>
-                <Button variant="outline" size="sm" disabled>
-                  Coming Soon
-                </Button>
-              </div>
+          <div className="border border-border rounded-lg p-8 min-h-40 flex items-center justify-center hover:bg-muted/30 transition-colors">
+            <div className="text-center">
+              <h2 className="text-xl font-semibold mb-4">Your Predictions</h2>
+              <p className="text-sm text-muted-foreground mb-6">View your prediction history</p>
+              <Button variant="outline" size="sm" onClick={() => setLocation("/diary")}>
+                View Diary
+              </Button>
             </div>
           </div>
         </section>
       </main>
+
+      {/* Recipe Selection Dialog - Integrated into flow */}
+      <Dialog open={showRecipeSelector} onOpenChange={setShowRecipeSelector}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Select a Recipe</DialogTitle>
+            <DialogDescription>
+              Choose a prediction recipe to use for: "{question}"
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {recipesQuery.isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : recipesQuery.data && recipesQuery.data.length > 0 ? (
+              recipesQuery.data.map((recipe) => (
+                <Button
+                  key={recipe.id}
+                  variant="outline"
+                  className="w-full justify-start text-left h-auto py-3"
+                  onClick={() => handleRecipeSelect(recipe.id)}
+                >
+                  <div className="flex-1">
+                    <div className="font-medium">{recipe.name}</div>
+                    {recipe.description && (
+                      <div className="text-xs text-muted-foreground mt-1">{recipe.description}</div>
+                    )}
+                  </div>
+                </Button>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No recipes available. Create one to get started.</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-4"
+                  onClick={() => setLocation("/recipe-builder")}
+                >
+                  Create Recipe
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Footer */}
       <footer className="border-t border-border">

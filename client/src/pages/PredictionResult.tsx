@@ -240,7 +240,7 @@ export default function PredictionResult() {
             {/* ===== ACTION BUTTONS ===== */}
             <div className="flex flex-col sm:flex-row gap-4">
               <Button onClick={handleSaveToDiary} className="flex-1">Save to Diary</Button>
-              <Button variant="outline" onClick={() => setLocation("/predict")} className="flex-1">New Prediction</Button>
+              <Button variant="outline" onClick={() => setLocation("/")} className="flex-1">Make Another Prediction</Button>
             </div>
           </div>
         </section>
