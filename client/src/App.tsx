@@ -24,6 +24,9 @@ import Tools from "./pages/Tools";
 import Learn from "./pages/Learn";
 import SignIn from "./pages/SignIn";
 import GitHub from "./pages/GitHub";
+import EngineLibrary from "./pages/EngineLibrary";
+import EngineDetail from "./pages/EngineDetail";
+import CategoryDetail from "./pages/CategoryDetail";
 import AdminPanel from "./pages/AdminPanel";
 import AdminUsers from "./pages/AdminUsers";
 
@@ -47,6 +50,9 @@ function Router() {
       <Route path={"/learn"} component={Learn} />
       <Route path={"/signin"} component={SignIn} />
       <Route path={"/github"} component={GitHub} />
+      <Route path={"/engines"} component={EngineLibrary} />
+      <Route path={"/engines/:id"} component={EngineDetail} />
+      <Route path={"/engines/category/:name"} component={CategoryDetail} />
       <Route path={"/admin"} component={AdminPanel} />
       <Route path={"/admin/users"} component={AdminUsers} />
       <Route path={"/404"} component={NotFound} />
