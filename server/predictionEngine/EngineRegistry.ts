@@ -117,7 +117,7 @@ export class EngineRegistry {
    */
   listByCategory(category: string): string[] {
     const result: string[] = [];
-    for (const [engineId, metadata] of this.metadata.entries()) {
+    for (const [engineId, metadata] of Array.from(this.metadata.entries())) {
       if (metadata.category === category) {
         result.push(engineId);
       }

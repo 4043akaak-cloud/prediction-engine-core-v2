@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 
 const PREDICTION_STORAGE_KEY = 'pec-prediction-result';
 
-function savePredictionToStorage(prediction: Prediction | null, counterPrediction: CounterPrediction | null) {
+function savePredictionToStorage(prediction: Prediction | null, counterPrediction: CounterPrediction | null, selectedRecipe: { id: string; name: string } | null) {
   if (!prediction) {
     localStorage.removeItem(PREDICTION_STORAGE_KEY);
     return;
@@ -12,6 +12,7 @@ function savePredictionToStorage(prediction: Prediction | null, counterPredictio
     localStorage.setItem(PREDICTION_STORAGE_KEY, JSON.stringify({
       prediction,
       counterPrediction,
+      selectedRecipe,
       timestamp: Date.now(),
     }));
   } catch (err) {
@@ -19,19 +20,20 @@ function savePredictionToStorage(prediction: Prediction | null, counterPredictio
   }
 }
 
-function loadPredictionFromStorage(): { prediction: Prediction | null; counterPrediction: CounterPrediction | null } {
+function loadPredictionFromStorage(): { prediction: Prediction | null; counterPrediction: CounterPrediction | null; selectedRecipe: { id: string; name: string } | null } {
   try {
     const stored = localStorage.getItem(PREDICTION_STORAGE_KEY);
-    if (!stored) return { prediction: null, counterPrediction: null };
+    if (!stored) return { prediction: null, counterPrediction: null, selectedRecipe: null };
     
     const data = JSON.parse(stored);
     return {
       prediction: data.prediction || null,
       counterPrediction: data.counterPrediction || null,
+      selectedRecipe: data.selectedRecipe || null,
     };
   } catch (err) {
     console.error('Failed to load prediction from storage:', err);
-    return { prediction: null, counterPrediction: null };
+    return { prediction: null, counterPrediction: null, selectedRecipe: null };
   }
 }
 
@@ -40,6 +42,7 @@ export interface PredictionMetadata {
   modelUsed: string;
   informationSources: string[];
   recipeId?: string;  // Recipe used for this prediction
+  recipeName?: string;  // Recipe name for display
 }
 
 export interface Prediction {
@@ -65,6 +68,7 @@ export interface PredictionState {
   isLoading: boolean;
   error: string | null;
   lastInput: { question: string; predictionType: string } | null;
+  selectedRecipe: { id: string; name: string } | null;
 }
 
 export interface PredictionContextType {
@@ -77,6 +81,7 @@ export interface PredictionContextType {
   setLastInput: (input: { question: string; predictionType: string }) => void;
   retryPrediction: () => Promise<void>;
   clearPrediction: () => void;
+  setSelectedRecipe: (recipe: { id: string; name: string } | null) => void;
 }
 
 const initialState: PredictionState = {
@@ -86,24 +91,26 @@ const initialState: PredictionState = {
   isLoading: false,
   error: null,
   lastInput: null,
+  selectedRecipe: null,
 };
 
 export const PredictionContext = createContext<PredictionContextType | undefined>(undefined);
 
 export const PredictionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, setState] = useState<PredictionState>(() => {
-    const { prediction, counterPrediction } = loadPredictionFromStorage();
+    const { prediction, counterPrediction, selectedRecipe } = loadPredictionFromStorage();
     return {
       ...initialState,
       currentPrediction: prediction,
       counterPrediction,
+      selectedRecipe,
     };
   });
 
-  // Save to storage whenever prediction or counterPrediction changes
+  // Save to storage whenever prediction, counterPrediction, or selectedRecipe changes
   useEffect(() => {
-    savePredictionToStorage(state.currentPrediction, state.counterPrediction);
-  }, [state.currentPrediction, state.counterPrediction]);
+    savePredictionToStorage(state.currentPrediction, state.counterPrediction, state.selectedRecipe);
+  }, [state.currentPrediction, state.counterPrediction, state.selectedRecipe]);
 
   const setPrediction = (prediction: Prediction) => {
     setState((prev) => ({ ...prev, currentPrediction: prediction }));
@@ -139,6 +146,10 @@ export const PredictionProvider: React.FC<{ children: ReactNode }> = ({ children
     setState(initialState);
   };
 
+  const setSelectedRecipe = (recipe: { id: string; name: string } | null) => {
+    setState((prev) => ({ ...prev, selectedRecipe: recipe }));
+  };
+
   const value: PredictionContextType = {
     state,
     setPrediction,
@@ -149,6 +160,7 @@ export const PredictionProvider: React.FC<{ children: ReactNode }> = ({ children
     setLastInput,
     retryPrediction,
     clearPrediction,
+    setSelectedRecipe,
   };
 
   return (

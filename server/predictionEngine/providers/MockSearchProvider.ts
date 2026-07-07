@@ -103,7 +103,7 @@ export class MockSearchProvider implements ISearchProvider {
     }
 
     // Try keyword matching
-    for (const [key, results] of this.mockResults.entries()) {
+    for (const [key, results] of Array.from(this.mockResults.entries())) {
       if (queryLower.includes(key) || key.includes(queryLower)) {
         return results.slice(0, query.limit || 10);
       }

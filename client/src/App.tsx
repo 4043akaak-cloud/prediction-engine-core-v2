@@ -30,6 +30,7 @@ import CategoryDetail from "./pages/CategoryDetail";
 import AdminPanel from "./pages/AdminPanel";
 import RecipeBuilder from "./pages/RecipeBuilder";
 import RecipesList from "./pages/RecipesList";
+import RecipeSelector from "./pages/RecipeSelector";
 import AdminUsers from "./pages/AdminUsers";
 
 function Router() {
@@ -41,21 +42,9 @@ function Router() {
       <Route path={"/result"} component={PredictionResult} />
       <Route path={"/diary"} component={PredictionDiary} />
       <Route path={"/detail/:id"} component={PredictionDetail} />
-      <Route path={"/recipes"} component={RecipeList} />
-      <Route path={"/recipes/:id"} component={RecipeDetail} />
-      <Route path={"/settings"} component={Settings} />
-      <Route path={"/about"} component={About} />
-      <Route path={"/privacy"} component={Privacy} />
-      <Route path={"/terms"} component={Terms} />
-      <Route path={"/contact"} component={Contact} />
-      <Route path={"/tools"} component={Tools} />
-      <Route path={"/learn"} component={Learn} />
-      <Route path={"/signin"} component={SignIn} />
-      <Route path={"/github"} component={GitHub} />
-      <Route path={"/engines"} component={EngineLibrary} />
-      <Route path={"/engines/category/:name"} component={CategoryDetail} />
-  <Route path={"/recipes/create"} component={RecipeBuilder} />
-  <Route path={"/recipes"} component={RecipesList} />
+      <Route path={"/select-recipe"} component={RecipeSelector} />
+      <Route path={"/recipe-builder"} component={RecipeBuilder} />
+      <Route path={"/recipes"} component={RecipesList} />
       <Route path={"/engines/:id"} component={EngineDetail} />
       <Route path={"/admin"} component={AdminPanel} />
       <Route path={"/admin/users"} component={AdminUsers} />

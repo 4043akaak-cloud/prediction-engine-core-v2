@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Loader2, Info } from "lucide-react";
+import { Loader2, Info, ChevronRight } from "lucide-react";
 import { usePrediction } from "@/hooks/usePrediction";
 import { generatePrediction } from "@/services/api";
 import { trpc } from "@/lib/trpc";
 import { PageContainer } from "@/components/PageContainer";
 import { PageHeader } from "@/components/PageHeader";
+import { PredictionContext } from "@/contexts/PredictionContext";
 
 /**
  * Prediction Input Experience
@@ -16,12 +17,14 @@ import { PageHeader } from "@/components/PageHeader";
 export default function PredictionInput() {
   const [, setLocation] = useLocation();
   const { state, setPrediction, setCounterPrediction, setLoading, setError, setLastInput } = usePrediction();
+  const predictionContext = useContext(PredictionContext);
   
   const [question, setQuestion] = useState("");
   const [predictionType, setPredictionType] = useState("general");
   const [showExample, setShowExample] = useState(false);
 
   const { isLoading } = state;
+  const selectedRecipe = predictionContext?.state.selectedRecipe;
 
   // Create the mutation hook in the component (complies with React Hook rules)
   const predictMutation = trpc.prediction.predict.useMutation();
@@ -46,6 +49,8 @@ export default function PredictionInput() {
         {
           question,
           predictionType,
+          recipeId: selectedRecipe?.id,
+          recipeName: selectedRecipe?.name,
         },
         predictMutation.mutateAsync
       );
@@ -86,6 +91,25 @@ export default function PredictionInput() {
                 Ask a clear question about the future. Be as specific as possible.
               </p>
             </div>
+
+            {/* Selected Recipe Display */}
+            {selectedRecipe && (
+              <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-blue-900">Using Recipe</p>
+                    <p className="text-base font-semibold text-blue-900 mt-1">{selectedRecipe.name}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setLocation("/select-recipe")}
+                    className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+                  >
+                    Change <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Loading State */}
             {isLoading && (

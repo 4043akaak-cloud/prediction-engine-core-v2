@@ -37,7 +37,7 @@ export const recipes = mysqlTable("recipes", {
   category: varchar("category", { length: 100 }),
   version: varchar("version", { length: 20 }).default("1.0.0").notNull(),
   status: mysqlEnum("status", ["draft", "ready", "archived"]).default("draft").notNull(),
-  isPublic: tinyint("isPublic").default(false).notNull(),
+  isPublic: tinyint("isPublic").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

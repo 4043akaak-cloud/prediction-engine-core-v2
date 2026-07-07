@@ -7,21 +7,31 @@ import { generateMockPrediction, GeneratePredictionInput, GeneratePredictionOutp
 export type PredictionMutationFn = (input: { query: string; recipeId: string }) => Promise<any>;
 
 /**
+ * Extended input type for generatePrediction
+ */
+export interface GeneratePredictionInputWithRecipe extends GeneratePredictionInput {
+  recipeId?: string;
+  recipeName?: string;
+}
+
+/**
  * Generate prediction using the provided mutation function
  * 
  * This function is called from React components where useMutation() is available
  * The mutation function is passed as a parameter to comply with React Hook rules
  */
 export async function generatePrediction(
-  input: GeneratePredictionInput,
+  input: GeneratePredictionInputWithRecipe,
   mutationFn: PredictionMutationFn
 ): Promise<GeneratePredictionOutput> {
   try {
+    // Use provided recipe or default to mock-recipe
+    const recipeId = input.recipeId || "mock-recipe";
+
     // Call the real PredictionEngine through tRPC
-    // Default to mock-recipe for the demo
     const result = await mutationFn({
       query: input.question,
-      recipeId: "mock-recipe",
+      recipeId,
     });
 
     // Transform PredictionPipelineResult to GeneratePredictionOutput format
@@ -40,7 +50,8 @@ export async function generatePrediction(
           createdAt: new Date(predictionResult.timestamp).toISOString(),
           modelUsed: predictionResult.recipeUsed,
           informationSources: [], // Evidence summary can be added here
-          recipeId: predictionResult.recipeUsed,
+          recipeId: input.recipeId,
+          recipeName: input.recipeName,
         },
       },
       counterPrediction: {

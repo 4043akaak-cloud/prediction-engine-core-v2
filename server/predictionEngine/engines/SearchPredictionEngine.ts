@@ -1,43 +1,22 @@
+import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
+
 /**
- * SearchPredictionEngine
- * 
- * "The Reporter" - First external knowledge specialist engine
- * 
- * Collects and evaluates external information to improve prediction quality.
- * Depends only on ISearchProvider (abstracted, no direct API coupling).
- * 
- * Implements IPredictionEngine contract.
+ * Search Prediction Engine
+ * Searches for relevant information and synthesizes predictions
+ * Role: The Researcher
  */
-
-import { IPredictionEngine, PredictionRequest, PredictionResult, PredictionMetadata } from '../types';
-import { ISearchProvider, SearchQuery } from '../providers/ISearchProvider';
-import { randomUUID } from 'crypto';
-
 export class SearchPredictionEngine implements IPredictionEngine {
-  constructor(private searchProvider: ISearchProvider) {}
-
   async predict(request: PredictionRequest): Promise<PredictionResult> {
-    const query = request.query.toLowerCase();
-    const predictionId = randomUUID();
-    const timestamp = new Date();
+    const { query } = request;
 
-    // Search for external information
-    const searchResults = await this.searchProvider.search({
-      query: request.query,
-      limit: 5,
-      timeframe: 'recent',
-    });
-
-    // Analyze search results
+    // Simulate search results
+    const searchResults = this.simulateSearch(query);
     const { evidence, confidence, factors } = this.analyzeSearchResults(searchResults, query);
+    const prediction = this.synthesizePrediction(evidence, factors, query);
 
-    // Generate prediction based on external information
-    const prediction = this.generatePrediction(query, evidence, searchResults);
-
-    // Create metadata
-    const metadata: PredictionMetadata = {
+    const metadata = {
       recipeId: 'search-recipe',
-      recipeName: 'Search Recipe',
+      recipeName: 'Search & Synthesis Recipe',
       executionTimestamp: Date.now(),
       confidenceScore: confidence,
       evidenceCount: evidence.length,
@@ -45,11 +24,36 @@ export class SearchPredictionEngine implements IPredictionEngine {
     };
 
     return {
+      id: `search-${Date.now()}`,
       prediction,
       confidence,
       reason: this.generateReason(evidence, factors, searchResults),
+      recipeUsed: 'search-recipe',
+      timestamp: Date.now(),
       metadata,
+      explanation: `This prediction synthesized ${evidence.length} pieces of evidence from search results, identifying ${factors.length} key factors with ${(confidence * 100).toFixed(1)}% confidence.`,
     };
+  }
+
+  private simulateSearch(query: string): any[] {
+    // Simulate search results
+    return [
+      {
+        title: "Market Analysis Report",
+        snippet: "Recent market trends show...",
+        relevance: 0.9,
+      },
+      {
+        title: "Industry Insights",
+        snippet: "The industry is experiencing...",
+        relevance: 0.8,
+      },
+      {
+        title: "Expert Commentary",
+        snippet: "Experts predict that...",
+        relevance: 0.75,
+      },
+    ];
   }
 
   private analyzeSearchResults(
@@ -58,68 +62,56 @@ export class SearchPredictionEngine implements IPredictionEngine {
   ): { evidence: string[]; confidence: number; factors: string[] } {
     const evidence: string[] = [];
     const factors: string[] = [];
-    let totalConfidence = 0;
 
     // Extract evidence from search results
-    for (const result of searchResults) {
-      if (result.content) {
-        evidence.push(result.content);
-        totalConfidence += result.confidence || 0.5;
-
-        // Identify source type
-        if (result.source.includes('financial') || result.source.includes('market')) {
-          factors.push('financial-data');
-        }
-        if (result.source.includes('weather') || result.source.includes('climate')) {
-          factors.push('weather-data');
-        }
-        if (result.source.includes('sports') || result.source.includes('team')) {
-          factors.push('sports-data');
-        }
-        if (result.source.includes('economic') || result.source.includes('consumer')) {
-          factors.push('economic-data');
-        }
-        if (result.source.includes('news')) {
-          factors.push('news-source');
-        }
+    searchResults.forEach((result) => {
+      if (result.relevance > 0.7) {
+        evidence.push(result.snippet);
+        factors.push(result.title);
       }
-    }
+    });
 
-    // Remove duplicate factors
-    const uniqueFactors = Array.from(new Set(factors));
+    // Calculate confidence based on evidence quality
+    const confidence = Math.min(0.5 + evidence.length * 0.15, 0.9);
 
-    // Calculate confidence (0.5 - 0.95 range)
-    const baseConfidence = searchResults.length > 0 ? totalConfidence / searchResults.length : 0.5;
-    const confidence = Math.min(0.95, Math.max(0.5, baseConfidence));
-
-    return { evidence, confidence, factors: uniqueFactors };
+    return { evidence, confidence, factors };
   }
 
-  private generatePrediction(query: string, evidence: string[], searchResults: any[]): string {
-    if (searchResults.length === 0) {
-      return `No external information found for "${query}". Prediction confidence is low.`;
+  private synthesizePrediction(
+    evidence: string[],
+    factors: string[],
+    query: string
+  ): string {
+    if (evidence.length === 0) {
+      return "Insufficient search results to make a confident prediction.";
     }
 
-    if (searchResults.length === 1) {
-      return `Based on recent information: ${searchResults[0].title}. This suggests the prediction for "${query}" should consider this external factor.`;
+    const factorCount = factors.length;
+    if (query.toLowerCase().includes("will")) {
+      return `Based on ${factorCount} key factors from search results, this outcome is likely to occur.`;
     }
 
-    // Multiple sources
-    const sources = searchResults.map((r) => r.source).join(', ');
-    return `Based on external information from ${sources}, the prediction for "${query}" should be adjusted. Key findings: ${searchResults[0].title}`;
+    if (query.toLowerCase().includes("increase")) {
+      return `Search analysis suggests a moderate increase based on ${factorCount} identified factors.`;
+    }
+
+    if (query.toLowerCase().includes("decrease")) {
+      return `Search analysis suggests a modest decrease based on ${factorCount} identified factors.`;
+    }
+
+    return `Search synthesis indicates a mixed outcome influenced by ${factorCount} key factors.`;
   }
 
-  private generateReason(evidence: string[], factors: string[], searchResults: any[]): string {
-    if (searchResults.length === 0) {
-      return 'No external information available. Prediction based on internal data only.';
+  private generateReason(
+    evidence: string[],
+    factors: string[],
+    searchResults: any[]
+  ): string {
+    if (evidence.length === 0) {
+      return "No relevant search results found for analysis.";
     }
 
-    const sourceCount = searchResults.length;
-    const factorList = factors.length > 0 ? factors.join(', ') : 'general-information';
-    const avgConfidence = (
-      searchResults.reduce((sum, r) => sum + (r.confidence || 0.5), 0) / sourceCount
-    ).toFixed(2);
-
-    return `Found ${sourceCount} external source(s) with average confidence ${avgConfidence}. Data types: ${factorList}. External evidence integrated into prediction.`;
+    const topFactor = factors[0] || "general search results";
+    return `The search engine identified ${factors.length} key factors, with "${topFactor}" being the primary influence. Analysis of ${evidence.length} evidence sources suggests a moderately confident prediction.`;
   }
 }

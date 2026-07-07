@@ -89,7 +89,7 @@ export function initializeEngines(): void {
     version: "1.0.0",
   });
 
-  registry.register("search-engine", new SearchPredictionEngine(new MockSearchProvider()), {
+  registry.register("search-engine", new SearchPredictionEngine(), {
     name: "SearchPredictionEngine",
     category: "Evidence Synthesis",
     role: "The Researcher",
@@ -119,7 +119,7 @@ export function initializeEngines(): void {
     version: "1.0.0",
   });
 
-  registry.register("neural-engine", new NeuralPredictionEngine(new MockNeuralProvider()), {
+  registry.register("neural-engine", new NeuralPredictionEngine(), {
     name: "NeuralPredictionEngine",
     category: "Learning Family",
     role: "The Intuitive",

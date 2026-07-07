@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { trpc } from "@/lib/trpc";
+import { useContext } from "react";
+import { PredictionContext } from "@/contexts/PredictionContext";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
@@ -22,13 +25,16 @@ export default function PredictionResult() {
   const [expandCounter, setExpandCounter] = useState(false);
 
   const { currentPrediction, counterPrediction, isLoading, error, lastInput } = predictionState;
+  const predictMutation = trpc.prediction.predict.useMutation();
+  const predictionContext = useContext(PredictionContext);
+  const selectedRecipe = predictionContext?.state.selectedRecipe;
 
   const handleRetry = async () => {
     if (!lastInput) return;
     setError(null);
     setLoading(true);
     try {
-      const result = await generatePrediction(lastInput);
+      const result = await generatePrediction(lastInput, predictMutation.mutateAsync);
       setPrediction(result.prediction);
       setCounterPrediction(result.counterPrediction);
       setLoading(false);
@@ -174,6 +180,14 @@ export default function PredictionResult() {
                   <div className="bg-card border border-border rounded-lg p-4">
                     <h3 className="font-semibold mb-3">Recipe Used</h3>
                     <p className="text-sm text-muted-foreground mb-3">The prediction approach used for this analysis:</p>
+                    {selectedRecipe ? (
+                      <div className="flex items-center justify-between py-2 px-3 bg-primary/5 rounded">
+                        <span className="font-medium">{selectedRecipe.name}</span>
+                        <span className="text-xs text-primary font-semibold">Active</span>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No recipe selected</p>
+                    )}
                     {currentPrediction.metadata.recipeId && (
                       <div className="flex items-center justify-between py-2 px-3 bg-primary/5 rounded">
                         <span className="font-medium">{getRecipesByIds([currentPrediction.metadata.recipeId])[0]?.name || 'Unknown Recipe'}</span>

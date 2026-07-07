@@ -147,7 +147,7 @@ export const engineLibraryRouter = router({
 
     // Collect unique categories
     const categoriesSet = new Set<string>();
-    for (const metadata of allMetadata.values()) {
+    for (const metadata of Array.from(allMetadata.values())) {
       categoriesSet.add(metadata.category);
     }
 
