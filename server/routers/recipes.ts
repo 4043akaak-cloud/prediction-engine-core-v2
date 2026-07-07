@@ -11,6 +11,76 @@ import { v4 as uuidv4 } from "uuid";
  */
 export const recipesRouter = router({
   /**
+   * Get recipe count for current user
+   * Used to detect first-time users (count = 0)
+   */
+  getRecipeCount: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) throw new Error("Database not available");
+
+    const userRecipes = await db
+      .select()
+      .from(recipes)
+      .where(eq(recipes.userId, ctx.user.id));
+
+    return { count: userRecipes.length };
+  }),
+
+  /**
+   * Create Starter Recipe for first-time users
+   * Uses balanced combination of engines with medium weights
+   * Prevents duplicates by checking recipe count first
+   */
+  createStarterRecipe: protectedProcedure
+    .mutation(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      // Check if user already has recipes
+      const existingRecipes = await db
+        .select()
+        .from(recipes)
+        .where(eq(recipes.userId, ctx.user.id));
+
+      if (existingRecipes.length > 0) {
+        throw new Error("Starter Recipe can only be created for users with no recipes");
+      }
+
+      const recipeId = uuidv4();
+      const starterEngines = [
+        { engineId: "trend-engine", weight: "medium" as const },
+        { engineId: "statistical-engine", weight: "medium" as const },
+        { engineId: "pattern-engine", weight: "medium" as const },
+        { engineId: "causal-engine", weight: "medium" as const },
+      ];
+
+      // Create Starter Recipe
+      await db.insert(recipes).values({
+        id: recipeId,
+        userId: ctx.user.id,
+        name: "Balanced Starter",
+        description: "A balanced combination of reasoning engines for general predictions",
+        category: "General",
+        status: "ready",
+        version: "1.0.0",
+        isPublic: 0,
+      });
+
+      // Add engines to Starter Recipe
+      for (let i = 0; i < starterEngines.length; i++) {
+        await db.insert(recipeEngines).values({
+          id: uuidv4(),
+          recipeId,
+          engineId: starterEngines[i].engineId,
+          weight: starterEngines[i].weight,
+          position: i,
+        });
+      }
+
+      return { id: recipeId, name: "Balanced Starter" };
+    }),
+
+  /**
    * Create a new recipe
    */
   create: protectedProcedure
@@ -177,7 +247,7 @@ export const recipesRouter = router({
         }
       }
 
-      return { id: input.id };
+      return { id: input.id, name: input.name || recipe.name };
     }),
 
   /**
@@ -205,7 +275,7 @@ export const recipesRouter = router({
         throw new Error("Recipe not found");
       }
 
-      // Delete engines first
+      // Delete recipe engines
       await db
         .delete(recipeEngines)
         .where(eq(recipeEngines.recipeId, input.id));
@@ -217,14 +287,13 @@ export const recipesRouter = router({
     }),
 
   /**
-   * Search recipes by name with optional engine filter
+   * Search recipes by name and description
    */
   search: protectedProcedure
     .input(
       z.object({
-        query: z.string().optional(),
+        query: z.string().default(""),
         engineId: z.string().optional(),
-        sortBy: z.enum(["name", "created", "engines"]).optional().default("created"),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -236,49 +305,59 @@ export const recipesRouter = router({
         .from(recipes)
         .where(eq(recipes.userId, ctx.user.id));
 
-      const results = await query;
+      // Filter by search query if provided
+      if (input.query.trim()) {
+        const searchTerm = `%${input.query}%`;
+        const userRecipes = await db
+          .select()
+          .from(recipes)
+          .where(eq(recipes.userId, ctx.user.id));
 
-      // Filter by search query (name or description)
-      let filtered = results;
-      if (input.query) {
-        const lowerQuery = input.query.toLowerCase();
-        filtered = results.filter(
+        const filtered = userRecipes.filter(
           (r) =>
-            r.name.toLowerCase().includes(lowerQuery) ||
-            (r.description && r.description.toLowerCase().includes(lowerQuery))
+            r.name.toLowerCase().includes(input.query.toLowerCase()) ||
+            r.description?.toLowerCase().includes(input.query.toLowerCase())
         );
+
+        if (input.engineId) {
+          // Further filter by engine
+          const recipesWithEngine = await db
+            .select({ recipeId: recipeEngines.recipeId })
+            .from(recipeEngines)
+            .where(eq(recipeEngines.engineId, input.engineId));
+
+          const engineRecipeIds = new Set(
+            recipesWithEngine.map((r) => r.recipeId)
+          );
+          return filtered.filter((r) => engineRecipeIds.has(r.id));
+        }
+
+        return filtered;
       }
 
-      // Filter by engine if specified
+      // If no search query, filter by engine if provided
       if (input.engineId) {
-        const recipeIds = await db
+        const recipesWithEngine = await db
           .select({ recipeId: recipeEngines.recipeId })
           .from(recipeEngines)
           .where(eq(recipeEngines.engineId, input.engineId));
 
-        const recipeIdSet = new Set(recipeIds.map((r) => r.recipeId));
-        filtered = filtered.filter((r) => recipeIdSet.has(r.id));
-      }
-
-      // Sort results
-      if (input.sortBy === "name") {
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-      } else if (input.sortBy === "engines") {
-        // Sort by number of engines (requires fetching)
-        const withCounts = await Promise.all(
-          filtered.map(async (r) => {
-            const count = await db
-              .select({ count: recipeEngines.id })
-              .from(recipeEngines)
-              .where(eq(recipeEngines.recipeId, r.id));
-            return { ...r, engineCount: count.length };
-          })
+        const engineRecipeIds = new Set(
+          recipesWithEngine.map((r) => r.recipeId)
         );
-        withCounts.sort((a, b) => b.engineCount - a.engineCount);
-        filtered = withCounts.map(({ engineCount, ...r }) => r);
-      }
-      // Default: "created" - already in reverse chronological order from DB
 
-      return filtered;
+        const allUserRecipes = await db
+          .select()
+          .from(recipes)
+          .where(eq(recipes.userId, ctx.user.id));
+
+        return allUserRecipes.filter((r) => engineRecipeIds.has(r.id));
+      }
+
+      // Return all user recipes
+      return await db
+        .select()
+        .from(recipes)
+        .where(eq(recipes.userId, ctx.user.id));
     }),
 });

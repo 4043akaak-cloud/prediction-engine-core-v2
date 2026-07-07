@@ -1,11 +1,10 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Loader2 } from "lucide-react";
-import { useState, useContext } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { PageContainer } from "@/components/PageContainer";
 import { trpc } from "@/lib/trpc";
-import { PredictionContext } from "@/contexts/PredictionContext";
 import { usePrediction } from "@/hooks/usePrediction";
 import { generatePrediction } from "@/services/api";
 import {
@@ -17,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * PEC Homepage - UX Refinement
+ * PEC Homepage - With Starter Recipe for First-Time Users
  * Integrated prediction flow: Question → Recipe Selection → Generate → Result
  * No unnecessary page transitions
  */
@@ -28,10 +27,53 @@ export default function Home() {
   const [question, setQuestion] = useState("");
   const [showRecipeSelector, setShowRecipeSelector] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isCreatingStarter, setIsCreatingStarter] = useState(false);
 
-  const { state, setPrediction, setCounterPrediction, setLoading, setError, setLastInput, setSelectedRecipe } = usePrediction();
+  const { state, setPrediction, setCounterPrediction, setLoading, setError, setLastInput, setSelectedRecipe, updateRecipeCache, clearStaleRecipeSelection } = usePrediction();
   const predictMutation = trpc.prediction.predict.useMutation();
   const recipesQuery = trpc.recipes.search.useQuery({ query: "" });
+  const recipeCountQuery = trpc.recipes.getRecipeCount.useQuery();
+  const createStarterRecipeMutation = trpc.recipes.createStarterRecipe.useMutation();
+
+  // Auto-create Starter Recipe for first-time users
+  useEffect(() => {
+    if (recipeCountQuery.data && recipeCountQuery.data.count === 0 && !isCreatingStarter) {
+      setIsCreatingStarter(true);
+      createStarterRecipeMutation.mutate(undefined, {
+        onSuccess: () => {
+          // Refetch recipes to include the newly created Starter Recipe
+          recipesQuery.refetch();
+          setIsCreatingStarter(false);
+        },
+        onError: () => {
+          setIsCreatingStarter(false);
+        },
+      });
+    }
+  }, [recipeCountQuery.data, isCreatingStarter, createStarterRecipeMutation, recipesQuery]);
+
+  // Update recipe validation cache whenever recipes are fetched
+  useEffect(() => {
+    if (recipesQuery.data && recipesQuery.data.length > 0) {
+      const recipeIds = recipesQuery.data.map((r) => r.id);
+      updateRecipeCache(recipeIds);
+      // Check if current selection is still valid
+      clearStaleRecipeSelection();
+
+  // Auto-select Starter Recipe if it's the only one available
+  useEffect(() => {
+    if (
+      recipesQuery.data &&
+      recipesQuery.data.length === 1 &&
+      !state.selectedRecipe &&
+      !isCreatingStarter
+    ) {
+      const starterRecipe = recipesQuery.data[0];
+      setSelectedRecipe(starterRecipe);
+    }
+  }, [recipesQuery.data, state.selectedRecipe, isCreatingStarter, setSelectedRecipe]);
+    }
+  }, [recipesQuery.data, updateRecipeCache, clearStaleRecipeSelection]);
 
   const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuestion(e.target.value);
@@ -150,10 +192,15 @@ export default function Home() {
               />
               <Button
                 onClick={() => handleGeneratePrediction()}
-                disabled={!question.trim() || isGenerating}
+                disabled={!question.trim() || isGenerating || isCreatingStarter}
                 className="w-full md:w-auto"
               >
-                {isGenerating ? (
+                {isCreatingStarter ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Preparing...
+                  </>
+                ) : isGenerating ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Generating...
@@ -190,7 +237,7 @@ export default function Home() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2 max-h-96 overflow-y-auto">
-            {recipesQuery.isLoading ? (
+            {recipesQuery.isLoading || isCreatingStarter ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>

@@ -27,7 +27,7 @@ export default function RecipesList() {
   const { data: searchResults = [] } = trpc.recipes.search.useQuery(
     {
       query: searchQuery,
-      sortBy: sortBy as "name" | "created" | "engines",
+      query: searchQuery,
     },
     { enabled: !!user && searchQuery.length > 0 }
   );
