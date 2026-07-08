@@ -15,6 +15,13 @@
       "when": 1783422667991,
       "tag": "0001_many_midnight",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1783507328621,
+      "tag": "0002_hesitant_domino",
+      "breakpoints": true
     }
   ]
 }

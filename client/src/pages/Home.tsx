@@ -164,54 +164,71 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Future Expansion Placeholders */}
-          <section className="container mx-auto px-4 py-20 border-t border-border">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-              {/* Featured Prediction Types */}
-              <div className="border border-border rounded p-8 min-h-40 flex items-center justify-center">
-                <div className="text-center">
-                  <h2 className="text-xl font-semibold mb-4">Prediction Types</h2>
-                  <p className="text-sm text-muted-foreground mb-4">Choose from various prediction categories</p>
-                  <Button variant="outline" size="sm" onClick={() => setLocation("/predict")}>
-                    Explore
-                  </Button>
-                </div>
-              </div>
-
-              {/* Your Predictions */}
-              <div className="border border-border rounded p-8 min-h-40 flex items-center justify-center">
-                <div className="text-center">
-                  <h2 className="text-xl font-semibold mb-4">Your Predictions</h2>
-                  <p className="text-sm text-muted-foreground mb-4">View your prediction history</p>
-                  <Button variant="outline" size="sm" onClick={() => setLocation("/diary")}>
-                    View Diary
-                  </Button>
-                </div>
-              </div>
-
-              {/* Insights */}
-              <div className="border border-border rounded p-8 min-h-40 flex items-center justify-center">
-                <div className="text-center">
-                  <h2 className="text-xl font-semibold mb-4">Insights</h2>
-                  <p className="text-sm text-muted-foreground mb-4">Discover prediction insights</p>
-                  <Button variant="outline" size="sm" disabled>
-                    Coming Soon
-                  </Button>
-                </div>
-              </div>
-
-              {/* Trending */}
-              <div className="border border-border rounded p-8 min-h-40 flex items-center justify-center">
-                <div className="text-center">
-                  <h2 className="text-xl font-semibold mb-4">Trending Topics</h2>
-                  <p className="text-sm text-muted-foreground mb-4">See what others are predicting</p>
-                  <Button variant="outline" size="sm" disabled>
-                    Coming Soon
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </section>
+                    {/* Choose Your Approach Section */}
+          <section className="container mx-auto px-4 py-20 border-t border-border">
+            <h2 className="text-2xl font-bold mb-4">Choose Your Approach</h2>
+            <p className="text-muted-foreground mb-12">
+              Explore different ways to make predictions. Start with Quick Start Recipes, build your own, or discover what others have created.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+              {/* Quick Start Recipes */}
+              <div className="border border-border rounded p-8 min-h-40 flex items-center justify-center">
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold mb-4">Quick Start Recipes</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Official starter templates to begin predicting</p>
+                  <Button variant="outline" size="sm" onClick={() => setLocation("/recipes")}>
+                    Browse
+                  </Button>
+                </div>
+              </div>
+
+              {/* Recipe Library */}
+              <div className="border border-border rounded p-8 min-h-40 flex items-center justify-center">
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold mb-4">Recipe Library</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Your complete collection of recipes</p>
+                  <Button variant="outline" size="sm" onClick={() => setLocation("/recipes")}>
+                    View Library
+                  </Button>
+                </div>
+              </div>
+
+              {/* Recipe Builder */}
+              <div className="border border-border rounded p-8 min-h-40 flex items-center justify-center">
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold mb-4">Recipe Builder</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Create your own prediction recipes</p>
+                  <Button variant="outline" size="sm" onClick={() => setLocation("/recipe-builder")}>
+                    Create
+                  </Button>
+                </div>
+              </div>
+
+              {/* Community Recipes */}
+              <div className="border border-border rounded p-8 min-h-40 flex items-center justify-center">
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold mb-4">Community Recipes</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Discover recipes from the community</p>
+                  <Button variant="outline" size="sm" disabled>
+                    Coming Soon
+                  </Button>
+                </div>
+              </div>
+
+              {/* Featured Recipes */}
+              <div className="border border-border rounded p-8 min-h-40 flex items-center justify-center">
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold mb-4">Featured Recipes</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Curated recipes for specific domains</p>
+                  <Button variant="outline" size="sm" disabled>
+                    Coming Soon
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </section>
+
         </main>
       </div>
 

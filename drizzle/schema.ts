@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, tinyint } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, tinyint, index } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -27,20 +27,31 @@ export type InsertUser = typeof users.$inferInsert;
 
 // TODO: Add your tables here
 /**
- * Recipes table - stores user-created prediction recipes
+ * Recipes table - stores prediction strategies
+ * Represents a higher-order concept combining engines and their weights
  */
 export const recipes = mysqlTable("recipes", {
   id: varchar("id", { length: 36 }).primaryKey(), // UUID
-  userId: int("userId").notNull(),
+  userId: int("userId"), // NULL for SYSTEM/FEATURED recipes
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  category: varchar("category", { length: 100 }),
-  version: varchar("version", { length: 20 }).default("1.0.0").notNull(),
-  status: mysqlEnum("status", ["draft", "ready", "archived"]).default("draft").notNull(),
+  type: mysqlEnum("type", ["SYSTEM", "USER", "COMMUNITY", "FEATURED"]).default("USER").notNull(),
+  category: mysqlEnum("category", ["FINANCE", "SPORTS", "WEATHER", "HEALTH", "TECHNOLOGY", "POLITICS", "OTHER"]).default("OTHER").notNull(),
+  status: mysqlEnum("status", ["ACTIVE", "DRAFT", "ARCHIVED"]).default("DRAFT").notNull(),
+  version: int("version").default(1).notNull(),
   isPublic: tinyint("isPublic").default(0).notNull(),
+  displayOrder: int("displayOrder"), // For SYSTEM recipes ordering
+  createdFromRecipeId: varchar("createdFromRecipeId", { length: 36 }), // Track lineage
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  idxType: index("idx_recipes_type").on(table.type),
+  idxUserId: index("idx_recipes_user_id").on(table.userId),
+  idxCreatedFrom: index("idx_recipes_created_from").on(table.createdFromRecipeId),
+  idxTypeDisplayOrder: index("idx_recipes_type_display_order").on(table.type, table.displayOrder),
+  idxStatus: index("idx_recipes_status").on(table.status),
+  idxCategory: index("idx_recipes_category").on(table.category),
+}));
 
 export type Recipe = typeof recipes.$inferSelect;
 export type InsertRecipe = typeof recipes.$inferInsert;

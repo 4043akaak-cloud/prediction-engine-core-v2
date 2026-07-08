@@ -6,9 +6,11 @@ import { predictionRouter } from "./routers/prediction";
 import { usersRouter } from "./routers/users";
 import { engineLibraryRouter } from "./routers/engineLibrary";
 import { recipesRouter } from "./routers/recipes";
+import { recipeRouter } from "./routers/recipe";
 
 export const appRouter = router({
   recipes: recipesRouter,
+  recipe: recipeRouter,
   // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with 
   system: systemRouter,
   auth: router({
