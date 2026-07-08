@@ -1,3 +1,4 @@
+import { Switch, Route } from "wouter";
 import { PredictionProvider } from "@/contexts/PredictionContext";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import LayoutWrapper from "@/components/LayoutWrapper";
