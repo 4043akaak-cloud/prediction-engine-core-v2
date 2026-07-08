@@ -136,18 +136,20 @@ export default function Home() {
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex gap-8">
-              <button onClick={() => setLocation("/diary")} className="text-sm hover:text-primary">Predictions</button>
-              <a href="#" className="text-sm hover:text-primary">Tools</a>
-              <a href="#" className="text-sm hover:text-primary">Learn</a>
+              <button onClick={() => setLocation("/")} className="text-sm hover:text-primary">Home</button>
+              <button onClick={() => setLocation("/how-to-use")} className="text-sm hover:text-primary">How to Use</button>
+              <button onClick={() => setLocation("/diary")} className="text-sm hover:text-primary">Prediction Diary</button>
+              <button onClick={() => setLocation("/recipes")} className="text-sm hover:text-primary">Recipe Library</button>
+              <button onClick={() => setLocation("/recipe-builder")} className="text-sm hover:text-primary">Recipe Builder</button>
+              <button onClick={() => setLocation("/labs")} className="text-sm hover:text-primary">Labs</button>
             </nav>
             
             {/* Header Actions */}
             <div className="hidden md:flex items-center gap-4">
-              <button className="text-sm">Theme</button>
               {isAuthenticated ? (
                 <Button variant="outline" size="sm" onClick={logout}>Sign Out</Button>
               ) : (
-                <Button variant="outline" size="sm">Sign In</Button>
+                <Button variant="outline" size="sm" onClick={() => setLocation("/")}>Sign In</Button>
               )}
             </div>
             
@@ -163,13 +165,16 @@ export default function Home() {
           {/* Mobile Menu */}
           {mobileMenuOpen && (
             <nav className="md:hidden border-t border-border p-4 flex flex-col gap-4">
-              <button onClick={() => { setLocation("/diary"); setMobileMenuOpen(false); }} className="text-sm hover:text-primary">Predictions</button>
-              <a href="#" className="text-sm">Tools</a>
-              <a href="#" className="text-sm">Learn</a>
+              <button onClick={() => { setLocation("/"); setMobileMenuOpen(false); }} className="text-sm hover:text-primary">Home</button>
+              <button onClick={() => { setLocation("/how-to-use"); setMobileMenuOpen(false); }} className="text-sm hover:text-primary">How to Use</button>
+              <button onClick={() => { setLocation("/diary"); setMobileMenuOpen(false); }} className="text-sm hover:text-primary">Prediction Diary</button>
+              <button onClick={() => { setLocation("/recipes"); setMobileMenuOpen(false); }} className="text-sm hover:text-primary">Recipe Library</button>
+              <button onClick={() => { setLocation("/recipe-builder"); setMobileMenuOpen(false); }} className="text-sm hover:text-primary">Recipe Builder</button>
+              <button onClick={() => { setLocation("/labs"); setMobileMenuOpen(false); }} className="text-sm hover:text-primary">Labs</button>
               {isAuthenticated ? (
                 <Button variant="outline" size="sm" className="w-full" onClick={logout}>Sign Out</Button>
               ) : (
-                <Button variant="outline" size="sm" className="w-full">Sign In</Button>
+                <Button variant="outline" size="sm" className="w-full" onClick={() => setLocation("/")}>Sign In</Button>
               )}
             </nav>
           )}

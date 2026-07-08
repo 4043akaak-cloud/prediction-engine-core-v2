@@ -7,6 +7,8 @@ import { PredictionProvider } from "./contexts/PredictionContext";
 import { DiaryProvider } from "./contexts/DiaryContext";
 import { UIProvider } from "./contexts/UIContext";
 import Home from "./pages/Home";
+import HowToUse from "./pages/HowToUse";
+import Labs from "./pages/Labs";
 import PredictionInput from "./pages/PredictionInput";
 import PredictionResult from "./pages/PredictionResult";
 import PredictionDiary from "./pages/PredictionDiary";
@@ -38,6 +40,8 @@ function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/how-to-use"} component={HowToUse} />
+      <Route path={"/labs"} component={Labs} />
       <Route path={"/predict"} component={PredictionInput} />
       <Route path={"/result"} component={PredictionResult} />
       <Route path={"/diary"} component={PredictionDiary} />
