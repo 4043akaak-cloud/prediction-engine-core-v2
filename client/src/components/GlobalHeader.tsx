@@ -7,7 +7,7 @@ import { useLocation } from "wouter";
 
 export default function GlobalHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [, setLocation] = useLocation();
 
   const navigationItems = [
@@ -21,12 +21,6 @@ export default function GlobalHeader() {
 
   const handleNavClick = (path: string) => {
     setLocation(path);
-    setMobileMenuOpen(false);
-  };
-
-  const handleLogout = async () => {
-    await logout();
-    setLocation("/");
     setMobileMenuOpen(false);
   };
 
@@ -57,21 +51,12 @@ export default function GlobalHeader() {
         {/* Desktop Auth Controls */}
         <div className="hidden md:flex items-center gap-4">
           {user ? (
-            <>
-              <button
-                onClick={() => handleNavClick("/account")}
-                className="text-sm hover:text-primary transition-colors"
-              >
-                Account
-              </button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-              >
-                Sign Out
-              </Button>
-            </>
+            <button
+              onClick={() => handleNavClick("/account")}
+              className="text-sm hover:text-primary transition-colors"
+            >
+              Account
+            </button>
           ) : (
             <Button
               variant="outline"
@@ -106,22 +91,12 @@ export default function GlobalHeader() {
           ))}
           <div className="border-t border-border pt-4 flex flex-col gap-2">
             {user ? (
-              <>
-                <button
-                  onClick={() => handleNavClick("/account")}
-                  className="text-sm hover:text-primary transition-colors text-left"
-                >
-                  Account
-                </button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  onClick={handleLogout}
-                >
-                  Sign Out
-                </Button>
-              </>
+              <button
+                onClick={() => handleNavClick("/account")}
+                className="text-sm hover:text-primary transition-colors text-left"
+              >
+                Account
+              </button>
             ) : (
               <Button
                 variant="outline"
