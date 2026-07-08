@@ -1,4 +1,5 @@
 import { Route, Switch } from "wouter";
+import { PredictionProvider } from "@/contexts/PredictionContext";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import Home from "@/pages/Home";
 import HowToUse from "@/pages/HowToUse";
@@ -18,24 +19,26 @@ import Roadmap from "@/pages/Roadmap";
 
 export default function App() {
   return (
-    <LayoutWrapper>
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/how-to-use" component={HowToUse} />
-        <Route path="/diary" component={PredictionDiary} />
-        <Route path="/recipes" component={RecipesList} />
-        <Route path="/recipe-builder" component={RecipeBuilder} />
-        <Route path="/recipes/:id" component={RecipeDetail} />
-        <Route path="/result" component={PredictionResult} />
-        <Route path="/account" component={Account} />
-        <Route path="/labs" component={Labs} />
-        <Route path="/about" component={About} />
-        <Route path="/privacy" component={Privacy} />
-        <Route path="/terms" component={Terms} />
-        <Route path="/contact" component={Contact} />
-        <Route path="/roadmap" component={Roadmap} />
-        <Route component={NotFound} />
-      </Switch>
-    </LayoutWrapper>
+    <PredictionProvider>
+      <LayoutWrapper>
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/how-to-use" component={HowToUse} />
+          <Route path="/diary" component={PredictionDiary} />
+          <Route path="/recipes" component={RecipesList} />
+          <Route path="/recipe-builder" component={RecipeBuilder} />
+          <Route path="/recipes/:id" component={RecipeDetail} />
+          <Route path="/result" component={PredictionResult} />
+          <Route path="/account" component={Account} />
+          <Route path="/labs" component={Labs} />
+          <Route path="/about" component={About} />
+          <Route path="/privacy" component={Privacy} />
+          <Route path="/terms" component={Terms} />
+          <Route path="/contact" component={Contact} />
+          <Route path="/roadmap" component={Roadmap} />
+          <Route component={NotFound} />
+        </Switch>
+      </LayoutWrapper>
+    </PredictionProvider>
   );
 }
