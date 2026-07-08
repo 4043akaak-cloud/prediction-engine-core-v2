@@ -1,4 +1,3 @@
-import { Route, Switch } from "wouter";
 import { PredictionProvider } from "@/contexts/PredictionContext";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import LayoutWrapper from "@/components/LayoutWrapper";
@@ -17,6 +16,8 @@ import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
 import Contact from "@/pages/Contact";
 import Roadmap from "@/pages/Roadmap";
+import ChooseYourApproach from "@/pages/ChooseYourApproach";
+import RecipeLibrary from "@/pages/RecipeLibrary";
 
 export default function App() {
   return (
@@ -38,6 +39,8 @@ export default function App() {
           <Route path="/terms" component={Terms} />
           <Route path="/contact" component={Contact} />
           <Route path="/roadmap" component={Roadmap} />
+          <Route path="/choose-approach" component={ChooseYourApproach} />
+          <Route path="/recipe-library" component={RecipeLibrary} />
           <Route component={NotFound} />
         </Switch>
       </LayoutWrapper>
