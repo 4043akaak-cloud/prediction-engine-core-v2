@@ -5,53 +5,69 @@ export default function GlobalFooter() {
 
   const footerLinks = [
     { label: "About", path: "/about" },
-    { label: "Documentation", path: "/how-to-use" },
     { label: "Privacy", path: "/privacy" },
     { label: "Terms", path: "/terms" },
     { label: "Contact", path: "/contact" },
-    { label: "GitHub", path: "/github" },
   ];
 
+  const secondaryLinks = [
+    { label: "GitHub", path: "https://github.com" },
+    { label: "Roadmap", path: "/roadmap" },
+  ];
+
+  const handleNavigation = (path: string) => {
+    if (path.startsWith("http")) {
+      window.open(path, "_blank");
+    } else {
+      setLocation(path);
+    }
+  };
+
   return (
-    <footer className="border-t border-border bg-background mt-16">
+    <footer className="border-t border-border bg-background mt-20">
       <div className="container mx-auto px-4 py-12">
         {/* Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          {/* Brand Section */}
-          <div>
-            <h3 className="text-lg font-bold mb-2">Prediction Engine Core</h3>
-            <p className="text-sm text-muted-foreground">
-              Reasoning OS for Better Predictions
-            </p>
+          {/* Primary Links */}
+          <div className="flex flex-col gap-4">
+            {footerLinks.map((link) => (
+              <button
+                key={link.path}
+                onClick={() => handleNavigation(link.path)}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors text-left"
+              >
+                {link.label}
+              </button>
+            ))}
           </div>
 
-          {/* Links Section */}
-          <div className="md:col-span-2">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {footerLinks.map((link) => (
-                <button
-                  key={link.path}
-                  onClick={() => setLocation(link.path)}
-                  className="text-sm hover:text-primary transition-colors text-left"
-                >
-                  {link.label}
-                </button>
-              ))}
+          {/* Secondary Links */}
+          <div className="flex flex-col gap-4">
+            {secondaryLinks.map((link) => (
+              <button
+                key={link.path}
+                onClick={() => handleNavigation(link.path)}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors text-left"
+              >
+                {link.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Version Info */}
+          <div className="flex flex-col gap-4">
+            <div>
+              <p className="text-sm font-semibold mb-1">Version</p>
+              <p className="text-sm text-muted-foreground">v0.1</p>
             </div>
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="border-t border-border pt-8">
-          {/* Version and Copyright */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="text-xs text-muted-foreground">
-              © 2026 Prediction Engine Core. All rights reserved.
-            </div>
-            <div className="text-xs text-muted-foreground">
-              v0.1
-            </div>
-          </div>
+        {/* Copyright */}
+        <div className="border-t border-border pt-8 text-center">
+          <p className="text-xs text-muted-foreground">
+            © 2026 Prediction Engine Core. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
