@@ -1,5 +1,6 @@
 import { Route, Switch } from "wouter";
 import { PredictionProvider } from "@/contexts/PredictionContext";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import Home from "@/pages/Home";
 import HowToUse from "@/pages/HowToUse";
@@ -20,6 +21,7 @@ import Roadmap from "@/pages/Roadmap";
 export default function App() {
   return (
     <PredictionProvider>
+      <ScrollToTop />
       <LayoutWrapper>
         <Switch>
           <Route path="/" component={Home} />
