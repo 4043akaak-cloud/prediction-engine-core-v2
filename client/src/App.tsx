@@ -6,9 +6,11 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { PredictionProvider } from "./contexts/PredictionContext";
 import { DiaryProvider } from "./contexts/DiaryContext";
 import { UIProvider } from "./contexts/UIContext";
+import LayoutWrapper from "./components/LayoutWrapper";
 import Home from "./pages/Home";
 import HowToUse from "./pages/HowToUse";
 import Labs from "./pages/Labs";
+import Account from "./pages/Account";
 import PredictionInput from "./pages/PredictionInput";
 import PredictionResult from "./pages/PredictionResult";
 import PredictionDiary from "./pages/PredictionDiary";
@@ -42,6 +44,7 @@ function Router() {
       <Route path={"/"} component={Home} />
       <Route path={"/how-to-use"} component={HowToUse} />
       <Route path={"/labs"} component={Labs} />
+      <Route path={"/account"} component={Account} />
       <Route path={"/predict"} component={PredictionInput} />
       <Route path={"/result"} component={PredictionResult} />
       <Route path={"/diary"} component={PredictionDiary} />
@@ -78,7 +81,9 @@ function App() {
               <SettingsProvider>
                 <TooltipProvider>
                   <Toaster />
-                  <Router />
+                  <LayoutWrapper>
+                    <Router />
+                  </LayoutWrapper>
                 </TooltipProvider>
               </SettingsProvider>
             </DiaryProvider>
