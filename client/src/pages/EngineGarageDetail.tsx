@@ -1,12 +1,12 @@
-import { useLocation } from "wouter";
+import { useLocation, useParams } from "wouter";
 import { PageContainer } from "@/components/PageContainer";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import { Loader2, ArrowLeft, Check, AlertCircle } from "lucide-react";
 
 export default function EngineGarageDetail() {
-  const [location, setLocation] = useLocation();
-  const engineId = location.split("/").pop();
+  const [, setLocation] = useLocation();
+  const { id: engineId } = useParams<{ id: string }>();
 
   const engineQuery = trpc.engineLibrary.getEngine.useQuery(
     { id: engineId || "" },
