@@ -4,12 +4,63 @@ import { getDb } from "../db";
 import { recipes, recipeEngines } from "../../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
+import { STOCK_DEFAULT_RECIPE } from "../predictionEngine/recipes/StockDefaultRecipe";
 
 /**
  * Recipe Builder API
  * Handles recipe CRUD operations for Phase 1B-1 MVP
  */
 export const recipesRouter = router({
+  /**
+   * List recipes with filtering by type (SYSTEM or USER)
+   * SYSTEM recipes are available to all users
+   * USER recipes are only for the current user
+   */
+  list: publicProcedure
+    .input(z.object({ 
+      type: z.enum(["SYSTEM", "USER"]).optional(),
+      status: z.string().optional(),
+      limit: z.number().optional().default(100),
+    }))
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      // For SYSTEM recipes, return Stock Default
+      if (input.type === "SYSTEM") {
+        // Convert STOCK_DEFAULT_RECIPE to database format
+        const systemRecipe = {
+          id: STOCK_DEFAULT_RECIPE.id,
+          userId: null,
+          name: STOCK_DEFAULT_RECIPE.name,
+          description: STOCK_DEFAULT_RECIPE.description,
+          type: "SYSTEM" as const,
+          category: "FINANCE" as const,
+          status: "ACTIVE" as const,
+          version: STOCK_DEFAULT_RECIPE.version,
+          isPublic: STOCK_DEFAULT_RECIPE.isPublic,
+          displayOrder: STOCK_DEFAULT_RECIPE.displayOrder,
+          createdFromRecipeId: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        return { data: [systemRecipe] };
+      }
+
+      // For USER recipes, return user's recipes from database
+      if (!ctx.user) {
+        return { data: [] };
+      }
+
+      const userRecipes = await db
+        .select()
+        .from(recipes)
+        .where(eq(recipes.userId, ctx.user.id))
+        .limit(input.limit);
+
+      return { data: userRecipes };
+    }),
+
   /**
    * Get recipe count for current user
    * Used to detect first-time users (count = 0)
@@ -60,9 +111,9 @@ export const recipesRouter = router({
         userId: ctx.user.id,
         name: "Balanced Starter",
         description: "A balanced combination of reasoning engines for general predictions",
-        category: "General",
-        status: "ready",
-        version: "1.0.0",
+        category: "OTHER",
+        status: "DRAFT",
+        version: 1,
         isPublic: 0,
       });
 
@@ -109,9 +160,9 @@ export const recipesRouter = router({
         userId: ctx.user.id,
         name: input.name,
         description: input.description || "",
-        category: input.category || "",
-        status: "ready",
-        version: "1.0.0",
+        category: (input.category || "OTHER") as "FINANCE" | "SPORTS" | "WEATHER" | "HEALTH" | "TECHNOLOGY" | "POLITICS" | "OTHER",
+        status: "DRAFT",
+        version: 1,
         isPublic: 0,
       });
 
@@ -218,13 +269,14 @@ export const recipesRouter = router({
 
       // Update recipe metadata
       if (input.name || input.description || input.category) {
+        const updateData: any = {};
+        if (input.name) updateData.name = input.name;
+        if (input.description) updateData.description = input.description;
+        if (input.category) updateData.category = input.category as "FINANCE" | "SPORTS" | "WEATHER" | "HEALTH" | "TECHNOLOGY" | "POLITICS" | "OTHER";
+        
         await db
           .update(recipes)
-          .set({
-            name: input.name || recipe.name,
-            description: input.description || recipe.description,
-            category: input.category || recipe.category,
-          })
+          .set(updateData)
           .where(eq(recipes.id, input.id));
       }
 

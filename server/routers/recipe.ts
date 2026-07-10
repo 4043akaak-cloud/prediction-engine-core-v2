@@ -48,7 +48,7 @@ export const recipeRouter = router({
       }
 
       // Build query
-      let query = db.select().from(recipes);
+      let query: any = db.select().from(recipes);
       if (conditions.length > 0) {
         query = query.where(and(...conditions));
       }
@@ -60,7 +60,7 @@ export const recipeRouter = router({
       if (input.query?.trim()) {
         const searchTerm = input.query.toLowerCase();
         filtered = allRecipes.filter(
-          (r) =>
+          (r: any) =>
             r.name.toLowerCase().includes(searchTerm) ||
             r.description?.toLowerCase().includes(searchTerm)
         );
@@ -71,7 +71,7 @@ export const recipeRouter = router({
       const paginated = filtered.slice(input.offset, input.offset + input.limit);
 
       return {
-        data: paginated.map((r) => ({
+        data: paginated.map((r: any) => ({
           id: r.id,
           name: r.name,
           description: r.description,
