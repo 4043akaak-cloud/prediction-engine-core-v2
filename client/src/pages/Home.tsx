@@ -109,6 +109,10 @@ export default function Home() {
     }
   };
 
+  const handleChooseYourApproachClick = () => {
+    setLocation("/choose-approach");
+  };
+
   return (
     <PageContainer>
       <div className="min-h-screen flex flex-col bg-background text-foreground">
@@ -153,22 +157,30 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Choose Your Approach Card - Entry Point Only */}
+          {/* Choose Your Approach Card - Fully Clickable */}
           <section className="container mx-auto px-4 py-20 border-t border-border">
             <div className="max-w-md">
-              <div className="border border-border rounded-lg p-6 hover:border-primary transition-colors">
+              <button
+                onClick={handleChooseYourApproachClick}
+                className="w-full text-left border border-border rounded-lg p-6 hover:border-primary transition-colors cursor-pointer"
+              >
                 <h3 className="text-lg font-semibold mb-2">Choose Your Approach</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Explore different ways to make predictions. Start with Quick Start Recipes, build your own, or discover what others have created.
                 </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setLocation("/choose-approach")}
-                >
-                  Explore
-                </Button>
-              </div>
+                <div className="pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleChooseYourApproachClick();
+                    }}
+                  >
+                    Explore
+                  </Button>
+                </div>
+              </button>
             </div>
           </section>
         </main>

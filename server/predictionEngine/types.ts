@@ -1,3 +1,11 @@
+export interface IPredictionEngine {
+  predict(request: PredictionRequest): Promise<RecipeExecutionResult>;
+}
+
+export interface IPredictionEngineMulti {
+  predictMultiple(requests: PredictionRequest[]): Promise<RecipeExecutionResult[]>;
+}
+
 export interface PredictionRequest {
   query: string;
   recipeId: string;
@@ -62,4 +70,25 @@ export interface RecommendationResult {
 export interface PredictionPipelineResult {
   prediction: PredictionResult;
   recommendations: RecommendationResult[];
+}
+
+export interface KnowledgeSource {
+  type: "People" | "Theories & Laws" | "Philosophy" | "Art & Culture" | "Natural Systems";
+  value: string;
+}
+
+export interface EngineMetadata {
+  name: string;
+  family: string;
+  category: string;
+  role: string;
+  coreQuestion: string;
+  description: string;
+  strengths: string[];
+  weaknesses: string[];
+  input: string;
+  output: string;
+  version: string;
+  status: "stable" | "beta" | "experimental";
+  knowledgeSource?: KnowledgeSource;
 }

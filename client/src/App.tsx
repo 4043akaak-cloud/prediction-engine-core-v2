@@ -19,6 +19,8 @@ import Contact from "@/pages/Contact";
 import Roadmap from "@/pages/Roadmap";
 import ChooseYourApproach from "@/pages/ChooseYourApproach";
 import RecipeLibrary from "@/pages/RecipeLibrary";
+import EngineGarage from "@/pages/EngineGarage";
+import EngineGarageDetail from "@/pages/EngineGarageDetail";
 
 export default function App() {
   return (
@@ -42,6 +44,8 @@ export default function App() {
           <Route path="/roadmap" component={Roadmap} />
           <Route path="/choose-approach" component={ChooseYourApproach} />
           <Route path="/recipe-library" component={RecipeLibrary} />
+          <Route path="/engine-garage" component={EngineGarage} />
+          <Route path="/engines/:id" component={EngineGarageDetail} />
           <Route component={NotFound} />
         </Switch>
       </LayoutWrapper>

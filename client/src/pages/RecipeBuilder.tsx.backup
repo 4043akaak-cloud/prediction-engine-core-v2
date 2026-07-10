@@ -34,8 +34,6 @@ export default function RecipeBuilder() {
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingRecipeId, setEditingRecipeId] = useState<string | null>(null);
-  const [engineSearchQuery, setEngineSearchQuery] = useState("");
-
 
   // Extract recipeId from query params
   const params = new URLSearchParams(search);
@@ -44,18 +42,6 @@ export default function RecipeBuilder() {
   // Fetch engines
   const { data: engines = [], isLoading: enginesLoading } =
     trpc.engineLibrary.listEngines.useQuery();
-  // Filter engines based on search query
-  const filteredEngines = engines.filter((engine) => {
-    if (!engineSearchQuery.trim()) return true;
-    const query = engineSearchQuery.toLowerCase();
-    return (
-      engine.name.toLowerCase().includes(query) ||
-      engine.role.toLowerCase().includes(query) ||
-      engine.category.toLowerCase().includes(query) ||
-      engine.description.toLowerCase().includes(query)
-    );
-  });
-
 
   // Fetch recipe if editing
   const recipeQuery = trpc.recipe.getById.useQuery(
@@ -321,29 +307,13 @@ export default function RecipeBuilder() {
                   {/* Engine Library */}
                   {showEngineLibrary && (
                     <div className="mt-4 border border-border rounded-lg p-4 max-h-96 overflow-y-auto">
-<div className="mb-3">
-                        <Input
-                          type="text"
-                          placeholder="Search engines..."
-                          value={engineSearchQuery}
-                          onChange={(e) => setEngineSearchQuery(e.target.value)}
-                          className="w-full"
-                        />
-                      </div>
-                                            {enginesLoading ? (
+                      {enginesLoading ? (
                         <div className="flex items-center justify-center py-8">
                           <Loader2 className="animate-spin w-6 h-6" />
                         </div>
                       ) : (
                         <div className="space-y-3">
-                          {filteredEngines.length === 0 ? (
-                            <div className="text-center py-8">
-                              <p className="text-sm text-muted-foreground">
-                                No engines found matching "{engineSearchQuery}"
-                              </p>
-                            </div>
-                          ) : (
-                            filteredEngines.map((engine) => (
+                          {engines.map((engine) => (
                             <div
                               key={engine.id}
                               className="flex items-start justify-between p-3 border border-border rounded hover:bg-muted transition-colors"
@@ -354,9 +324,6 @@ export default function RecipeBuilder() {
                                 </p>
                                 <p className="text-xs text-muted-foreground">
                                   {engine.role} • {engine.category}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
-                                  {engine.description}
                                 </p>
                               </div>
                               <Button
@@ -374,9 +341,7 @@ export default function RecipeBuilder() {
                                   : "Add"}
                               </Button>
                             </div>
-                          ))
-                          )}
-
+                          ))}
                         </div>
                       )}
                     </div>

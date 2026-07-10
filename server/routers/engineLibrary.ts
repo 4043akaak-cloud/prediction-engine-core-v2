@@ -15,17 +15,26 @@ import { z } from "zod";
 
 /**
  * Engine DTO - Data Transfer Object for Engine Library
- * Contains only the 7 approved metadata fields
+ * Contains all 12 approved metadata fields
  */
 interface EngineDTO {
   id: string;
   name: string;
+  family: string;
   category: string;
   role: string;
+  coreQuestion: string;
   description: string;
+  strengths: string[];
+  weaknesses: string[];
   input: string;
   output: string;
   version: string;
+  status: "stable" | "beta" | "experimental";
+  knowledgeSource?: {
+    type: "People" | "Theories & Laws" | "Philosophy" | "Art & Culture" | "Natural Systems";
+    value: string;
+  };
 }
 
 /**
@@ -76,12 +85,18 @@ export const engineLibraryRouter = router({
       return {
         id,
         name: metadata.name,
+        family: metadata.family || "Unknown",
         category: metadata.category,
         role: metadata.role,
+        coreQuestion: metadata.coreQuestion || "",
         description: metadata.description,
+        strengths: metadata.strengths || [],
+        weaknesses: metadata.weaknesses || [],
         input: metadata.input,
         output: metadata.output,
         version: metadata.version,
+        status: metadata.status || "stable",
+        ...(metadata.knowledgeSource && { knowledgeSource: metadata.knowledgeSource }),
       };
     });
   }),
@@ -99,12 +114,18 @@ export const engineLibraryRouter = router({
       return {
         id: input.id,
         name: metadata.name,
+        family: metadata.family || "Unknown",
         category: metadata.category,
         role: metadata.role,
+        coreQuestion: metadata.coreQuestion || "",
         description: metadata.description,
+        strengths: metadata.strengths || [],
+        weaknesses: metadata.weaknesses || [],
         input: metadata.input,
         output: metadata.output,
         version: metadata.version,
+        status: metadata.status || "stable",
+        ...(metadata.knowledgeSource && { knowledgeSource: metadata.knowledgeSource }),
       };
     }),
 
@@ -127,12 +148,18 @@ export const engineLibraryRouter = router({
         return {
           id,
           name: metadata.name,
+          family: metadata.family || "Unknown",
           category: metadata.category,
           role: metadata.role,
+          coreQuestion: metadata.coreQuestion || "",
           description: metadata.description,
+          ...(metadata.knowledgeSource && { knowledgeSource: metadata.knowledgeSource }),
+          strengths: metadata.strengths || [],
+          weaknesses: metadata.weaknesses || [],
           input: metadata.input,
           output: metadata.output,
           version: metadata.version,
+          status: metadata.status || "stable",
         };
       });
     }),

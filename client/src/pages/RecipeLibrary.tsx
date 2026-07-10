@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { PageContainer } from "@/components/PageContainer";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Trash2, Edit2 } from "lucide-react";
+import { Loader2, Trash2, Edit2, Copy } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,6 +46,9 @@ export default function RecipeLibrary() {
   // Delete recipe mutation
   const deleteRecipeMutation = trpc.recipe.delete.useMutation();
 
+  // Duplicate recipe mutation
+  const duplicateRecipeMutation = trpc.recipe.duplicate.useMutation();
+
   // Filter and sort recipes
   const filteredRecipes = useMemo(() => {
     if (!recipesQuery.data) return [];
@@ -80,6 +83,19 @@ export default function RecipeLibrary() {
 
   const handleEdit = (recipeId: string) => {
     setLocation(`/recipe-builder?recipeId=${recipeId}`);
+  };
+
+  const handleDuplicate = (recipeId: string) => {
+    duplicateRecipeMutation.mutate(
+      { sourceRecipeId: recipeId },
+      {
+        onSuccess: (data) => {
+          recipesQuery.refetch();
+          // Open duplicated recipe in Recipe Builder
+          setLocation(`/recipe-builder?recipeId=${data.id}`);
+        },
+      }
+    );
   };
 
   return (
@@ -145,6 +161,7 @@ export default function RecipeLibrary() {
                         <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
                           <span>Category: {recipe.category}</span>
                           <span>Version {recipe.version}</span>
+                          <span>{recipe.engineCount} engine{recipe.engineCount !== 1 ? 's' : ''}</span>
                           <span>
                             Created: {new Date(recipe.createdAt).toLocaleDateString()}
                           </span>
@@ -152,6 +169,19 @@ export default function RecipeLibrary() {
                       </div>
 
                       <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDuplicate(recipe.id)}
+                          title="Duplicate recipe"
+                          disabled={duplicateRecipeMutation.isPending}
+                        >
+                          {duplicateRecipeMutation.isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -205,7 +235,6 @@ export default function RecipeLibrary() {
                 }
               }}
               disabled={deleteRecipeMutation.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deleteRecipeMutation.isPending ? (
                 <>
