@@ -14,7 +14,7 @@ export default function GlobalHeader() {
     { label: "Home", path: "/" },
     { label: "How to Use", path: "/how-to-use" },
     { label: "Prediction Diary", path: "/diary" },
-    { label: "Recipe Library", path: "/recipes" },
+    { label: "Recipe Library", path: "/recipe-library" },
     { label: "Recipe Builder", path: "/recipe-builder" },
     { label: "Engine Garage", path: "/engine-garage" },
     { label: "Labs", path: "/labs" },

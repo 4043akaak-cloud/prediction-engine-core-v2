@@ -5,7 +5,7 @@ import LayoutWrapper from "@/components/LayoutWrapper";
 import Home from "@/pages/Home";
 import HowToUse from "@/pages/HowToUse";
 import PredictionDiary from "@/pages/PredictionDiary";
-import RecipesList from "@/pages/RecipesList";
+
 import RecipeBuilder from "@/pages/RecipeBuilder";
 import RecipeDetail from "@/pages/RecipeDetail";
 import PredictionResult from "@/pages/PredictionResult";
@@ -31,7 +31,7 @@ export default function App() {
           <Route path="/" component={Home} />
           <Route path="/how-to-use" component={HowToUse} />
           <Route path="/diary" component={PredictionDiary} />
-          <Route path="/recipes" component={RecipesList} />
+
           <Route path="/recipe-builder" component={RecipeBuilder} />
           <Route path="/recipes/:id" component={RecipeDetail} />
           <Route path="/result" component={PredictionResult} />

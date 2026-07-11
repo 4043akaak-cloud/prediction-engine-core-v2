@@ -42,7 +42,7 @@ export default function RecipeDetail() {
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <div className="text-xl font-bold">PEC</div>
             <button
-              onClick={() => setLocation("/recipes")}
+              onClick={() => setLocation("/recipe-library")}
               className="text-sm hover:text-primary"
             >
               ← Back
@@ -52,7 +52,7 @@ export default function RecipeDetail() {
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <p className="text-muted-foreground mb-4">Recipe not found</p>
-            <Button onClick={() => setLocation("/recipes")}>Back to Recipes</Button>
+            <Button onClick={() => setLocation("/recipe-library")}>Back to Recipes</Button>
           </div>
         </main>
       </div>
@@ -89,7 +89,7 @@ export default function RecipeDetail() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="text-xl font-bold">PEC</div>
           <button
-            onClick={() => setLocation("/recipes")}
+            onClick={() => setLocation("/recipe-library")}
             className="text-sm hover:text-primary flex items-center gap-1"
           >
             <ChevronLeft size={16} />
@@ -279,7 +279,7 @@ export default function RecipeDetail() {
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => setLocation("/recipes")}
+                    onClick={() => setLocation("/recipe-library")}
                     className="flex-1"
                   >
                     Back to Recipes
