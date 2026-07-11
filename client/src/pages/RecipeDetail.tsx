@@ -53,8 +53,8 @@ export default function RecipeDetail() {
 
   const handleUseThisRecipe = () => {
     if (predictionQuestion.trim()) {
-      // Navigate to prediction with recipe and question
-      setLocation(`/predict?recipeId=${recipeId}&question=${encodeURIComponent(predictionQuestion)}`);
+      // Navigate to prediction input with recipe and question
+      setLocation(`/prediction-input?recipeId=${recipeId}&question=${encodeURIComponent(predictionQuestion)}`);
     }
   };
 

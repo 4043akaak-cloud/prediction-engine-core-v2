@@ -1,5 +1,5 @@
-import { useState, useContext } from "react";
-import { useLocation } from "wouter";
+import { useState, useContext, useEffect } from "react";
+import { useLocation, useSearch } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Loader2, Info, ChevronRight } from "lucide-react";
 import { usePrediction } from "@/hooks/usePrediction";
@@ -13,9 +13,14 @@ import { PredictionContext } from "@/contexts/PredictionContext";
  * Prediction Input Experience
  * User enters a question and selects prediction type
  * Part of the continuous prediction flow
+ * 
+ * Supports query parameters:
+ * - ?question=... (pre-fills the question field)
+ * - ?recipeId=... (selects the recipe)
  */
 export default function PredictionInput() {
   const [, setLocation] = useLocation();
+  const search = useSearch();
   const { state, setPrediction, setCounterPrediction, setLoading, setError, setLastInput } = usePrediction();
   const predictionContext = useContext(PredictionContext);
   
@@ -25,6 +30,17 @@ export default function PredictionInput() {
 
   const { isLoading } = state;
   const selectedRecipe = predictionContext?.state.selectedRecipe;
+
+  // Read query parameters and pre-fill the question if provided
+  useEffect(() => {
+    if (search) {
+      const params = new URLSearchParams(search);
+      const questionParam = params.get("question");
+      if (questionParam) {
+        setQuestion(decodeURIComponent(questionParam));
+      }
+    }
+  }, [search]);
 
   // Create the mutation hook in the component (complies with React Hook rules)
   const predictMutation = trpc.prediction.predict.useMutation();

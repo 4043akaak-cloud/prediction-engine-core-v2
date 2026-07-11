@@ -66,6 +66,7 @@ import { ReciprocityEngine } from "./engines/ReciprocityEngine";
 import { ComplianceEngine } from "./engines/ComplianceEngine";
 import { BarnumEffectEngine } from "./engines/BarnumEffectEngine";
 
+import { InfrastructureResidualEngine } from "./engines/InfrastructureResidualEngine";
 /**
  * EngineInitializer
  *
@@ -1546,6 +1547,34 @@ export function initializeEngines(): void {
     knowledgeSource: {
       type: "Theories & Laws",
       value: "Barnum (Forer) Effect"
+    }
+  });
+
+  registry.register("infrastructure-residual-engine", new InfrastructureResidualEngine(), {
+    name: "Infrastructure Residual Engine",
+    family: "Residual Value Analysis",
+    category: "Finance",
+    role: "The Infrastructure Analyst",
+    coreQuestion: "If this boom ends tomorrow, what lasting value will remain?",
+    description: "Evaluates the long-term residual value created by investment waves and booms. Estimates the Residual Infrastructure Score (0-100) based on 8 evaluation dimensions: physical infrastructure, human capital, knowledge assets, digital infrastructure, standards & protocols, supply chain capability, institutional impact, and cultural adoption.",
+    strengths: [
+      "Identifies lasting value beyond price speculation",
+      "Evaluates infrastructure durability",
+      "Considers multiple dimensions of residual value",
+      "Useful for long-term investment analysis"
+    ],
+    weaknesses: [
+      "Requires evidence of infrastructure creation",
+      "Difficult to quantify some dimensions",
+      "Historical context dependent"
+    ],
+    input: "A prediction query about an investment wave, boom, or technology adoption asking about lasting value or infrastructure creation.",
+    output: "A residual infrastructure score (0-100) with dimension breakdown and confidence assessment.",
+    status: "Stable",
+    version: "1.0.0",
+    knowledgeSource: {
+      type: "Theories & Laws",
+      value: "Infrastructure Residual Value Analysis"
     }
   });
 }

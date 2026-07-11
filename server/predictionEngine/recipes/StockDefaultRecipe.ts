@@ -92,6 +92,13 @@ export const STOCK_DEFAULT_RECIPE = {
       position: 10,
       weight: "medium",
       role: "Simulate uncertainty and generate probability distributions"
+    },
+    {
+      engineId: "infrastructure-residual-engine",
+      name: "Infrastructure Residual Engine",
+      position: 11,
+      weight: "high",
+      role: "Evaluate long-term residual value beyond price speculation"
     }
   ],
 

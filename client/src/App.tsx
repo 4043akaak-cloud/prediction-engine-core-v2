@@ -21,6 +21,8 @@ import ChooseYourApproach from "@/pages/ChooseYourApproach";
 import RecipeLibrary from "@/pages/RecipeLibrary";
 import EngineGarage from "@/pages/EngineGarage";
 import EngineGarageDetail from "@/pages/EngineGarageDetail";
+import PredictionInput from "@/pages/PredictionInput";
+import RecipeSelector from "@/pages/RecipeSelector";
 
 export default function App() {
   return (
@@ -34,6 +36,7 @@ export default function App() {
 
           <Route path="/recipe-builder" component={RecipeBuilder} />
           <Route path="/recipes/:id" component={RecipeDetail} />
+          <Route path="/prediction-input" component={PredictionInput} />
           <Route path="/result" component={PredictionResult} />
           <Route path="/account" component={Account} />
           <Route path="/labs" component={Labs} />
@@ -44,6 +47,7 @@ export default function App() {
           <Route path="/roadmap" component={Roadmap} />
           <Route path="/choose-approach" component={ChooseYourApproach} />
           <Route path="/recipe-library" component={RecipeLibrary} />
+          <Route path="/select-recipe" component={RecipeSelector} />
           <Route path="/engine-garage" component={EngineGarage} />
           <Route path="/engines/:id" component={EngineGarageDetail} />
           <Route component={NotFound} />
