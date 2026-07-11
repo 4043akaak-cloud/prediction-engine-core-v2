@@ -1,5 +1,6 @@
 import { Switch, Route } from "wouter";
 import { PredictionProvider } from "@/contexts/PredictionContext";
+import { DiaryProvider } from "@/contexts/DiaryContext";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import Home from "@/pages/Home";
@@ -25,9 +26,10 @@ import EngineGarageDetail from "@/pages/EngineGarageDetail";
 
 export default function App() {
   return (
-    <PredictionProvider>
-      <ScrollToTop />
-      <LayoutWrapper>
+    <DiaryProvider>
+      <PredictionProvider>
+        <ScrollToTop />
+        <LayoutWrapper>
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/how-to-use" component={HowToUse} />
@@ -49,7 +51,8 @@ export default function App() {
           <Route path="/engines/:id" component={EngineGarageDetail} />
           <Route component={NotFound} />
         </Switch>
-      </LayoutWrapper>
-    </PredictionProvider>
+        </LayoutWrapper>
+      </PredictionProvider>
+    </DiaryProvider>
   );
 }

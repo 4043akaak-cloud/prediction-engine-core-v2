@@ -2,6 +2,7 @@ import { IRecipe } from "./types";
 import { MockRecipe } from "./RecipeInterface";
 import { TrendRecipe } from "./TrendRecipe";
 import { StatisticalRecipe } from "./StatisticalRecipe";
+import { SystemRecipeRegistry } from "./SystemRecipeRegistry";
 
 export interface RecipeMetadata {
   id: string;
@@ -22,6 +23,15 @@ export class RecipeRegistry {
     this.registerRecipe(new MockRecipe());
     this.registerRecipe(new TrendRecipe());
     this.registerRecipe(new StatisticalRecipe());
+    
+    // Register all system recipes (Stock, Loto, Sports Betting, Weather, Crypto, etc.)
+    const systemRegistry = SystemRecipeRegistry.getInstance();
+    for (const systemRecipeDef of systemRegistry.getAllSystemRecipes()) {
+      const recipe = systemRegistry.createRecipe(systemRecipeDef.id);
+      if (recipe) {
+        this.registerRecipe(recipe);
+      }
+    }
   }
 
   public static getInstance(): RecipeRegistry {

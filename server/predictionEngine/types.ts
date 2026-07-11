@@ -39,6 +39,19 @@ export interface RecipeExecutionResult {
 // Standardized RecipeOutput (v0.1: temporary alias for RecipeExecutionResult)
 export type RecipeOutput = RecipeExecutionResult;
 
+export interface IRecipe {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  category: string;
+  execute(evidence: Evidence): Promise<RecipeExecutionResult>;
+}
+
+export interface IRecipeExecutor {
+  execute(recipe: IRecipe, evidence: Evidence): Promise<RecipeExecutionResult>;
+}
+
 export interface PredictionResult {
   id: string;
   prediction: string;
