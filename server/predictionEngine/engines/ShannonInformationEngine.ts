@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class ShannonInformationEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const informationAnalysis = this.analyzeInformation(features);
@@ -24,6 +24,10 @@ export class ShannonInformationEngine implements IPredictionEngine {
         evidenceCount: informationAnalysis.informationContent,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -50,6 +54,10 @@ export class ShannonInformationEngine implements IPredictionEngine {
       hasProbabilityKeywords: /probability|probabilities|likely|likelihood|odds|distribution|expected|variance|deviation/.test(query),
       hasEntropyKeywords: /entropy|disorder|randomness|chaos|complexity|structure|pattern|order|organized/.test(query),
       hasQualityKeywords: /quality|reliable|reliability|robust|robustness|stable|stability|fidelity|accuracy|precise/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -104,6 +112,10 @@ export class ShannonInformationEngine implements IPredictionEngine {
       signalQuality: Math.max(0, Math.min(1, signalQuality)),
       predictability: Math.max(0, predictability),
       noiseLevel: Math.min(1, noiseLevel),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

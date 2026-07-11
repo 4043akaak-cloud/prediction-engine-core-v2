@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class SymbiosisEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const symbiosis = this.analyzeSymbiosis(features);
@@ -24,6 +24,10 @@ export class SymbiosisEngine implements IPredictionEngine {
         evidenceCount: symbiosis.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class SymbiosisEngine implements IPredictionEngine {
       hasInterdependenceKeywords: /depend|dependence|interdepend|interdependence|rely|reliance|need|needed/.test(query),
       hasCoevolutionKeywords: /coevolut|coevolve|coevolution|adapt|adaptation|evolve|evolution|together|joint/.test(query),
       hasGrowthKeywords: /grow|growth|expand|expansion|scale|scaling|increase|increasing|multiply/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -118,6 +126,10 @@ export class SymbiosisEngine implements IPredictionEngine {
       synergisticPotential,
       symbiosisLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

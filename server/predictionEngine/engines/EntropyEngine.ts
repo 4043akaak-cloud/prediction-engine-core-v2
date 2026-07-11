@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class EntropyEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const entropyAnalysis = this.analyzeEntropy(features);
@@ -24,6 +24,10 @@ export class EntropyEngine implements IPredictionEngine {
         evidenceCount: entropyAnalysis.complexityScore,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -47,6 +51,10 @@ export class EntropyEngine implements IPredictionEngine {
       hasInformationKeywords: /information|data|signal|pattern|structure|knowledge|meaning|content|message|encoding/.test(query),
       hasSystemKeywords: /system|process|network|ecosystem|organization|mechanism|dynamics|evolution|behavior/.test(query),
       hasVariabilityKeywords: /variable|variation|variability|fluctuation|volatility|inconsistent|inconsistency|diversity|heterogeneous/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -95,6 +103,10 @@ export class EntropyEngine implements IPredictionEngine {
       orderScore: Math.max(0, Math.min(1, orderScore)),
       informationContent: Math.min(1, informationContent),
       predictability: Math.max(0, predictability),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

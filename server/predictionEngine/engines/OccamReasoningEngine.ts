@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class OccamReasoningEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const occam = this.analyzeOccam(features);
@@ -24,6 +24,10 @@ export class OccamReasoningEngine implements IPredictionEngine {
         evidenceCount: occam.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class OccamReasoningEngine implements IPredictionEngine {
       hasEvidenceKeywords: /evidence|data|fact|facts|observed|observation|support|support/.test(query),
       hasAssumptionKeywords: /assume|assumption|assume|presume|suppose|hypothetical|theoretical|speculative/.test(query),
       hasParsimonKeywords: /parsimon|parsimony|efficient|economy|minimal|least|fewest|reduce|reduction/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -128,6 +136,10 @@ export class OccamReasoningEngine implements IPredictionEngine {
       assumptionCount,
       occamLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

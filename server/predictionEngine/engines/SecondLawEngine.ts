@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class SecondLawEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const entropyAnalysis = this.analyzeEntropy(features);
@@ -24,6 +24,10 @@ export class SecondLawEngine implements IPredictionEngine {
         evidenceCount: entropyAnalysis.systemComplexity,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -46,6 +50,10 @@ export class SecondLawEngine implements IPredictionEngine {
       hasLongtermKeywords: /long-term|long term|future|eventually|over time|years|decades|sustainability|permanent|lasting/.test(query),
       hasComplexityKeywords: /complex|complicated|intricate|interconnected|dependent|coupled|fragile|brittle|delicate/.test(query),
       hasNaturalKeywords: /natural|without|no external|left alone|abandoned|neglected|unattended|passive/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -90,6 +98,10 @@ export class SecondLawEngine implements IPredictionEngine {
       systemComplexity,
       degradationRisk: Math.min(1, degradationRisk),
       stabilityScore: Math.max(0, stabilityScore),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

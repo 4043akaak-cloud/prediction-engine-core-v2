@@ -11,7 +11,7 @@ import { IEngine } from "../EngineRegistry";
  * Inspired By: Carl Gustav Jung — Analytical Psychology
  */
 export class ArchetypalReasoningEngine implements IEngine {
-  async predict(query: string): Promise<PredictionResult> {
+  async predict(query: string): Promise<RecipeExecutionResult> {
     const lowerQuery = query.toLowerCase();
 
     // Detect archetypal keywords
@@ -67,6 +67,10 @@ export class ArchetypalReasoningEngine implements IEngine {
       confidence,
       reasoning: "Analytical psychology analysis of recurring archetypes and symbolic roles",
       evidenceList: evidence,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 }

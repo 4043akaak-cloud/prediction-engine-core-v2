@@ -17,7 +17,7 @@ import { randomUUID } from 'crypto';
 export class MarketDataPredictionEngine implements IPredictionEngine {
   constructor(private marketDataProvider: IMarketDataProvider) {}
 
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     const query = request.query.toLowerCase();
     const predictionId = randomUUID();
     const timestamp = new Date();
@@ -278,6 +278,10 @@ export class MarketDataPredictionEngine implements IPredictionEngine {
       confidenceScore: 0.0,
       evidenceCount: 0,
       predictionVersion: '1.0.0',
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
 
     return {
@@ -290,6 +294,10 @@ export class MarketDataPredictionEngine implements IPredictionEngine {
       metadata,
       evidenceList: [],
       explanation: message,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 }

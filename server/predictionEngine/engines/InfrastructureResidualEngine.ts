@@ -25,7 +25,7 @@ import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types
  * - AI Boom: (current estimate generated from evidence)
  */
 export class InfrastructureResidualEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const analysis = this.analyzeResidualValue(features);
@@ -59,6 +59,10 @@ export class InfrastructureResidualEngine implements IPredictionEngine {
           culturalAdoption: analysis.culturalAdoption,
         },
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -117,6 +121,10 @@ export class InfrastructureResidualEngine implements IPredictionEngine {
       hasCulturalKeywords: /adoption|behavior|usage|user|consumer|society|culture|habit|lifestyle|daily|everyday|widespread|ubiquitous/.test(lowerQuery),
       hasAdoptionKeywords: /adoption|adoption rate|user|consumer|market penetration|widespread/.test(lowerQuery),
       hasBehaviorChangeKeywords: /behavior|habit|lifestyle|daily|everyday|routine|normal|common/.test(lowerQuery),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -259,6 +267,10 @@ export class InfrastructureResidualEngine implements IPredictionEngine {
       institutionalImpact,
       culturalAdoption,
       totalEvidence: Math.max(1, totalEvidence),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

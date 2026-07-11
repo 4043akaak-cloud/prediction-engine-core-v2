@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class FramingEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const analysis = this.analyzeFraming(features);
@@ -24,6 +24,10 @@ export class FramingEngine implements IPredictionEngine {
         evidenceCount: analysis.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class FramingEngine implements IPredictionEngine {
       hasContextKeywords: /context|context|situation|circumstance|circumstances|condition|conditions|environment|background/.test(query),
       hasOutcomeKeywords: /outcome|outcomes|result|results|consequence|consequences|effect|effects|impact|impacts/.test(query),
       hasComparisonKeywords: /compare|comparison|different|differently|contrast|alternative|alternatives|versus|vs/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -118,6 +126,10 @@ export class FramingEngine implements IPredictionEngine {
       perceptionInfluence,
       framingLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

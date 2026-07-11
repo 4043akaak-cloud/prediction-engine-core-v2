@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class ImmuneSystemEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const immune = this.analyzeImmune(features);
@@ -24,6 +24,10 @@ export class ImmuneSystemEngine implements IPredictionEngine {
         evidenceCount: immune.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class ImmuneSystemEngine implements IPredictionEngine {
       hasDefenseKeywords: /defense|defend|protect|protection|guard|guarding|shield|shielding/.test(query),
       hasLearningKeywords: /learn|learning|adapt|adaptation|remember|memory|experience|experienced/.test(query),
       hasResilienceKeywords: /resilience|resilient|robust|robustness|strong|strength|recover|recovery/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -118,6 +126,10 @@ export class ImmuneSystemEngine implements IPredictionEngine {
       responseStrength,
       immuneLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

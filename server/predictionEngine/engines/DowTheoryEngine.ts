@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class DowTheoryEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const analysis = this.analyzeDowTheory(features);
@@ -24,6 +24,10 @@ export class DowTheoryEngine implements IPredictionEngine {
         evidenceCount: analysis.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class DowTheoryEngine implements IPredictionEngine {
       hasMarketKeywords: /market|markets|stock|stocks|price|prices|volume|volumes/.test(query),
       hasTimeKeywords: /time|long term|short term|period|periods|duration|phase|phases/.test(query),
       hasMovementKeywords: /move|movement|movement|momentum|momentum|advance|decline|rally|sell off/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -118,6 +126,10 @@ export class DowTheoryEngine implements IPredictionEngine {
       reversalIndicator,
       dowLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

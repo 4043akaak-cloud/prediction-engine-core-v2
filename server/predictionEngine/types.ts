@@ -28,6 +28,15 @@ export interface StandardizedEvidence {
 }
 
 export interface RecipeExecutionResult {
+  id?: string;
+  prediction?: string;
+  confidence?: number;
+  reason?: string;
+  recipeUsed?: string;
+  timestamp?: number;
+  metadata?: PredictionMetadata;
+  evidenceList?: StandardizedEvidence[];
+  explanation?: string;
   rawPredictionData: {
     value: string;
     factors: string[];

@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class SuperpositionReasoningEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const superposition = this.analyzeSuperposition(features);
@@ -24,6 +24,10 @@ export class SuperpositionReasoningEngine implements IPredictionEngine {
         evidenceCount: superposition.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class SuperpositionReasoningEngine implements IPredictionEngine {
       hasEvidenceKeywords: /evidence|support|supports|contradict|contradicts|suggest|suggests|indicate|indicates/.test(query),
       hasDelayKeywords: /delay|uncertain|wait|waiting|pending|unclear|determine|determining/.test(query),
       hasCoexistenceKeywords: /coexist|coexistence|both|either|neither|simultaneous|simultaneously|together/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -126,6 +134,10 @@ export class SuperpositionReasoningEngine implements IPredictionEngine {
       evidenceBalance,
       superpositionLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

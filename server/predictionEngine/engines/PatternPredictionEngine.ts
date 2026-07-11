@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class PatternPredictionEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const patterns = this.detectPatterns(features);
@@ -24,6 +24,10 @@ export class PatternPredictionEngine implements IPredictionEngine {
         evidenceCount: patterns.evidenceCount,
         predictionVersion: "1.0",
         } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -50,6 +54,10 @@ export class PatternPredictionEngine implements IPredictionEngine {
       hasRepeatingChars: this.hasRepeatingElements(chars),
       wordFrequency: this.calculateFrequency(words),
       charFrequency: this.calculateFrequency(chars),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -135,6 +143,10 @@ export class PatternPredictionEngine implements IPredictionEngine {
       symmetryScore,
       sequenceScore,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -156,6 +168,10 @@ export class PatternPredictionEngine implements IPredictionEngine {
     return {
       detected: score > 0.6,
       score,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -178,6 +194,10 @@ export class PatternPredictionEngine implements IPredictionEngine {
     return {
       detected: maxRepeat > 0,
       score,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -201,6 +221,10 @@ export class PatternPredictionEngine implements IPredictionEngine {
     return {
       detected: cv > 0.5,
       score,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -220,6 +244,10 @@ export class PatternPredictionEngine implements IPredictionEngine {
     return {
       detected: score > 0.5,
       score,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

@@ -9,7 +9,7 @@ import { ILLMProvider } from "../providers/ILLMProvider";
 export class LLMPredictionEngine implements IPredictionEngine {
   constructor(private llmProvider: ILLMProvider) {}
 
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     try {
       // Analyze the query using LLM
       const llmResponse = await this.llmProvider.analyzeText({

@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class SystemsThinkingReasoningEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const systems = this.analyzeSystemsThinking(features);
@@ -24,6 +24,10 @@ export class SystemsThinkingReasoningEngine implements IPredictionEngine {
         evidenceCount: systems.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class SystemsThinkingReasoningEngine implements IPredictionEngine {
       hasBoundaryKeywords: /boundary|boundaries|boundary|scope|scope|limit|limits|border|edge/.test(query),
       hasLeverageKeywords: /leverage|leverage point|critical|critical point|key|key point|intervention|influence/.test(query),
       hasEmergenceKeywords: /emerge|emergence|emergent|collective|collective behavior|unexpected|surprise/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -127,6 +135,10 @@ export class SystemsThinkingReasoningEngine implements IPredictionEngine {
       leverageIdentification,
       systemsLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

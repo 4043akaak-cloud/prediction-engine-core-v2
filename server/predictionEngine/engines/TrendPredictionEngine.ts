@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class TrendPredictionEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const trend = this.analyzeTrend(features);
@@ -24,6 +24,10 @@ export class TrendPredictionEngine implements IPredictionEngine {
         evidenceCount: trend.evidenceCount,
         predictionVersion: "1.0",
         } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -45,6 +49,10 @@ export class TrendPredictionEngine implements IPredictionEngine {
       hasIncreaseKeywords: /up|rise|grow|increase|climb|surge|boom/.test(query),
       hasDecreaseKeywords: /down|fall|drop|decline|crash|plunge|slump/.test(query),
       hasMomentumKeywords: /momentum|acceleration|velocity|speed|pace/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -120,6 +128,10 @@ export class TrendPredictionEngine implements IPredictionEngine {
       momentum,
       consistency,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

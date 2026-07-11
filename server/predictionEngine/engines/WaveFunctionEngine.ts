@@ -1,7 +1,7 @@
-import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
+import { IPredictionEngine, PredictionRequest, PredictionResult, RecipeExecutionResult } from "../types";
 
 export class WaveFunctionEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const possibilities = this.generatePossibilities(features);
@@ -25,6 +25,10 @@ export class WaveFunctionEngine implements IPredictionEngine {
         evidenceCount: analysis.possibilityCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction,
+        factors: [],
+      },
     };
   }
 

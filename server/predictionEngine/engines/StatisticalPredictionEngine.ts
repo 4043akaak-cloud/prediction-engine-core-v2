@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class StatisticalPredictionEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const analysis = this.performStatisticalAnalysis(features);
@@ -24,6 +24,10 @@ export class StatisticalPredictionEngine implements IPredictionEngine {
         evidenceCount: analysis.evidenceCount,
         predictionVersion: "1.0",
         } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -41,6 +45,10 @@ export class StatisticalPredictionEngine implements IPredictionEngine {
       wordCount: words.length,
       hasNumbers: /\d+/.test(query),
       hasQuestions: query.includes("?"),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -73,6 +81,10 @@ export class StatisticalPredictionEngine implements IPredictionEngine {
       evidenceCount: values.length,
       distribution,
       outlierDetected,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

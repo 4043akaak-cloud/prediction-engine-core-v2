@@ -6,7 +6,7 @@ import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types
  * Role: The Researcher
  */
 export class SearchPredictionEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     const { query } = request;
 
     // Simulate search results
@@ -32,6 +32,10 @@ export class SearchPredictionEngine implements IPredictionEngine {
       timestamp: Date.now(),
       metadata,
       explanation: `This prediction synthesized ${evidence.length} pieces of evidence from search results, identifying ${factors.length} key factors with ${(confidence * 100).toFixed(1)}% confidence.`,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

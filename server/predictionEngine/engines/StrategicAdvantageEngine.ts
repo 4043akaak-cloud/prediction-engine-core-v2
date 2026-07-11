@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class StrategicAdvantageEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const strategyAnalysis = this.analyzeStrategy(features);
@@ -24,6 +24,10 @@ export class StrategicAdvantageEngine implements IPredictionEngine {
         evidenceCount: strategyAnalysis.positioning,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -50,6 +54,10 @@ export class StrategicAdvantageEngine implements IPredictionEngine {
       hasResourceKeywords: /resource|asset|capital|force|strength|power|budget|supply|equipment|tool/.test(query),
       hasVulnerabilityKeywords: /vulnerab|weak|weakness|flaw|gap|risk|threat|danger|exposed|exposed/.test(query),
       hasSuccessKeywords: /success|win|winning|victory|triumph|prevail|achieve|accomplish|attain|goal/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -105,6 +113,10 @@ export class StrategicAdvantageEngine implements IPredictionEngine {
       efficiency: Math.max(0, Math.min(1, efficiency)),
       vulnerability: Math.max(0, Math.min(1, vulnerability)),
       successLikelihood: Math.max(0, Math.min(1, successLikelihood)),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class EmergenceReasoningEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const emergence = this.analyzeEmergence(features);
@@ -24,6 +24,10 @@ export class EmergenceReasoningEngine implements IPredictionEngine {
         evidenceCount: emergence.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class EmergenceReasoningEngine implements IPredictionEngine {
       hasScaleKeywords: /scale|scales|large-scale|macro|micro|level|levels|hierarchical|hierarchy/.test(query),
       hasComplexityKeywords: /complex|complexity|complicated|intricate|sophisticated|pattern|patterns|structure/.test(query),
       hasSimplicityKeywords: /simple|simplicity|rule|rules|basic|elementary|fundamental|straightforward/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -127,6 +135,10 @@ export class EmergenceReasoningEngine implements IPredictionEngine {
       scaleTransitionClarity,
       emergenceLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

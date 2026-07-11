@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class ComplianceEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const analysis = this.analyzeCompliance(features);
@@ -24,6 +24,10 @@ export class ComplianceEngine implements IPredictionEngine {
         evidenceCount: analysis.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class ComplianceEngine implements IPredictionEngine {
       hasRequestKeywords: /request|requests|requested|ask|asking|asked|demand|demands|demanded|require|required/.test(query),
       hasInfluenceKeywords: /influenc|influence|affect|affects|impact|impacts|sway|sway|persuad|persuade/.test(query),
       hasBehaviorKeywords: /behavior|behaviours|behaviour|action|actions|act|acting|conduct|conducts|conduct/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -118,6 +126,10 @@ export class ComplianceEngine implements IPredictionEngine {
       consistencyPressure,
       complianceLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

@@ -23,7 +23,7 @@ import { v4 as uuidv4 } from "uuid";
  * Uses only PredictionRequest data.
  */
 export class AdaptivePredictionEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     const query = request.query.toLowerCase();
     const predictionId = uuidv4();
     const timestamp = Date.now();
@@ -54,6 +54,10 @@ export class AdaptivePredictionEngine implements IPredictionEngine {
         confidenceScore: confidence,
         evidenceCount: environmentalAnalysis.evidenceCount,
         predictionVersion: "1.0.0",
+      },
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
       },
     };
   }
@@ -136,6 +140,10 @@ export class AdaptivePredictionEngine implements IPredictionEngine {
       adaptiveWeight,
       evidenceCount,
       environmentalFactors: factors,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

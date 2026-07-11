@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class MarketSentimentEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const analysis = this.analyzeMarketSentiment(features);
@@ -24,6 +24,10 @@ export class MarketSentimentEngine implements IPredictionEngine {
         evidenceCount: analysis.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class MarketSentimentEngine implements IPredictionEngine {
       hasReversalKeywords: /reversal|reverse|reverse|correction|correcting|pullback|pullback|crash/.test(query),
       hasMarketKeywords: /market|markets|sentiment|psychology|psychological|behavior|behavioral/.test(query),
       hasIndicatorKeywords: /indicator|indicators|signal|signals|sign|signs|measure|measurement/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -113,6 +121,10 @@ export class MarketSentimentEngine implements IPredictionEngine {
       reversalPotential,
       sentimentLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

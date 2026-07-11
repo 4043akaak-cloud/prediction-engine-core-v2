@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class LanchesterStrategyEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const strategyAnalysis = this.analyzeStrategy(features);
@@ -24,6 +24,10 @@ export class LanchesterStrategyEngine implements IPredictionEngine {
         evidenceCount: strategyAnalysis.competitiveBalance,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class LanchesterStrategyEngine implements IPredictionEngine {
       hasWeakerKeywords: /weaker|inferior|disadvantag|behind|losing|losing|defeat|fail|struggle|underdog/.test(query),
       hasAllocationKeywords: /allocat|distribut|assign|deploy|position|place|station|garrison|garrison|garrison/.test(query),
       hasCooperationKeywords: /cooperat|alliance|partner|team|coalition|joint|together|united|combined|coordin/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -98,6 +106,10 @@ export class LanchesterStrategyEngine implements IPredictionEngine {
       strategicAdvantage: Math.max(0, Math.min(1, strategicAdvantage)),
       cooperationLevel: Math.max(0, Math.min(1, cooperationLevel)),
       predictability: Math.max(0, Math.min(1, predictability)),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

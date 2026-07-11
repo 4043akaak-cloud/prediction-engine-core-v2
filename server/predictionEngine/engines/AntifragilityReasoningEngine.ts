@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class AntifragilityReasoningEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const antifragility = this.analyzeAntifragility(features);
@@ -24,6 +24,10 @@ export class AntifragilityReasoningEngine implements IPredictionEngine {
         evidenceCount: antifragility.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class AntifragilityReasoningEngine implements IPredictionEngine {
       hasOpportunityKeywords: /opportunity|opportunities|benefit|benefits|gain|gains|strengthen|strengthening/.test(query),
       hasVulnerabilityKeywords: /vulnerable|vulnerability|fragile|fragility|weak|weakness|break|breaking/.test(query),
       hasLongTermKeywords: /long-term|long term|future|sustainability|sustainable|evolution|evolve|growth/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -126,6 +134,10 @@ export class AntifragilityReasoningEngine implements IPredictionEngine {
       resilienceStrength,
       antifragilityLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

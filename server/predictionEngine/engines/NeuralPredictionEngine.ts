@@ -6,7 +6,7 @@ import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types
  * Role: The Intuitive
  */
 export class NeuralPredictionEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     const { query } = request;
 
     // Simulate neural network processing
@@ -33,6 +33,10 @@ export class NeuralPredictionEngine implements IPredictionEngine {
         predictionVersion: "1.0.0",
       },
       explanation: `This prediction was generated using neural pattern recognition, identifying ${patterns.length} key patterns with an average confidence of ${(neuralScore * 100).toFixed(1)}%.`,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

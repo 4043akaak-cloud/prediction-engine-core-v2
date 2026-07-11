@@ -3,26 +3,42 @@ import { trpc } from "@/lib/trpc";
 import { useContext } from "react";
 import { PredictionContext } from "@/contexts/PredictionContext";
 import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
 import { usePrediction } from "@/hooks/usePrediction";
 import { useDiary } from "@/hooks/useDiary";
 import { generatePrediction } from "@/services/api";
-import { formatConfidencePercent, getConfidenceBarWidth } from "@/lib/confidenceFormatter";
 import { getRecipesByIds } from "@shared/recipes";
 import { PageContainer } from "@/components/PageContainer";
 import { PageHeader } from "@/components/PageHeader";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
+import { CompactQuestionHeader } from "@/components/PredictionResult/CompactQuestionHeader";
+import { PredictionConfidenceCard } from "@/components/PredictionResult/PredictionConfidenceCard";
+import { AgreementSummary } from "@/components/PredictionResult/AgreementSummary";
+import { FrameworkSummary, FrameworkData } from "@/components/PredictionResult/FrameworkSummary";
+import { FrameworkDetails } from "@/components/PredictionResult/FrameworkDetails";
+import { AggregatorSection } from "@/components/PredictionResult/AggregatorSection";
+import { ActionSection } from "@/components/PredictionResult/ActionSection";
+
+// Mock framework data - will be replaced with real engine data
+const MOCK_FRAMEWORKS: FrameworkData[] = [
+  { id: "market-data", name: "Market Data", direction: "bullish", confidence: 72, reasoning: "Current market indicators show strong uptrend" },
+  { id: "trend", name: "Trend Analysis", direction: "bearish", confidence: 58, reasoning: "Recent momentum shows signs of weakening" },
+  { id: "statistical", name: "Statistical", direction: "bullish", confidence: 68, reasoning: "Historical patterns suggest continuation" },
+  { id: "bayesian", name: "Bayesian", direction: "bullish", confidence: 71, reasoning: "Probability distribution favors upside" },
+  { id: "game-theory", name: "Game Theory", direction: "neutral", confidence: 65, reasoning: "Strategic actors show mixed signals" },
+  { id: "entropy", name: "Entropy", direction: "bullish", confidence: 70, reasoning: "Information entropy suggests order" },
+  { id: "wave-function", name: "Wave Function", direction: "bullish", confidence: 75, reasoning: "Quantum-inspired analysis shows coherence" },
+  { id: "sentiment", name: "Sentiment", direction: "bullish", confidence: 69, reasoning: "Market sentiment is positive" },
+  { id: "macro", name: "Macro", direction: "bearish", confidence: 62, reasoning: "Macroeconomic headwinds present" },
+  { id: "micro", name: "Micro", direction: "bullish", confidence: 73, reasoning: "Microeconomic factors are favorable" },
+];
 
 export default function PredictionResult() {
   const [, setLocation] = useLocation();
   const { state: predictionState, setPrediction, setCounterPrediction, setLoading, setError } = usePrediction();
   const { addEntry } = useDiary();
-  
-  const [expandDetails, setExpandDetails] = useState(false);
-  const [expandCounter, setExpandCounter] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const { currentPrediction, counterPrediction, isLoading, error, lastInput } = predictionState;
   const predictMutation = trpc.prediction.predict.useMutation();
@@ -100,27 +116,36 @@ export default function PredictionResult() {
 
   if (!currentPrediction) return null;
 
-  const handleSaveToDiary = () => {
-    addEntry({
-      id: currentPrediction.id,
-      question: currentPrediction.question,
-      prediction: currentPrediction.prediction,
-      confidence: currentPrediction.confidence,
-      timestamp: currentPrediction.metadata.createdAt,
-      predictionType: currentPrediction.predictionType,
-      metadata: {
-        predictionModel: currentPrediction.metadata.modelUsed,
-        reasonSummary: currentPrediction.reason,
-        informationSources: currentPrediction.metadata.informationSources,
-      },
-      recipeUsage: {
-        recipeIds: currentPrediction.metadata.recipeId ? [currentPrediction.metadata.recipeId] : [],
-        selectedRecipeNames: currentPrediction.metadata.recipeId 
-          ? [getRecipesByIds([currentPrediction.metadata.recipeId])[0]?.name || 'Unknown Recipe']
-          : [],
-      },
-    });
-    setLocation("/diary");
+  // Calculate agreement summary
+  const bullishCount = MOCK_FRAMEWORKS.filter(f => f.direction === "bullish").length;
+  const cautionCount = MOCK_FRAMEWORKS.filter(f => f.direction === "bearish").length;
+
+  const handleSaveToDiary = async () => {
+    setIsSaving(true);
+    try {
+      addEntry({
+        id: currentPrediction.id,
+        question: currentPrediction.question,
+        prediction: currentPrediction.prediction,
+        confidence: currentPrediction.confidence,
+        timestamp: currentPrediction.metadata.createdAt,
+        predictionType: currentPrediction.predictionType,
+        metadata: {
+          predictionModel: currentPrediction.metadata.modelUsed,
+          reasonSummary: currentPrediction.reason,
+          informationSources: currentPrediction.metadata.informationSources,
+        },
+        recipeUsage: {
+          recipeIds: currentPrediction.metadata.recipeId ? [currentPrediction.metadata.recipeId] : [],
+          selectedRecipeNames: currentPrediction.metadata.recipeId 
+            ? [getRecipesByIds([currentPrediction.metadata.recipeId])[0]?.name || 'Unknown Recipe']
+            : [],
+        },
+      });
+      setLocation("/diary");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -130,118 +155,34 @@ export default function PredictionResult() {
       <main className="flex-1">
         <section className="container py-8 md:py-12">
           <div className="max-w-2xl">
-            {/* ===== CONCLUSION SECTION (5-second understanding) ===== */}
-            <div className="mb-12">
-              {/* Question */}
-              <div className="mb-6">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Your Question</p>
-                <h1 className="text-2xl md:text-3xl font-bold leading-tight">{currentPrediction.question}</h1>
-              </div>
+            {/* 1. Compact Question Header */}
+            <CompactQuestionHeader prediction={currentPrediction} />
 
-              {/* Main Prediction - HERO SECTION */}
-              <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 md:p-8 mb-6">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground mb-3">Prediction</p>
-                <p className="text-2xl md:text-3xl font-bold leading-relaxed text-foreground">{currentPrediction.prediction}</p>
-              </div>
+            {/* 2. Unified Prediction + Confidence Card */}
+            <PredictionConfidenceCard prediction={currentPrediction} />
 
-              {/* Confidence - VISUAL INDICATOR */}
-              <div className="bg-card border border-border rounded-lg p-6">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground mb-4">Confidence Level</p>
-                <div className="flex items-center gap-4">
-                  <div className="flex-1">
-                    <div className="w-full bg-muted rounded-full h-3">
-                      <div className="bg-primary h-3 rounded-full transition-all" style={{ width: getConfidenceBarWidth(currentPrediction.confidence) }} />
-                    </div>
-                  </div>
-                  <span className="text-3xl font-bold text-primary">{formatConfidencePercent(currentPrediction.confidence)}</span>
-                </div>
-              </div>
-            </div>
+            {/* 3. Agreement Summary */}
+            <AgreementSummary 
+              bullishCount={bullishCount} 
+              cautionCount={cautionCount} 
+              totalFrameworks={MOCK_FRAMEWORKS.length}
+            />
 
-            {/* ===== REASONING SECTION ===== */}
-            <div className="mb-12 pb-12 border-b border-border">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground mb-3">Why This Prediction</p>
-              <p className="text-lg leading-relaxed text-foreground">{currentPrediction.reason}</p>
-            </div>
+            {/* 4. Framework Summary (Reasoning Landscape) */}
+            <FrameworkSummary frameworks={MOCK_FRAMEWORKS} />
 
-            {/* ===== DETAILS SECTION (Collapsible) ===== */}
-            <div className="mb-12 pb-12 border-b border-border">
-              <button 
-                onClick={() => setExpandDetails(!expandDetails)} 
-                className="w-full flex items-center justify-between py-4 hover:bg-muted/50 rounded transition-colors"
-              >
-                <span className="text-lg font-semibold">Recipe Used & Factors</span>
-                <ChevronDown size={20} className={`transition-transform ${expandDetails ? "rotate-180" : ""}`} />
-              </button>
-              
-              {expandDetails && (
-                <div className="space-y-6 pt-4">
-                  {/* Recipe Used */}
-                  <div className="bg-card border border-border rounded-lg p-4">
-                    <h3 className="font-semibold mb-3">Recipe Used</h3>
-                    <p className="text-sm text-muted-foreground mb-3">The prediction approach used for this analysis:</p>
-                    {selectedRecipe ? (
-                      <div className="flex items-center justify-between py-2 px-3 bg-primary/5 rounded">
-                        <span className="font-medium">{selectedRecipe.name}</span>
-                        <span className="text-xs text-primary font-semibold">Active</span>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No recipe selected</p>
-                    )}
-                    {currentPrediction.metadata.recipeId && (
-                      <div className="flex items-center justify-between py-2 px-3 bg-primary/5 rounded">
-                        <span className="font-medium">{getRecipesByIds([currentPrediction.metadata.recipeId])[0]?.name || 'Unknown Recipe'}</span>
-                        <span className="text-xs text-primary font-semibold">Active</span>
-                      </div>
-                    )}
-                  </div>
+            {/* 5. Framework Details (Expandable) */}
+            <FrameworkDetails frameworks={MOCK_FRAMEWORKS} />
 
-                  {/* Important Factors */}
-                  <div className="bg-card border border-border rounded-lg p-4">
-                    <h3 className="font-semibold mb-3">Important Factors</h3>
-                    <p className="text-sm text-muted-foreground mb-4">Key elements that influenced this prediction:</p>
-                    <ul className="space-y-2">
-                      {currentPrediction.metadata.informationSources.map((source, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm">
-                          <span className="text-primary font-bold mt-1">•</span>
-                          <span>{source}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* 6. Aggregator Explanation */}
+            <AggregatorSection reason={currentPrediction.reason} />
 
-            {/* ===== COUNTER PREDICTION SECTION (Collapsible, default closed) ===== */}
-            <div className="mb-12 pb-12 border-b border-border">
-              <button 
-                onClick={() => setExpandCounter(!expandCounter)} 
-                className="w-full flex items-center justify-between py-4 hover:bg-muted/50 rounded transition-colors"
-              >
-                <span className="text-lg font-semibold">Alternative Outcome</span>
-                <ChevronDown size={20} className={`transition-transform ${expandCounter ? "rotate-180" : ""}`} />
-              </button>
-              
-              {expandCounter && (
-                <div className="space-y-4 pt-4 bg-card border border-border rounded-lg p-4">
-                  <div>
-                    <h3 className="font-semibold mb-2">What Could Happen Instead</h3>
-                    <p className="leading-relaxed">{counterPrediction?.prediction || "The opposite scenario could occur."}</p>
-                  </div>
-                  <div className="pt-4 border-t border-border">
-                    <h3 className="font-semibold mb-2">Why It's Less Likely</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{counterPrediction?.reason || "While possible, current indicators suggest lower probability."}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* ===== ACTION BUTTONS ===== */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button onClick={handleSaveToDiary} className="flex-1">Save to Diary</Button>
-              <Button variant="outline" onClick={() => setLocation("/")} className="flex-1">Make Another Prediction</Button>
-            </div>
+            {/* 7. Action Buttons */}
+            <ActionSection 
+              onSaveToDiary={handleSaveToDiary}
+              onMakeAnother={() => setLocation("/")}
+              isSaving={isSaving}
+            />
           </div>
         </section>
       </main>

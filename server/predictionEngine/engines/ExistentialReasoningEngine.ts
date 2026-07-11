@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class ExistentialReasoningEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const existentialAnalysis = this.analyzeExistential(features);
@@ -24,6 +24,10 @@ export class ExistentialReasoningEngine implements IPredictionEngine {
         evidenceCount: existentialAnalysis.uncertainty,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -50,6 +54,10 @@ export class ExistentialReasoningEngine implements IPredictionEngine {
       hasCommitmentKeywords: /commit|dedicate|pledge|vow|promise|bind|bound|engaged|engagement/.test(query),
       hasActionKeywords: /action|act|do|act|perform|execute|implement|carry out|take/.test(query),
       hasConflictKeywords: /conflict|dilemma|tension|contradiction|paradox|opposing|contrary|versus/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -105,6 +113,10 @@ export class ExistentialReasoningEngine implements IPredictionEngine {
       authenticity: Math.max(0, Math.min(1, authenticity)),
       urgency: Math.max(0, Math.min(1, urgency)),
       clarity: Math.max(0, Math.min(1, clarity)),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

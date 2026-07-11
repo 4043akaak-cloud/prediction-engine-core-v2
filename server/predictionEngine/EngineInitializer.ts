@@ -9,6 +9,7 @@ import { SearchPredictionEngine } from "./engines/SearchPredictionEngine";
 import { MockSearchProvider } from "./providers/MockSearchProvider";
 import { MarketDataPredictionEngine } from "./engines/MarketDataPredictionEngine";
 import { AlphaVantageProvider } from "./providers/AlphaVantageProvider";
+import { MockMarketDataProvider } from "./providers/MockMarketDataProvider";
 import { LLMPredictionEngine } from "./engines/LLMPredictionEngine";
 import { MockLLMProvider } from "./providers/MockLLMProvider";
 import { NeuralPredictionEngine } from "./engines/NeuralPredictionEngine";
@@ -271,7 +272,16 @@ export function initializeEngines(): void {
     },
   });
 
-  registry.register("market-data-engine", new MarketDataPredictionEngine(new AlphaVantageProvider()), {
+  // Create market data provider with fallback logic
+  const alphaVantageProvider = new AlphaVantageProvider();
+  const mockMarketProvider = new MockMarketDataProvider();
+  
+  // Use real provider if API key is available, otherwise use mock
+  const marketDataProvider = process.env.ALPHA_VANTAGE_API_KEY 
+    ? alphaVantageProvider 
+    : mockMarketProvider;
+  
+  registry.register("market-data-engine", new MarketDataPredictionEngine(marketDataProvider), {
     name: "Market Data Prediction Engine",
     family: "Metric Reasoning",
     category: "Finance",

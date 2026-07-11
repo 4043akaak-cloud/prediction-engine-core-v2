@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class MonteCarloEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const analysis = this.analyzeMonteCarlo(features);
@@ -24,6 +24,10 @@ export class MonteCarloEngine implements IPredictionEngine {
         evidenceCount: analysis.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class MonteCarloEngine implements IPredictionEngine {
       hasAssumptionKeywords: /assumption|assumptions|assume|assuming|parameter|parameters|condition|conditions/.test(query),
       hasRiskKeywords: /risk|risks|risky|probability|probabilities|likely|likelihood|chance|chances/.test(query),
       hasAnalysisKeywords: /analys|analyze|analysis|assess|assessment|evaluate|evaluation|forecast/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -118,6 +126,10 @@ export class MonteCarloEngine implements IPredictionEngine {
       forecastPotential,
       monteCarloLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

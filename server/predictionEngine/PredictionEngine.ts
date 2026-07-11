@@ -21,7 +21,7 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
     this.predictionResultBuilder = new PredictionResultBuilder();
   }
 
-  public async predict(request: PredictionRequest): Promise<PredictionResult> {
+  public async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     console.log("Prediction Engine: Starting prediction process...");
 
     // 1. Select Recipe - Using RecipeRegistry as the single Recipe Provider
@@ -52,7 +52,7 @@ export class PredictionEngine implements IPredictionEngine, IPredictionEngineMul
     return predictionResult;
   }
 
-  public async predictMultiple(requests: PredictionRequest[]): Promise<PredictionResult[]> {
+  public async predictMultiple(requests: PredictionRequest[]): Promise<RecipeExecutionResult[]> {
     return Promise.all(requests.map((req) => this.predict(req)));
   }
 }

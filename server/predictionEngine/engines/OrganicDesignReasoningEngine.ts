@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class OrganicDesignReasoningEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const organicDesign = this.analyzeOrganicDesign(features);
@@ -24,6 +24,10 @@ export class OrganicDesignReasoningEngine implements IPredictionEngine {
         evidenceCount: organicDesign.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class OrganicDesignReasoningEngine implements IPredictionEngine {
       hasStructureKeywords: /structure|form|pattern|design|architecture|framework|system|organization/.test(query),
       hasFunctionKeywords: /function|purpose|role|utility|practical|works|operates|serves/.test(query),
       hasSustainabilityKeywords: /sustainable|sustainable|long-term|enduring|resilient|robust|durable/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -124,6 +132,10 @@ export class OrganicDesignReasoningEngine implements IPredictionEngine {
       harmony,
       organicLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

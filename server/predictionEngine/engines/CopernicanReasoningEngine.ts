@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class CopernicanReasoningEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const copernican = this.analyzeCopernican(features);
@@ -24,6 +24,10 @@ export class CopernicanReasoningEngine implements IPredictionEngine {
         evidenceCount: copernican.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class CopernicanReasoningEngine implements IPredictionEngine {
       hasObservationKeywords: /observe|observation|observe|current|present|now|today|moment|point in time/.test(query),
       hasUncertaintyKeywords: /uncertain|uncertainty|unknown|unknowns|unclear|unclear|ambiguous|ambiguity/.test(query),
       hasProjectionKeywords: /future|forecast|predict|prediction|project|projection|estimate|estimation/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -126,6 +134,10 @@ export class CopernicanReasoningEngine implements IPredictionEngine {
       randomnessAssumption,
       copernicanLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

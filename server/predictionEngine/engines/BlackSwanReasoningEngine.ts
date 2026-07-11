@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class BlackSwanReasoningEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const blackSwan = this.analyzeBlackSwan(features);
@@ -24,6 +24,10 @@ export class BlackSwanReasoningEngine implements IPredictionEngine {
         evidenceCount: blackSwan.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class BlackSwanReasoningEngine implements IPredictionEngine {
       hasRiskKeywords: /risk|risks|danger|dangerous|threat|threats|hazard|hazards|vulnerable|vulnerability/.test(query),
       hasUncertaintyKeywords: /uncertain|uncertainty|unpredictable|unpredictability|unknown|unknowns|surprise|surprising/.test(query),
       hasPreparednessKeywords: /prepare|preparedness|prepared|ready|readiness|resilient|resilience|robust|robustness/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -127,6 +135,10 @@ export class BlackSwanReasoningEngine implements IPredictionEngine {
       assumptionChallenge,
       blackSwanLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

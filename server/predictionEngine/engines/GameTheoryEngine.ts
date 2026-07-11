@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class GameTheoryEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const analysis = this.analyzeStrategicSituation(features);
@@ -24,6 +24,10 @@ export class GameTheoryEngine implements IPredictionEngine {
         evidenceCount: analysis.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -46,6 +50,10 @@ export class GameTheoryEngine implements IPredictionEngine {
       hasEquilibriumKeywords: /equilibrium|stable|balance|nash|dominant|strategy/.test(query),
       hasMultiplayerKeywords: /player|participant|agent|actor|stakeholder|multiple/.test(query),
       hasInformationKeywords: /inform|hidden|secret|asymmetric|transparent|uncertain/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -122,6 +130,10 @@ export class GameTheoryEngine implements IPredictionEngine {
       cooperationLikelihood,
       equilibriumStability,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

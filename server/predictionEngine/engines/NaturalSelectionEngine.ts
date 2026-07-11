@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class NaturalSelectionEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const selection = this.analyzeSelection(features);
@@ -24,6 +24,10 @@ export class NaturalSelectionEngine implements IPredictionEngine {
         evidenceCount: selection.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class NaturalSelectionEngine implements IPredictionEngine {
       hasSurvivalKeywords: /survive|survival|persist|persistence|thrive|thriving|succeed|success|dominant/.test(query),
       hasEliminationKeywords: /eliminate|elimination|eliminate|fail|failure|disappear|disappearance|extinct|extinction/.test(query),
       hasResourceKeywords: /resource|resources|scarce|scarcity|limited|limit|constraint|constraints/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -118,6 +126,10 @@ export class NaturalSelectionEngine implements IPredictionEngine {
       survivalPotential,
       selectionLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

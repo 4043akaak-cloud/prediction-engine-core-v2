@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class PortfolioOptimizationEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const analysis = this.analyzePortfolio(features);
@@ -24,6 +24,10 @@ export class PortfolioOptimizationEngine implements IPredictionEngine {
         evidenceCount: analysis.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class PortfolioOptimizationEngine implements IPredictionEngine {
       hasBalanceKeywords: /balance|balanced|balance|tradeoff|trade off|optimize|optimization|efficient/.test(query),
       hasResourceKeywords: /resource|resources|capital|allocation|allocate|budget|budgets|asset|assets/.test(query),
       hasCorrelationKeywords: /correlat|correlation|correlation|relationship|relationships|independent|independence/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -118,6 +126,10 @@ export class PortfolioOptimizationEngine implements IPredictionEngine {
       optimizationPotential,
       portfolioLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

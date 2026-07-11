@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class HomeostasisEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const homeostasis = this.analyzeHomeostasis(features);
@@ -24,6 +24,10 @@ export class HomeostasisEngine implements IPredictionEngine {
         evidenceCount: homeostasis.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class HomeostasisEngine implements IPredictionEngine {
       hasRecoveryKeywords: /recover|recovery|resilience|resilient|adapt|adaptation|restore|restoration|bounce back/.test(query),
       hasThresholdKeywords: /threshold|limit|limits|boundary|boundaries|range|ranges|tolerance|tolerances/.test(query),
       hasSystemKeywords: /system|systems|mechanism|mechanisms|process|processes|cycle|cycles|loop|loops/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -118,6 +126,10 @@ export class HomeostasisEngine implements IPredictionEngine {
       resilienceIndicator,
       homeostasisLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class HaloEffectEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const analysis = this.analyzeHaloEffect(features);
@@ -24,6 +24,10 @@ export class HaloEffectEngine implements IPredictionEngine {
         evidenceCount: analysis.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class HaloEffectEngine implements IPredictionEngine {
       hasOverallKeywords: /overall|overall|general|generally|entire|whole|comprehensive|comprehensive|holistic|holistic/.test(query),
       hasObjectiveKeywords: /objective|objectively|fact|facts|factual|evidence|evidenced|based|basis|actual/.test(query),
       hasAttributeKeywords: /attribute|attributes|assign|assigned|ascribe|ascribed|project|projected|extend|extended/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -118,6 +126,10 @@ export class HaloEffectEngine implements IPredictionEngine {
       generalizedInfluence,
       haloLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

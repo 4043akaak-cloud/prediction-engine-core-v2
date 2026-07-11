@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class BarnumEffectEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const analysis = this.analyzeBarnum(features);
@@ -24,6 +24,10 @@ export class BarnumEffectEngine implements IPredictionEngine {
         evidenceCount: analysis.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class BarnumEffectEngine implements IPredictionEngine {
       hasStatementKeywords: /statement|statements|statement|claim|claims|claimed|assertion|assertions|asserted|assertion/.test(query),
       hasPerceptionKeywords: /perceiv|perception|perceiv|interpret|interpretation|interpret|understand|understanding|understand|view/.test(query),
       hasValidationKeywords: /validat|validate|validation|validat|confirm|confirmation|confirmed|verify|verification|verified/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -118,6 +126,10 @@ export class BarnumEffectEngine implements IPredictionEngine {
       acceptanceBias,
       barnumLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

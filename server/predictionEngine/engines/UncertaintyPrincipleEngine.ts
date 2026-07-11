@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class UncertaintyPrincipleEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const uncertainty = this.analyzeUncertainty(features);
@@ -24,6 +24,10 @@ export class UncertaintyPrincipleEngine implements IPredictionEngine {
         evidenceCount: uncertainty.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class UncertaintyPrincipleEngine implements IPredictionEngine {
       hasUncertaintyKeywords: /uncertain|uncertainty|unknown|unknowns|unclear|ambiguous|ambiguity|vague/.test(query),
       hasMeasurementKeywords: /measure|measurement|measure|observe|observation|observe|detect|detection/.test(query),
       hasLimitKeywords: /limit|limitation|limited|constraint|constraints|constrained|boundary|boundaries/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -126,6 +134,10 @@ export class UncertaintyPrincipleEngine implements IPredictionEngine {
       limitIdentification,
       uncertaintyLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

@@ -11,7 +11,7 @@ import { IEngine } from "../EngineRegistry";
  * Inspired By: Daniel Kahneman & Amos Tversky — Prospect Theory
  */
 export class ProspectTheoryEngine implements IEngine {
-  async predict(query: string): Promise<PredictionResult> {
+  async predict(query: string): Promise<RecipeExecutionResult> {
     const lowerQuery = query.toLowerCase();
 
     // Detect behavioral keywords
@@ -70,6 +70,10 @@ export class ProspectTheoryEngine implements IEngine {
       confidence,
       reasoning: "Prospect Theory analysis of perceived gains, losses, and risk preferences",
       evidenceList: evidence,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 }

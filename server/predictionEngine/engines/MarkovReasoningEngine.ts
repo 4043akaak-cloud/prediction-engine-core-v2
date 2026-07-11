@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class MarkovReasoningEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const markov = this.analyzeMarkov(features);
@@ -24,6 +24,10 @@ export class MarkovReasoningEngine implements IPredictionEngine {
         evidenceCount: markov.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class MarkovReasoningEngine implements IPredictionEngine {
       hasProbabilityKeywords: /likely|probable|probability|chance|odds|possible|possibility|expected/.test(query),
       hasStabilityKeywords: /stable|stability|equilibrium|balance|steady|constant|persistent|recurring/.test(query),
       hasDynamicsKeywords: /dynamic|evolve|evolution|change|adapt|adaptive|responsive|behavior/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -128,6 +136,10 @@ export class MarkovReasoningEngine implements IPredictionEngine {
       stability,
       markovLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

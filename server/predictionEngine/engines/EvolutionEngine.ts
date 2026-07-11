@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class EvolutionEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const evolution = this.analyzeEvolution(features);
@@ -24,6 +24,10 @@ export class EvolutionEngine implements IPredictionEngine {
         evidenceCount: evolution.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class EvolutionEngine implements IPredictionEngine {
       hasTimeKeywords: /time|over time|long term|generation|generations|evolve|evolution|gradually|gradual/.test(query),
       hasAdaptationKeywords: /adapt|adaptation|adaptive|fit|fitness|respond|response|adjust|adjustment/.test(query),
       hasSuccessKeywords: /success|successful|thrive|thriving|prosper|prosperity|dominant|dominance/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -118,6 +126,10 @@ export class EvolutionEngine implements IPredictionEngine {
       adaptationPotential,
       evolutionLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

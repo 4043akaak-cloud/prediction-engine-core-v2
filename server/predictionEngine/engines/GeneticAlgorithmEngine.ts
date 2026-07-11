@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class GeneticAlgorithmEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const genetic = this.analyzeGenetic(features);
@@ -24,6 +24,10 @@ export class GeneticAlgorithmEngine implements IPredictionEngine {
         evidenceCount: genetic.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class GeneticAlgorithmEngine implements IPredictionEngine {
       hasVariationKeywords: /variation|variations|mutate|mutation|crossover|cross over|combine|combination/.test(query),
       hasConvergenceKeywords: /converge|convergence|converging|optimal|optimality|solution|solutions|improve/.test(query),
       hasPopulationKeywords: /population|populations|candidate|candidates|solution|solutions|individual|individuals/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -118,6 +126,10 @@ export class GeneticAlgorithmEngine implements IPredictionEngine {
       fitnessIndicator,
       geneticLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

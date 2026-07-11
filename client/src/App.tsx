@@ -22,6 +22,7 @@ import ChooseYourApproach from "@/pages/ChooseYourApproach";
 import RecipeLibrary from "@/pages/RecipeLibrary";
 import EngineGarage from "@/pages/EngineGarage";
 import EngineGarageDetail from "@/pages/EngineGarageDetail";
+import PredictionDetail from "@/pages/PredictionDetail";
 
 
 export default function App() {
@@ -34,6 +35,7 @@ export default function App() {
           <Route path="/" component={Home} />
           <Route path="/how-to-use" component={HowToUse} />
           <Route path="/diary" component={PredictionDiary} />
+          <Route path="/detail/:id" component={PredictionDetail} />
 
           <Route path="/recipe-builder" component={RecipeBuilder} />
           <Route path="/recipes/:id" component={RecipeDetail} />

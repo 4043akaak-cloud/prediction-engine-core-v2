@@ -16,7 +16,7 @@ import type { Evidence, IPredictionEngine, PredictionResult } from "../types";
  * 5. Evidence aggregation - Aggregate evidence for causal claims
  */
 export class CausalPredictionEngine implements IPredictionEngine {
-  async predict(evidence: Evidence): Promise<PredictionResult> {
+  async predict(evidence: Evidence): Promise<RecipeExecutionResult> {
     const query = evidence.query || "";
     const timestamp = Date.now();
     const predictionId = `causal-${timestamp}-${Math.random().toString(36).slice(2, 9)}`;
@@ -46,6 +46,10 @@ export class CausalPredictionEngine implements IPredictionEngine {
         confidenceScore: confidence,
         evidenceCount: causes.length + triggers.length,
         predictionVersion: "1.0.0",
+      },
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
       },
     };
   }
@@ -117,6 +121,10 @@ export class CausalPredictionEngine implements IPredictionEngine {
       influences: influences.slice(0, 3), // Max 3 influences
       confidence,
       evidenceCount,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

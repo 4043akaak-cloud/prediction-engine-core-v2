@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class GeneralRelativityEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const analysis = this.analyzeFrames(features);
@@ -24,6 +24,10 @@ export class GeneralRelativityEngine implements IPredictionEngine {
         evidenceCount: analysis.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -46,6 +50,10 @@ export class GeneralRelativityEngine implements IPredictionEngine {
       hasTransformKeywords: /transform|change|shift|convert|translate|map|project|interpret/.test(query),
       hasMultipleViewKeywords: /multiple|different|various|several|many|both|either|perspective|view/.test(query),
       hasContextKeywords: /context|situation|circumstance|environment|condition|setting|background/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -110,6 +118,10 @@ export class GeneralRelativityEngine implements IPredictionEngine {
       invariantStrength,
       transformComplexity,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

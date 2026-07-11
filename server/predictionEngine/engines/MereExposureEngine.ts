@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class MereExposureEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const analysis = this.analyzeMereExposure(features);
@@ -24,6 +24,10 @@ export class MereExposureEngine implements IPredictionEngine {
         evidenceCount: analysis.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class MereExposureEngine implements IPredictionEngine {
       hasAcceptanceKeywords: /accept|acceptance|accept|adopt|adoption|adopt|embrace|embracing|embrace|welcome/.test(query),
       hasContactKeywords: /contact|contacts|contact|encounter|encounters|encounter|meet|meeting|meet|interact/.test(query),
       hasAttitudeKeywords: /attitude|attitudes|attitude|perception|perceptions|perception|view|views|view|opinion/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -118,6 +126,10 @@ export class MereExposureEngine implements IPredictionEngine {
       preferenceInfluence,
       mereExposureLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

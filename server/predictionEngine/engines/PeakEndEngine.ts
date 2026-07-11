@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class PeakEndEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const analysis = this.analyzePeakEnd(features);
@@ -24,6 +24,10 @@ export class PeakEndEngine implements IPredictionEngine {
         evidenceCount: analysis.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class PeakEndEngine implements IPredictionEngine {
       hasMemoryKeywords: /memory|memories|memorable|remember|remembering|recall|recalling|impression|impressions/.test(query),
       hasAverageKeywords: /average|averaged|overall|total|totality|whole|entire|complete|duration|throughout/.test(query),
       hasIntensityKeywords: /intense|intensity|strong|strong|powerful|powerful|emotional|emotion|feeling|feelings/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -118,6 +126,10 @@ export class PeakEndEngine implements IPredictionEngine {
       endingInfluence,
       peakEndLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

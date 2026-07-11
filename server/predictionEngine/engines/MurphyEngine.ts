@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class MurphyEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const analysis = this.analyzeRisks(features);
@@ -24,6 +24,10 @@ export class MurphyEngine implements IPredictionEngine {
         evidenceCount: analysis.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -46,6 +50,10 @@ export class MurphyEngine implements IPredictionEngine {
       hasCascadeKeywords: /cascade|chain|domino|propagat|spread|contagion|ripple/.test(query),
       hasComplexityKeywords: /complex|complicated|intricate|interdepend|coupled|interconnect/.test(query),
       hasEdgeCaseKeywords: /edge|corner|boundary|extreme|unusual|rare|exceptional/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -118,6 +126,10 @@ export class MurphyEngine implements IPredictionEngine {
       cascadingRisk,
       assumptionFragility,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

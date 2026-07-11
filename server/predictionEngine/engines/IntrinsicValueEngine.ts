@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class IntrinsicValueEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const analysis = this.analyzeIntrinsicValue(features);
@@ -24,6 +24,10 @@ export class IntrinsicValueEngine implements IPredictionEngine {
         evidenceCount: analysis.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class IntrinsicValueEngine implements IPredictionEngine {
       hasAnalysisKeywords: /analys|analyze|analysis|assess|assessment|evaluate|evaluation|estimate/.test(query),
       hasFundamentalKeywords: /fundamental|fundamentals|cash flow|earnings|profit|revenue|asset|assets/.test(query),
       hasOpportunityKeywords: /opportun|opportunity|opportunity|bargain|margin|safety|edge|advantage/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -118,6 +126,10 @@ export class IntrinsicValueEngine implements IPredictionEngine {
       opportunityPotential,
       valueLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 

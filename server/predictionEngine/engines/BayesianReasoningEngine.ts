@@ -1,7 +1,7 @@
 import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
 
 export class BayesianReasoningEngine implements IPredictionEngine {
-  async predict(request: PredictionRequest): Promise<PredictionResult> {
+  async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
     this.validateInput(request);
     const features = this.extractFeatures(request.query);
     const bayesian = this.analyzeBayesian(features);
@@ -24,6 +24,10 @@ export class BayesianReasoningEngine implements IPredictionEngine {
         evidenceCount: bayesian.evidenceCount,
         predictionVersion: "1.0",
       } as any,
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -49,6 +53,10 @@ export class BayesianReasoningEngine implements IPredictionEngine {
       hasUpdateKeywords: /update|revise|change|adjust|refine|improve|learn|feedback|new/.test(query),
       hasInferenceKeywords: /infer|inference|conclude|conclusion|deduce|reason|reasoning|imply/.test(query),
       hasPosteriorKeywords: /posterior|result|outcome|conclusion|final|revised|updated|refined/.test(query),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
@@ -128,6 +136,10 @@ export class BayesianReasoningEngine implements IPredictionEngine {
       updateCapacity,
       bayesianLevel,
       evidenceCount: Math.max(1, evidenceCount),
+      rawPredictionData: {
+        value: prediction || "",
+        factors: [],
+      },
     };
   }
 
