@@ -54,8 +54,8 @@ export default function PredictionResult() {
             title="No prediction available"
             description="Please start a new prediction to see results here."
             action={{
-              label: "Start Prediction",
-              onClick: () => setLocation("/predict"),
+              label: "Browse Recipes",
+              onClick: () => setLocation("/recipe-library"),
             }}
           />
         </main>
@@ -89,8 +89,8 @@ export default function PredictionResult() {
               onClick: handleRetry,
             }}
             secondaryAction={{
-              label: "Back to Input",
-              onClick: () => setLocation("/predict"),
+              label: "Back to Recipes",
+              onClick: () => setLocation("/recipe-library"),
             }}
           />
         </main>

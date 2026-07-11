@@ -354,7 +354,7 @@ export default function PredictionDetail() {
                 </Button>
               )}
               <Button
-                onClick={() => setLocation("/predict")}
+                onClick={() => setLocation("/recipe-library")}
                 variant="outline"
                 className="flex-1"
               >

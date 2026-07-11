@@ -236,3 +236,40 @@ This should become the single loading mechanism for:
 - Better support for recipe versioning and updates
 
 **Status:** DEFERRED (waiting for Recipe API finalization)
+
+
+---
+
+## ✅ COMPLETED PHASE 4B: Prediction Flow Unification
+
+### Issue #048: Prediction Flow Cleanup (COMPLETE)
+- [x] Remove PredictionInput.tsx (functionality merged into RecipeDetail)
+- [x] Remove RecipeSelector.tsx (unnecessary auto-redirect)
+- [x] Update App.tsx routes (removed /prediction-input and /select-recipe)
+- [x] Update RecipeDetail.tsx to generate prediction directly
+- [x] Update navigation references (PredictionDiary, PredictionResult, PredictionDetail)
+- [x] All /predict references changed to /recipe-library
+
+**Official Prediction Flow:**
+```
+Recipe Library → Recipe Detail → Prediction Result → Diary
+```
+
+**Single Entry Point:** Recipe Detail with integrated prediction input
+
+---
+
+### Issue #049: PredictionDetail.tsx Route Registration (FUTURE TODO)
+
+**Current State:**
+- PredictionDetail.tsx exists but route `/detail/:id` is NOT registered in App.tsx
+- Only referenced by PredictionDiary.tsx line 42
+- Provides lifecycle tracking (outcome, evaluation, notes) for saved predictions
+
+**Future Implementation:**
+When prediction lifecycle tracking is needed:
+1. Register `/detail/:id` route in App.tsx
+2. Import PredictionDetail component
+3. Enable viewing detailed prediction history with outcome tracking
+
+**Status:** TODO (future feature for prediction lifecycle management)

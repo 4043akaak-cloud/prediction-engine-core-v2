@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useLocation, useRoute } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import { getRecipeById } from "@shared/recipes";
 import { STOCK_DEFAULT_RECIPE } from "@/lib/recipes";
 import { trpc } from "@/lib/trpc";
+import { usePrediction } from "@/hooks/usePrediction";
+import { generatePrediction } from "@/services/api";
+import { PredictionContext } from "@/contexts/PredictionContext";
 
 /**
  * Recipe Detail Page - Fully Reusable Template
@@ -30,11 +33,17 @@ export default function RecipeDetail() {
   const recipeId = params?.id as string;
   const [predictionQuestion, setPredictionQuestion] = useState("");
   const [showFullPhilosophy, setShowFullPhilosophy] = useState(false);
+  const [isGeneratingPrediction, setIsGeneratingPrediction] = useState(false);
 
   // Hybrid approach: Load Stock Default directly, other recipes via tRPC
   const isStockDefault = recipeId === STOCK_DEFAULT_RECIPE.id;
   const recipe = isStockDefault ? STOCK_DEFAULT_RECIPE : (recipeId ? getRecipeById(recipeId) : null);
   const isLoading = false;
+
+  // Prediction hooks and context
+  const { setPrediction, setCounterPrediction } = usePrediction();
+  const predictMutation = trpc.prediction.predict.useMutation();
+  const predictionContext = useContext(PredictionContext);
 
   // Duplicate recipe mutation for Customize Recipe
   const duplicateRecipeMutation = trpc.recipe.duplicate.useMutation();
@@ -51,10 +60,25 @@ export default function RecipeDetail() {
     );
   };
 
-  const handleUseThisRecipe = () => {
-    if (predictionQuestion.trim()) {
-      // Navigate to prediction input with recipe and question
-      setLocation(`/prediction-input?recipeId=${recipeId}&question=${encodeURIComponent(predictionQuestion)}`);
+  const handleUseThisRecipe = async () => {
+    if (predictionQuestion.trim() && !isGeneratingPrediction) {
+      setIsGeneratingPrediction(true);
+      try {
+        const result = await generatePrediction(
+          {
+            question: predictionQuestion,
+            recipeId,
+            recipeName: recipe?.name,
+          },
+          predictMutation.mutateAsync
+        );
+        setPrediction(result.prediction);
+        setCounterPrediction(result.counterPrediction);
+        setLocation("/result");
+      } catch (err) {
+        console.error("Failed to generate prediction:", err);
+        setIsGeneratingPrediction(false);
+      }
     }
   };
 
@@ -179,9 +203,16 @@ export default function RecipeDetail() {
               <Button 
                 onClick={handleUseThisRecipe}
                 className="w-full py-6 text-base"
-                disabled={!predictionQuestion.trim()}
+                disabled={!predictionQuestion.trim() || isGeneratingPrediction}
               >
-                Use This Recipe
+                {isGeneratingPrediction ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  'Use This Recipe'
+                )}
               </Button>
               <Button
                 variant="outline"

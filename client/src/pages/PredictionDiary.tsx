@@ -85,8 +85,8 @@ export default function PredictionDiary() {
             {entries.length === 0 ? (
               <div className="border border-border rounded p-8 text-center">
                 <p className="text-muted-foreground mb-6">No predictions saved yet.</p>
-                <Button onClick={() => setLocation("/predict")}>
-                  Make Your First Prediction
+                <Button onClick={() => setLocation("/recipe-library")}>
+                  Browse Recipes
                 </Button>
               </div>
             ) : (
@@ -138,7 +138,7 @@ export default function PredictionDiary() {
 
             {/* Action Buttons */}
             <div className="flex gap-4 mt-12">
-              <Button onClick={() => setLocation("/predict")} className="flex-1">
+              <Button onClick={() => setLocation("/recipe-library")} className="flex-1">
                 New Prediction
               </Button>
               <Button
