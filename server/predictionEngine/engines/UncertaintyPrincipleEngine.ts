@@ -1,4 +1,4 @@
-import { IPredictionEngine, PredictionRequest, PredictionResult } from "../types";
+import { IPredictionEngine, PredictionRequest, PredictionResult, RecipeExecutionResult } from "../types";
 
 export class UncertaintyPrincipleEngine implements IPredictionEngine {
   async predict(request: PredictionRequest): Promise<RecipeExecutionResult> {
@@ -53,10 +53,6 @@ export class UncertaintyPrincipleEngine implements IPredictionEngine {
       hasUncertaintyKeywords: /uncertain|uncertainty|unknown|unknowns|unclear|ambiguous|ambiguity|vague/.test(query),
       hasMeasurementKeywords: /measure|measurement|measure|observe|observation|observe|detect|detection/.test(query),
       hasLimitKeywords: /limit|limitation|limited|constraint|constraints|constrained|boundary|boundaries/.test(query),
-      rawPredictionData: {
-        value: prediction || "",
-        factors: [],
-      },
     };
   }
 
