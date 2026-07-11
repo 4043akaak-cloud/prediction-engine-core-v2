@@ -160,7 +160,7 @@ export default function Home() {
           {/* Choose Your Approach Card - Fully Clickable */}
           <section className="container mx-auto px-4 py-20 border-t border-border">
             <div className="max-w-md">
-              <button
+              <div
                 onClick={handleChooseYourApproachClick}
                 className="w-full text-left border border-border rounded-lg p-6 hover:border-primary transition-colors cursor-pointer"
               >
@@ -180,7 +180,7 @@ export default function Home() {
                     Explore
                   </Button>
                 </div>
-              </button>
+              </div>
             </div>
           </section>
         </main>

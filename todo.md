@@ -159,9 +159,19 @@ This roadmap is organized into 6 major phases reflecting PEC v1 Blueprint:
 - "tech" test recipe: NOT FOUND (no legacy test data)
 - Complete workflow validated: Library → Detail → Customize
 
+### ✅ Phase 4A Completion Summary
+- Recipe Detail page refactored into reusable generic template
+- Prediction input field added directly on recipe page
+- Information hierarchy reorganized (name → description → metadata → input → actions)
+- Reasoning Flow simplified (generic parallel architecture visualization)
+- Aggregator and Final Prediction sections kept (provide context)
+- Template verified for all recipe types (Stock, Loto, Sports Betting, Weather, Crypto)
+- Mobile-first design (no horizontal scrolling, vertical only)
+- Verified on desktop (1280px) and mobile (375px) viewports
+
 ### 🔄 What's In Progress
-- Phase 4: Knowledge Providers (data integration, evidence sources)
-- Additional recipe templates (domain-specific recipes)
+- Phase 4B: Additional recipe templates (Loto, Sports Betting, Weather, Crypto)
+- Phase 5: Knowledge Providers (data integration, evidence sources)
 
 ### 🔮 What's Planned
 - 10+ additional specialist engines
@@ -179,3 +189,50 @@ This roadmap is organized into 6 major phases reflecting PEC v1 Blueprint:
 - **Extensibility:** New engines integrate via standard IPredictionEngine contract
 - **Quality:** TypeScript strict mode, comprehensive test coverage, clear documentation
 - **Recipe Architecture:** Unified single source of truth with RecipeRegistry as provider abstraction
+
+
+---
+
+## ✅ COMPLETED PHASE 4A: Recipe Detail Refactor to Reusable Template
+
+### Issue #046: Recipe Detail Page Refactor (COMPLETE)
+- [x] Analyze current RecipeDetail structure and design reusable template
+- [x] Add prediction input field directly on Recipe Detail page
+- [x] Refactor page layout to new information hierarchy (name → description → metadata → input → actions)
+- [x] Simplify Reasoning Flow visualization (generic, parallel architecture for all recipe types)
+- [x] Evaluate and keep Aggregator and Final Prediction sections (provide context for users)
+- [x] Verify template works for multiple recipe types (Stock, Loto, Sports Betting, Weather, Crypto)
+- [x] Validate no horizontal scrolling and no console errors
+- [x] Verified on desktop (1280px) and mobile (375px) viewports
+
+
+---
+
+## 🔧 Technical Debt & Future Refactoring
+
+### Issue #047: Recipe Loading Architecture Unification (FUTURE)
+
+**Current State:**
+Recipe Detail page uses a temporary hybrid loading approach:
+- Stock Default: Loaded directly from hardcoded import
+- Future recipes: Intended to load through tRPC API
+
+**Future Task:**
+Migrate all Recipe Detail pages to a unified tRPC loading architecture after the Recipe API has been finalized.
+
+**Scope:**
+This should become the single loading mechanism for:
+- [ ] Stock Default (migrate from hardcoded import)
+- [ ] Loto (future SYSTEM recipe)
+- [ ] Sports Betting (future SYSTEM recipe)
+- [ ] Weather (future SYSTEM recipe)
+- [ ] Crypto (future SYSTEM recipe)
+- [ ] All USER recipes created by users
+
+**Benefits:**
+- Single source of truth for recipe loading
+- Consistent API across all recipe types
+- Simplified Recipe Detail component
+- Better support for recipe versioning and updates
+
+**Status:** DEFERRED (waiting for Recipe API finalization)

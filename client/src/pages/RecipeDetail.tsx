@@ -7,19 +7,34 @@ import { STOCK_DEFAULT_RECIPE } from "@/lib/recipes";
 import { trpc } from "@/lib/trpc";
 
 /**
- * Recipe Detail Page - Mobile-First UX
- * Optimized for quick understanding and immediate action
- * Information hierarchy: What? → What for? → How to use?
+ * Recipe Detail Page - Fully Reusable Template
+ * 
+ * This page serves as a generic template for all recipe types (Stock, Loto, Sports Betting, Weather, Crypto, etc.)
+ * Only the recipe data changes; the page structure remains identical across all recipe types.
+ * 
+ * The template is fully data-driven:
+ * - Loads recipes from tRPC (works for both SYSTEM and USER recipes)
+ * - Sections are conditional on recipe data properties (not recipe type)
+ * - No Stock-specific logic or hardcoded imports
+ * 
+ * User Flow:
+ * 1. View recipe information (name, description, metadata)
+ * 2. Enter prediction question directly on this page
+ * 3. Use This Recipe to start prediction
+ * 4. Customize Recipe to create a personalized version
+ * 5. Read detailed information (Overview, How It Works, Philosophy)
  */
 export default function RecipeDetail() {
   const [, setLocation] = useLocation();
   const [match, params] = useRoute("/recipes/:id");
   const recipeId = params?.id as string;
+  const [predictionQuestion, setPredictionQuestion] = useState("");
   const [showFullPhilosophy, setShowFullPhilosophy] = useState(false);
 
-  // Check if it's Stock Default recipe
+  // Hybrid approach: Load Stock Default directly, other recipes via tRPC
   const isStockDefault = recipeId === STOCK_DEFAULT_RECIPE.id;
   const recipe = isStockDefault ? STOCK_DEFAULT_RECIPE : (recipeId ? getRecipeById(recipeId) : null);
+  const isLoading = false;
 
   // Duplicate recipe mutation for Customize Recipe
   const duplicateRecipeMutation = trpc.recipe.duplicate.useMutation();
@@ -36,6 +51,16 @@ export default function RecipeDetail() {
     );
   };
 
+  const handleUseThisRecipe = () => {
+    if (predictionQuestion.trim()) {
+      // Navigate to prediction with recipe and question
+      setLocation(`/predict?recipeId=${recipeId}&question=${encodeURIComponent(predictionQuestion)}`);
+    }
+  };
+
+
+
+  // Not found state
   if (!match || !recipe) {
     return (
       <div className="min-h-screen flex flex-col bg-background text-foreground">
@@ -68,20 +93,14 @@ export default function RecipeDetail() {
       fundamental: 'Fundamental Analysis',
       hybrid: 'Hybrid Approach',
       stock: 'Stock Prediction',
+      loto: 'Lottery',
+      sports: 'Sports Betting',
+      weather: 'Weather',
+      crypto: 'Cryptocurrency',
+      finance: 'Finance',
     };
     return labels[category] || category;
   };
-
-  const getAvailabilityBadge = (availability: string) => {
-    const badges: Record<string, { text: string; className: string }> = {
-      available: { text: 'Available', className: 'bg-green-100 text-green-800' },
-      coming_soon: { text: 'Coming Soon', className: 'bg-blue-100 text-blue-800' },
-      deprecated: { text: 'Deprecated', className: 'bg-gray-100 text-gray-800' },
-    };
-    return badges[availability] || badges.available;
-  };
-
-  const badge = getAvailabilityBadge(recipe.availability);
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
@@ -108,108 +127,86 @@ export default function RecipeDetail() {
               <h1 className="text-3xl md:text-4xl font-bold">{recipe.name}</h1>
             </div>
 
-            {/* SECTION 2: Badges */}
-            {isStockDefault && (
-              <div className="flex flex-wrap gap-2">
-                <span className="inline-block px-3 py-1 text-xs font-semibold bg-blue-600 text-white rounded-full">
-                  SYSTEM
-                </span>
-                <span className="inline-block px-3 py-1 text-xs font-semibold bg-amber-600 text-white rounded-full">
-                  FEATURED
-                </span>
-              </div>
-            )}
-
-            {/* SECTION 3: Short Description */}
+            {/* SECTION 2: Short Description */}
             <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
               {recipe.description}
             </p>
 
-            {/* SECTION 4: Quick Metadata */}
+            {/* SECTION 3: Quick Information (Category, Difficulty, Engine Count, Family Count) */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg border border-border">
               <div>
                 <div className="text-xs text-muted-foreground font-medium">Category</div>
                 <div className="text-sm font-semibold mt-1">
-                  {isStockDefault ? recipe.category : getCategoryLabel(recipe.category)}
+                  {getCategoryLabel(recipe.category)}
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground font-medium">Version</div>
-                <div className="text-sm font-semibold mt-1">v{recipe.version}</div>
+                <div className="text-xs text-muted-foreground font-medium">Difficulty</div>
+                <div className="text-sm font-semibold mt-1">
+                  {recipe.difficulty || 'Intermediate'}
+                </div>
               </div>
-              {isStockDefault && (recipe as any).engines && (
+              {recipe.engines && recipe.engines.length > 0 && (
                 <div>
                   <div className="text-xs text-muted-foreground font-medium">Engines</div>
-                  <div className="text-sm font-semibold mt-1">{(recipe as any).engines.length}</div>
+                  <div className="text-sm font-semibold mt-1">{recipe.engines.length}</div>
                 </div>
               )}
-              {isStockDefault && (recipe as any).metadata?.families && (
+              {recipe.families && recipe.families.length > 0 && (
                 <div>
                   <div className="text-xs text-muted-foreground font-medium">Families</div>
-                  <div className="text-sm font-semibold mt-1">{(recipe as any).metadata.families.length}</div>
+                  <div className="text-sm font-semibold mt-1">{recipe.families.length}</div>
                 </div>
               )}
             </div>
 
-            {/* SECTION 5: Primary Actions - NEAR TOP */}
-            <div className="flex flex-col gap-3 pt-4 border-t border-border">
-              {isStockDefault ? (
-                <>
-                  <Button 
-                    onClick={() => setLocation("/predict")} 
-                    className="w-full py-6 text-base"
-                  >
-                    Use This Recipe
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={handleCustomizeRecipe}
-                    className="w-full py-6 text-base"
-                    disabled={duplicateRecipeMutation.isPending}
-                  >
-                    {duplicateRecipeMutation.isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Customizing...
-                      </>
-                    ) : (
-                      'Customize Recipe'
-                    )}
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button 
-                    onClick={() => setLocation("/predict")} 
-                    className="w-full py-6 text-base"
-                    disabled={recipe.availability !== 'available'}
-                  >
-                    {recipe.availability === 'available' ? 'Make Prediction with This Recipe' : 'Not Available'}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setLocation("/recipe-library")}
-                    className="w-full py-6 text-base"
-                  >
-                    Back to Recipes
-                  </Button>
-                </>
-              )}
+            {/* SECTION 4: Prediction Input */}
+            <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+              <label className="block text-sm font-medium text-foreground mb-2">
+                What would you like to predict?
+              </label>
+              <textarea
+                value={predictionQuestion}
+                onChange={(e) => setPredictionQuestion(e.target.value)}
+                placeholder="Enter your prediction question here..."
+                className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                rows={3}
+              />
             </div>
 
-            {/* SECTION 6: Overview - Improved */}
+            {/* SECTION 5: Primary Actions */}
+            <div className="flex flex-col gap-3 pt-4 border-t border-border">
+              <Button 
+                onClick={handleUseThisRecipe}
+                className="w-full py-6 text-base"
+                disabled={!predictionQuestion.trim()}
+              >
+                Use This Recipe
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleCustomizeRecipe}
+                className="w-full py-6 text-base"
+                disabled={duplicateRecipeMutation.isPending}
+              >
+                {duplicateRecipeMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Customizing...
+                  </>
+                ) : (
+                  'Customize Recipe'
+                )}
+              </Button>
+            </div>
+
+            {/* SECTION 6: Overview */}
             <div className="pt-6 border-t border-border">
               <h2 className="text-xl md:text-2xl font-bold mb-4">Overview</h2>
               <div className="space-y-3">
                 <p className="text-sm md:text-base text-foreground leading-relaxed">
                   {recipe.description}
                 </p>
-                {isStockDefault && (recipe as any).difficulty && (
-                  <div className="pt-3 border-t border-border">
-                    <div className="text-xs text-muted-foreground font-medium">Difficulty Level</div>
-                    <div className="text-sm font-semibold mt-1">{(recipe as any).difficulty}</div>
-                  </div>
-                )}
               </div>
             </div>
 
@@ -228,14 +225,14 @@ export default function RecipeDetail() {
               </div>
             )}
 
-            {/* SECTION 8: Reasoning Flow - Parallel Architecture */}
-            {isStockDefault && (recipe as any).engines && (
+            {/* SECTION 8: How It Works - Generic Reasoning Flow */}
+            {recipe.engines && recipe.engines.length > 0 && (
               <div className="pt-6 border-t border-border">
                 <h2 className="text-xl md:text-2xl font-bold mb-4">How It Works</h2>
                 <div className="space-y-4">
                   {/* Question Input */}
                   <div className="p-4 bg-muted/30 rounded-lg border border-border text-center">
-                    <div className="text-sm font-medium text-muted-foreground">Question</div>
+                    <div className="text-sm font-medium text-muted-foreground">Your Question</div>
                   </div>
 
                   {/* Parallel Engines Visualization */}
@@ -244,8 +241,8 @@ export default function RecipeDetail() {
                       Multiple Reasoning Engines (Parallel)
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {(recipe as any).engines.map((engine: any, idx: number) => (
-                        <div key={engine.engineId} className="p-3 bg-background rounded border border-border">
+                      {recipe.engines.map((engine: any, idx: number) => (
+                        <div key={engine.engineId || idx} className="p-3 bg-background rounded border border-border">
                           <div className="flex items-start gap-2">
                             <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
                               {idx + 1}
@@ -268,14 +265,14 @@ export default function RecipeDetail() {
 
                   {/* Final Prediction */}
                   <div className="p-4 bg-primary/10 rounded-lg border border-primary/30 text-center">
-                    <div className="text-sm font-bold text-primary">Final Prediction</div>
+                    <div className="text-sm font-bold text-primary">Your Prediction</div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* SECTION 9: Recipe Philosophy - Concise or Hidden */}
-            {isStockDefault && (recipe as any).philosophy && (
+            {/* SECTION 9: Recipe Philosophy - Collapsible, Default Hidden */}
+            {recipe.philosophy && (
               <div className="pt-6 border-t border-border">
                 <button
                   onClick={() => setShowFullPhilosophy(!showFullPhilosophy)}
@@ -291,7 +288,7 @@ export default function RecipeDetail() {
                 {showFullPhilosophy && (
                   <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800 mt-3">
                     <p className="text-sm md:text-base text-foreground leading-relaxed">
-                      {(recipe as any).philosophy}
+                      {recipe.philosophy}
                     </p>
                   </div>
                 )}

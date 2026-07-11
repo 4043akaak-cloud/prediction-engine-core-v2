@@ -178,8 +178,7 @@ export default function RecipeLibrary() {
               
               {/* Stock Default Recipe Card - Mobile Optimized */}
               <div 
-                onClick={() => setLocation(`/recipes/${STOCK_DEFAULT_RECIPE.id}`)}
-                className="border border-border rounded-lg p-5 md:p-6 bg-white dark:bg-slate-950 hover:shadow-md hover:border-primary/50 transition-all cursor-pointer flex flex-col h-full"
+                className="border border-border rounded-lg p-5 md:p-6 bg-white dark:bg-slate-950 hover:shadow-md hover:border-primary/50 transition-all flex flex-col h-full"
               >
                 {/* Recipe Name */}
                 <div className="mb-3">
@@ -294,8 +293,7 @@ export default function RecipeLibrary() {
                   filteredRecipes.map((recipe) => (
                     <div
                       key={recipe.id}
-                      onClick={() => setLocation(`/recipe-builder?recipeId=${recipe.id}`)}
-                      className="border border-border rounded-lg p-4 md:p-5 bg-white dark:bg-slate-950 hover:shadow-md hover:border-primary/50 transition-all cursor-pointer flex flex-col"
+                      className="border border-border rounded-lg p-4 md:p-5 bg-white dark:bg-slate-950 hover:shadow-md hover:border-primary/50 transition-all flex flex-col"
                     >
                       {/* Recipe Info - Top of Card */}
                       <div className="mb-4 flex-1">
