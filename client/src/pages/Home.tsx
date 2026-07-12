@@ -108,11 +108,14 @@ export default function Home() {
 
     try {
       setLastInput({ question, recipeId: recipe.id });
-      const result = await generatePrediction({
-        question,
-        recipeId: recipe.id,
-        recipeName: recipe.name,
-      });
+      const result = await generatePrediction(
+        {
+          question,
+          recipeId: recipe.id,
+          recipeName: recipe.name,
+        },
+        predictMutation.mutateAsync
+      );
 
       setPrediction(result.prediction);
       setCounterPrediction(result.counterPrediction);
