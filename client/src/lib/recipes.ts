@@ -7,7 +7,7 @@ export const STOCK_DEFAULT_RECIPE = {
   id: "stock-default",
   name: "Stock Default",
   type: "SYSTEM",
-  status: "ACTIVE",
+  status: "ready",
   difficulty: "Beginner",
   category: "FINANCE",
   description:

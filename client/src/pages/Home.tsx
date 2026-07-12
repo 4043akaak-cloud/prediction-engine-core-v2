@@ -58,7 +58,7 @@ export default function Home() {
       updateRecipeCache(recipeIds);
       clearStaleRecipeSelection();
     }
-  }, [recipesQuery.data, updateRecipeCache, clearStaleRecipeSelection]);
+  }, [recipesQuery.data]);
 
   useEffect(() => {
     if (
@@ -70,7 +70,7 @@ export default function Home() {
       const starterRecipe = recipesQuery.data[0];
       setSelectedRecipe(starterRecipe);
     }
-  }, [recipesQuery.data, state.selectedRecipe, isCreatingStarter, setSelectedRecipe]);
+  }, [recipesQuery.data, state.selectedRecipe, isCreatingStarter]);
 
   // Set default recipe to first SYSTEM recipe (sorted by displayOrder)
   useEffect(() => {
@@ -79,7 +79,7 @@ export default function Home() {
       const sorted = [...systemRecipesQuery.data.data].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
       setSelectedRecipe(sorted[0]);
     }
-  }, [systemRecipesQuery.data, state.selectedRecipe, setSelectedRecipe]);
+  }, [systemRecipesQuery.data, state.selectedRecipe]);
 
   const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuestion(e.target.value);

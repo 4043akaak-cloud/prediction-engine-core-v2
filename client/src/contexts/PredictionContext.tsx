@@ -105,6 +105,17 @@ function loadPredictionFromStorage(): { prediction: Prediction | null; counterPr
   }
 }
 
+export interface StandardizedEvidence {
+  id: string;
+  source: string;
+  title: string;
+  summary: string;
+  confidence: number;
+  timestamp: number;
+  type: string;
+  weight?: number;
+}
+
 export interface PredictionMetadata {
   createdAt: string;
   modelUsed: string;
@@ -121,6 +132,8 @@ export interface Prediction {
   confidence: number;
   reason: string;
   metadata: PredictionMetadata;
+  evidenceList?: StandardizedEvidence[];  // Engine reasoning and evidence
+  explanation?: string;  // Human-readable explanation
 }
 
 export interface CounterPrediction {

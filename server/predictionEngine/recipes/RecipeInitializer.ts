@@ -40,7 +40,7 @@ export class RecipeInitializer {
         description: STOCK_DEFAULT_RECIPE.description,
         type: "SYSTEM",
         category: "FINANCE",
-        status: "ACTIVE",
+        status: "ready",
         version: STOCK_DEFAULT_RECIPE.version,
         isPublic: 1,
         displayOrder: STOCK_DEFAULT_RECIPE.displayOrder,

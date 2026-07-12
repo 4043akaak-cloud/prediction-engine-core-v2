@@ -303,3 +303,38 @@ Recipe Library → Recipe Detail → Prediction Result → Diary
 - [x] Support all current and future SYSTEM recipes without code changes
 
 **Status:** Recipe selector dropdown fully functional. Renders correctly on homepage. Ready for end-to-end testing.
+
+
+---
+
+## 🎯 COMPLETION MODE: End-to-End Workflow
+
+### Priority 1: Replace Placeholders with Real Engine Output
+- [ ] Remove "Evidence 1", "Evidence 2", "Evidence 3" placeholders from PredictionResult
+- [ ] Display actual engine reasoning from prediction output
+- [ ] Show real confidence values from engines
+- [ ] Display actual counter-prediction data
+- [ ] Test with real prediction execution
+
+### Priority 2: Verify Every Engine Produces Real Data
+- [ ] Verify each engine returns reasoning (not placeholder)
+- [ ] Verify each engine returns confidence (not placeholder)
+- [ ] Verify each engine returns evidence (not placeholder)
+- [ ] Test prediction with Stock Default recipe
+- [ ] Verify all 10+ engines contribute real data
+
+### Priority 3: Complete Diary Functionality
+- [ ] Implement save prediction to diary
+- [ ] Implement load predictions from diary
+- [ ] Implement diary detail view
+- [ ] Verify data persists across page reloads
+- [ ] Test diary navigation
+
+### Priority 4: Complete End-to-End Manual Test
+- [ ] Homepage → Recipe Selection
+- [ ] Recipe Selection → Recipe Detail
+- [ ] Recipe Detail → Prediction Execution
+- [ ] Prediction Execution → Prediction Result
+- [ ] Prediction Result → Save to Diary
+- [ ] Diary → Diary Detail
+- [ ] Verify entire flow works without errors

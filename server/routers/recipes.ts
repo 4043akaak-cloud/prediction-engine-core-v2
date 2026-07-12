@@ -36,7 +36,7 @@ export const recipesRouter = router({
           description: STOCK_DEFAULT_RECIPE.description,
           type: "SYSTEM" as const,
           category: "FINANCE" as const,
-          status: "ACTIVE" as const,
+          status: "ready" as const,
           version: STOCK_DEFAULT_RECIPE.version,
           isPublic: STOCK_DEFAULT_RECIPE.isPublic,
           displayOrder: STOCK_DEFAULT_RECIPE.displayOrder,
@@ -112,7 +112,7 @@ export const recipesRouter = router({
         name: "Balanced Starter",
         description: "A balanced combination of reasoning engines for general predictions",
         category: "OTHER",
-        status: "DRAFT",
+        status: "draft",
         version: 1,
         isPublic: 0,
       });
@@ -161,7 +161,7 @@ export const recipesRouter = router({
         name: input.name,
         description: input.description || "",
         category: (input.category || "OTHER") as "FINANCE" | "SPORTS" | "WEATHER" | "HEALTH" | "TECHNOLOGY" | "POLITICS" | "OTHER",
-        status: "DRAFT",
+        status: "draft",
         version: 1,
         isPublic: 0,
       });

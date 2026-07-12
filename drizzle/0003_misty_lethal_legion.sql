@@ -1,0 +1,1 @@
+ALTER TABLE `recipes` MODIFY COLUMN `status` enum('ready','draft','archived') NOT NULL DEFAULT 'draft';

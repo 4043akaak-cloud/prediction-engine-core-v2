@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { useContext } from "react";
-import { PredictionContext } from "@/contexts/PredictionContext";
+
+import { PredictionContext, StandardizedEvidence } from "@/contexts/PredictionContext";
 import { useLocation } from "wouter";
 import { usePrediction } from "@/hooks/usePrediction";
 import { useDiary } from "@/hooks/useDiary";
@@ -20,19 +20,20 @@ import { FrameworkDetails } from "@/components/PredictionResult/FrameworkDetails
 import { AggregatorSection } from "@/components/PredictionResult/AggregatorSection";
 import { ActionSection } from "@/components/PredictionResult/ActionSection";
 
-// Mock framework data - will be replaced with real engine data
-const MOCK_FRAMEWORKS: FrameworkData[] = [
-  { id: "market-data", name: "Market Data", direction: "bullish", confidence: 72, reasoning: "Current market indicators show strong uptrend" },
-  { id: "trend", name: "Trend Analysis", direction: "bearish", confidence: 58, reasoning: "Recent momentum shows signs of weakening" },
-  { id: "statistical", name: "Statistical", direction: "bullish", confidence: 68, reasoning: "Historical patterns suggest continuation" },
-  { id: "bayesian", name: "Bayesian", direction: "bullish", confidence: 71, reasoning: "Probability distribution favors upside" },
-  { id: "game-theory", name: "Game Theory", direction: "neutral", confidence: 65, reasoning: "Strategic actors show mixed signals" },
-  { id: "entropy", name: "Entropy", direction: "bullish", confidence: 70, reasoning: "Information entropy suggests order" },
-  { id: "wave-function", name: "Wave Function", direction: "bullish", confidence: 75, reasoning: "Quantum-inspired analysis shows coherence" },
-  { id: "sentiment", name: "Sentiment", direction: "bullish", confidence: 69, reasoning: "Market sentiment is positive" },
-  { id: "macro", name: "Macro", direction: "bearish", confidence: 62, reasoning: "Macroeconomic headwinds present" },
-  { id: "micro", name: "Micro", direction: "bullish", confidence: 73, reasoning: "Microeconomic factors are favorable" },
-];
+// Convert evidence list to framework display format
+function convertEvidenceToFrameworks(evidence?: StandardizedEvidence[]): FrameworkData[] {
+  if (!evidence || evidence.length === 0) {
+    return [];
+  }
+  
+  return evidence.map(e => ({
+    id: e.id,
+    name: e.title,
+    direction: e.confidence > 0.65 ? "bullish" : e.confidence < 0.35 ? "bearish" : "neutral",
+    confidence: Math.round(e.confidence * 100),
+    reasoning: e.summary,
+  }));
+}
 
 export default function PredictionResult() {
   const [, setLocation] = useLocation();
@@ -116,9 +117,12 @@ export default function PredictionResult() {
 
   if (!currentPrediction) return null;
 
+  // Convert real evidence to framework display format
+  const frameworks = convertEvidenceToFrameworks(currentPrediction.evidenceList);
+  
   // Calculate agreement summary
-  const bullishCount = MOCK_FRAMEWORKS.filter(f => f.direction === "bullish").length;
-  const cautionCount = MOCK_FRAMEWORKS.filter(f => f.direction === "bearish").length;
+  const bullishCount = frameworks.filter(f => f.direction === "bullish").length;
+  const cautionCount = frameworks.filter(f => f.direction === "bearish").length;
 
   const handleSaveToDiary = async () => {
     setIsSaving(true);
@@ -165,14 +169,14 @@ export default function PredictionResult() {
             <AgreementSummary 
               bullishCount={bullishCount} 
               cautionCount={cautionCount} 
-              totalFrameworks={MOCK_FRAMEWORKS.length}
+              totalFrameworks={frameworks.length}
             />
 
             {/* 4. Framework Summary (Reasoning Landscape) */}
-            <FrameworkSummary frameworks={MOCK_FRAMEWORKS} />
+            <FrameworkSummary frameworks={frameworks} />
 
             {/* 5. Framework Details (Expandable) */}
-            <FrameworkDetails frameworks={MOCK_FRAMEWORKS} />
+            <FrameworkDetails frameworks={frameworks} />
 
             {/* 6. Aggregator Explanation */}
             <AggregatorSection reason={currentPrediction.reason} />

@@ -37,7 +37,7 @@ export const recipes = mysqlTable("recipes", {
   description: text("description"),
   type: mysqlEnum("type", ["SYSTEM", "USER", "COMMUNITY", "FEATURED"]).default("USER").notNull(),
   category: mysqlEnum("category", ["FINANCE", "SPORTS", "WEATHER", "HEALTH", "TECHNOLOGY", "POLITICS", "OTHER"]).default("OTHER").notNull(),
-  status: mysqlEnum("status", ["ACTIVE", "DRAFT", "ARCHIVED"]).default("DRAFT").notNull(),
+  status: mysqlEnum("status", ["ready", "draft", "archived"]).default("draft").notNull(),
   version: int("version").default(1).notNull(),
   isPublic: tinyint("isPublic").default(0).notNull(),
   displayOrder: int("displayOrder"), // For SYSTEM recipes ordering

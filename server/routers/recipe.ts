@@ -19,7 +19,7 @@ export const recipeRouter = router({
     .input(
       z.object({
         type: z.enum(["SYSTEM", "USER", "COMMUNITY", "FEATURED"]).optional(),
-        status: z.enum(["ACTIVE", "DRAFT", "ARCHIVED"]).optional(),
+        status: z.enum(["ready", "draft", "archived"]).optional(),
         category: z.enum(["FINANCE", "SPORTS", "WEATHER", "HEALTH", "TECHNOLOGY", "POLITICS", "OTHER"]).optional(),
         query: z.string().optional(),
         limit: z.number().default(20),
@@ -166,7 +166,7 @@ export const recipeRouter = router({
         description: input.description || "",
         type: "USER",
         category: input.category || "OTHER",
-        status: "ACTIVE",
+        status: "ready",
         version: 1,
         isPublic: 0,
       });
@@ -226,7 +226,7 @@ export const recipeRouter = router({
         description: sourceRecipe.description,
         type: "USER",
         category: sourceRecipe.category,
-        status: "ACTIVE",
+        status: "ready",
         version: 1,
         isPublic: 0,
         createdFromRecipeId: input.sourceRecipeId,
@@ -256,7 +256,7 @@ export const recipeRouter = router({
         name: z.string().optional(),
         description: z.string().optional(),
         category: z.enum(["FINANCE", "SPORTS", "WEATHER", "HEALTH", "TECHNOLOGY", "POLITICS", "OTHER"]).optional(),
-        status: z.enum(["ACTIVE", "DRAFT", "ARCHIVED"]).optional(),
+        status: z.enum(["ready", "draft", "archived"]).optional(),
         engines: z
           .array(
             z.object({
@@ -350,7 +350,7 @@ export const recipeRouter = router({
 
       await db
         .update(recipes)
-        .set({ status: "ARCHIVED" })
+        .set({ status: "archived" })
         .where(eq(recipes.id, input.recipeId));
 
       return { success: true };
