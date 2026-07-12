@@ -35,7 +35,7 @@ export default function Home() {
   const recipesQuery = trpc.recipes.search.useQuery({ query: "" });
   const recipeCountQuery = trpc.recipes.getRecipeCount.useQuery();
   const createStarterRecipeMutation = trpc.recipes.createStarterRecipe.useMutation();
-  const systemRecipesQuery = trpc.recipe.list.useQuery({ type: "SYSTEM", status: "ACTIVE", limit: 100 });
+  const systemRecipesQuery = trpc.recipe.list.useQuery({ type: "SYSTEM", status: "ready", limit: 100 });
 
   useEffect(() => {
     if (recipeCountQuery.data && recipeCountQuery.data.count === 0 && !isCreatingStarter) {

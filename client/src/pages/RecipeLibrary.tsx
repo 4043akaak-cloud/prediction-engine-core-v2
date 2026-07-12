@@ -1,10 +1,9 @@
-import { useState, useMemo } from "react";
-import { STOCK_DEFAULT_RECIPE } from "@/lib/recipes";
 import { useLocation } from "wouter";
 import { PageContainer } from "@/components/PageContainer";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import { Loader2, Trash2, Edit2, Copy, ChevronRight } from "lucide-react";
+import { useState, useMemo } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,10 +37,17 @@ export default function RecipeLibrary() {
   const [sortBy, setSortBy] = useState<"name" | "date">("date");
   const [deleteConfirmRecipeId, setDeleteConfirmRecipeId] = useState<string | null>(null);
 
-  // Fetch user recipes
-  const recipesQuery = trpc.recipe.list.useQuery({
+  // Fetch SYSTEM recipes from Recipe Repository (single source of truth)
+  const systemRecipesQuery = trpc.recipe.list.useQuery({
+    type: "SYSTEM",
+    status: "ready",
+    limit: 100,
+  });
+
+  // Fetch USER recipes from Recipe Repository
+  const userRecipesQuery = trpc.recipe.list.useQuery({
     type: "USER",
-    status: "ACTIVE",
+    status: "ready",
     limit: 100,
   });
 
@@ -51,11 +57,11 @@ export default function RecipeLibrary() {
   // Duplicate recipe mutation
   const duplicateRecipeMutation = trpc.recipe.duplicate.useMutation();
 
-  // Filter and sort recipes
-  const filteredRecipes = useMemo(() => {
-    if (!recipesQuery.data) return [];
+  // Filter and sort USER recipes
+  const filteredUserRecipes = useMemo(() => {
+    if (!userRecipesQuery.data) return [];
 
-    let filtered = recipesQuery.data.data.filter(
+    let filtered = userRecipesQuery.data.data.filter(
       (recipe) =>
         recipe.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         recipe.description?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -69,7 +75,13 @@ export default function RecipeLibrary() {
     }
 
     return filtered;
-  }, [recipesQuery.data, searchQuery, sortBy]);
+  }, [userRecipesQuery.data, searchQuery, sortBy]);
+
+  // Get SYSTEM recipes sorted by displayOrder
+  const systemRecipes = useMemo(() => {
+    if (!systemRecipesQuery.data) return [];
+    return [...systemRecipesQuery.data.data].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  }, [systemRecipesQuery.data]);
 
   const handleDelete = (recipeId: string) => {
     deleteRecipeMutation.mutate(
@@ -77,14 +89,10 @@ export default function RecipeLibrary() {
       {
         onSuccess: () => {
           setDeleteConfirmRecipeId(null);
-          recipesQuery.refetch();
+          userRecipesQuery.refetch();
         },
       }
     );
-  };
-
-  const handleEdit = (recipeId: string) => {
-    setLocation(`/recipe-builder?recipeId=${recipeId}`);
   };
 
   const handleDuplicate = (recipeId: string) => {
@@ -92,18 +100,17 @@ export default function RecipeLibrary() {
       { sourceRecipeId: recipeId },
       {
         onSuccess: (data) => {
-          recipesQuery.refetch();
-          // Open duplicated recipe in Recipe Builder
+          userRecipesQuery.refetch();
           setLocation(`/recipe-builder?recipeId=${data.id}`);
         },
       }
     );
   };
 
-  const handleCustomizeSystemRecipe = () => {
-    // Duplicate Stock Default recipe for user
+  const handleCustomizeSystemRecipe = (systemRecipeId: string) => {
+    // Duplicate system recipe for user
     duplicateRecipeMutation.mutate(
-      { sourceRecipeId: STOCK_DEFAULT_RECIPE.id },
+      { sourceRecipeId: systemRecipeId },
       {
         onSuccess: (data) => {
           // Open duplicated recipe in Recipe Builder
@@ -176,208 +183,142 @@ export default function RecipeLibrary() {
             <div className="max-w-2xl mx-auto">
               <h2 className="text-2xl md:text-3xl font-bold mb-6">Featured System Recipes</h2>
               
-              {/* Stock Default Recipe Card - Mobile Optimized */}
-              <div 
-                className="border border-border rounded-lg p-5 md:p-6 bg-white dark:bg-slate-950 hover:shadow-md hover:border-primary/50 transition-all flex flex-col h-full"
-              >
-                {/* Recipe Name */}
-                <div className="mb-3">
-                  <h3 className="text-xl md:text-2xl font-bold text-foreground">
-                    {STOCK_DEFAULT_RECIPE.name}
-                  </h3>
+              {systemRecipesQuery.isLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
-
-                {/* Badges */}
-                <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <span className="inline-block px-3 py-1 text-xs font-semibold bg-blue-600 text-white rounded-full">
-                    SYSTEM
-                  </span>
-                  <span className="inline-block px-3 py-1 text-xs font-semibold bg-amber-600 text-white rounded-full">
-                    FEATURED
-                  </span>
-                </div>
-
-                {/* Description */}
-                <p className="text-sm md:text-base text-muted-foreground mb-5 line-clamp-3">
-                  {STOCK_DEFAULT_RECIPE.description}
-                </p>
-
-                {/* Recipe Metadata - Clean Layout */}
-                <div className="space-y-3 mb-6 flex-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Category:</span>
-                    <span className="font-medium">FINANCE</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Engines:</span>
-                    <span className="font-medium">{STOCK_DEFAULT_RECIPE.engines.length}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Families:</span>
-                    <span className="font-medium">{STOCK_DEFAULT_RECIPE.metadata.families.length}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Difficulty:</span>
-                    <span className="font-medium">{STOCK_DEFAULT_RECIPE.difficulty}</span>
-                  </div>
-                </div>
-
-                {/* Engine Families - Compact Display */}
-                <div className="mb-6 pb-6 border-t border-border pt-4">
-                  <p className="text-xs font-semibold text-muted-foreground mb-2">Engine Families:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {STOCK_DEFAULT_RECIPE.metadata.families.slice(0, 5).map((family) => (
-                      <span key={family} className="inline-block px-2 py-1 text-xs bg-muted text-muted-foreground rounded">
-                        {family}
-                      </span>
-                    ))}
-                    {STOCK_DEFAULT_RECIPE.metadata.families.length > 5 && (
-                      <span className="inline-block px-2 py-1 text-xs bg-muted text-muted-foreground rounded">
-                        +{STOCK_DEFAULT_RECIPE.metadata.families.length - 5} more
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Action Buttons - Bottom of Card */}
-                <div className="flex flex-col gap-2 w-full pt-4 border-t border-border">
-                  <Button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setLocation(`/recipes/${STOCK_DEFAULT_RECIPE.id}`);
-                    }}
-                    variant="default"
-                    className="w-full"
-                  >
-                    View Recipe
-                    <ChevronRight className="ml-2 h-4 w-4" />
-                  </Button>
-                  <Button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCustomizeSystemRecipe();
-                    }}
-                    variant="outline"
-                    className="w-full"
-                    disabled={duplicateRecipeMutation.isPending}
-                  >
-                    {duplicateRecipeMutation.isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Customizing...
-                      </>
-                    ) : (
-                      <>
-                        Customize Recipe
-                        <Copy className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Section 6: My Recipes */}
-          <section className="w-full px-4 py-8 md:py-10">
-            <div className="max-w-2xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-bold mb-6">My Recipes</h2>
-
-              {/* Recipes List */}
-              <div className="space-y-4">
-                {recipesQuery.isLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  </div>
-                ) : filteredRecipes.length > 0 ? (
-                  filteredRecipes.map((recipe) => (
-                    <div
+              ) : systemRecipes.length > 0 ? (
+                <div className="space-y-4">
+                  {systemRecipes.map((recipe) => (
+                    <div 
                       key={recipe.id}
-                      className="border border-border rounded-lg p-4 md:p-5 bg-white dark:bg-slate-950 hover:shadow-md hover:border-primary/50 transition-all flex flex-col"
+                      className="border border-border rounded-lg p-5 md:p-6 bg-white dark:bg-slate-950 hover:shadow-md hover:border-primary/50 transition-all flex flex-col h-full"
                     >
-                      {/* Recipe Info - Top of Card */}
-                      <div className="mb-4 flex-1">
-                        <h3 className="font-bold text-lg md:text-xl mb-2">{recipe.name}</h3>
-                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                          {recipe.description}
-                        </p>
-                        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                          <span>Category: {recipe.category}</span>
-                          <span>v{recipe.version}</span>
-                          <span>{recipe.engineCount} engine{recipe.engineCount !== 1 ? 's' : ''}</span>
+                      {/* Recipe Name */}
+                      <div className="mb-3">
+                        <h3 className="text-xl md:text-2xl font-bold text-foreground">
+                          {recipe.name}
+                        </h3>
+                      </div>
+
+                      {/* Badges */}
+                      <div className="flex flex-wrap items-center gap-2 mb-4">
+                        <span className="inline-block px-3 py-1 text-xs font-semibold bg-blue-600 text-white rounded-full">
+                          SYSTEM
+                        </span>
+                        <span className="inline-block px-3 py-1 text-xs font-semibold bg-amber-600 text-white rounded-full">
+                          FEATURED
+                        </span>
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-sm md:text-base text-muted-foreground mb-5 line-clamp-3">
+                        {recipe.description}
+                      </p>
+
+                      {/* Recipe Metadata - Clean Layout */}
+                      <div className="space-y-3 mb-6 flex-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Category:</span>
+                          <span className="font-medium">{recipe.category}</span>
                         </div>
                       </div>
 
                       {/* Action Buttons - Bottom of Card */}
-                      <div className="flex gap-2 w-full pt-4 border-t border-border">
-                        <Button
+                      <div className="flex flex-col gap-2 w-full pt-4 border-t border-border">
+                        <Button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setLocation(`/recipes/${recipe.id}`);
+                          }}
                           variant="default"
-                          size="sm"
+                          className="w-full"
+                        >
+                          View Details
+                          <ChevronRight className="ml-2 h-4 w-4" />
+                        </Button>
+                        <Button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleEdit(recipe.id);
+                            handleCustomizeSystemRecipe(recipe.id);
                           }}
-                          className="flex-1"
-                        >
-                          <Edit2 className="h-4 w-4 mr-2" />
-                          Edit
-                        </Button>
-                        <Button
                           variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDuplicate(recipe.id);
-                          }}
-                          title="Duplicate recipe"
-                          disabled={duplicateRecipeMutation.isPending}
-                          className="flex-1"
+                          className="w-full"
                         >
-                          {duplicateRecipeMutation.isPending ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <>
-                              <Copy className="h-4 w-4 mr-2" />
-                              Duplicate
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDeleteConfirmRecipeId(recipe.id);
-                          }}
-                          title="Delete recipe"
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
+                          <Copy className="mr-2 h-4 w-4" />
+                          Customize
                         </Button>
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground mb-4">
-                      {searchQuery ? "No recipes match your search" : "No recipes yet"}
-                    </p>
-                    <p className="text-sm text-muted-foreground mb-6">
-                      Start by exploring the Featured System Recipe above, or create your own.
-                    </p>
-                    <Button onClick={() => setLocation("/recipe-builder")} className="w-full md:w-auto">
-                      Create Your First Recipe
-                    </Button>
-                  </div>
-                )}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">No system recipes available</p>
+              )}
+            </div>
+          </section>
+
+          {/* Section 6: Your Recipes - User Recipes */}
+          <section className="w-full px-4 py-8 md:py-10">
+            <div className="max-w-2xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-bold mb-6">Your Recipes</h2>
+              
+              {userRecipesQuery.isLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : filteredUserRecipes.length > 0 ? (
+                <div className="space-y-3">
+                  {filteredUserRecipes.map((recipe) => (
+                    <div
+                      key={recipe.id}
+                      className="border border-border rounded-lg p-4 md:p-5 hover:bg-accent/50 transition-colors flex items-center justify-between"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-foreground truncate">{recipe.name}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-1">{recipe.description}</p>
+                      </div>
+                      <div className="flex gap-2 ml-4 flex-shrink-0">
+                        <button
+                          onClick={() => setLocation(`/recipe-builder?recipeId=${recipe.id}`)}
+                          className="p-2 hover:bg-muted rounded transition-colors"
+                          title="Edit recipe"
+                        >
+                          <Edit2 className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                        </button>
+                        <button
+                          onClick={() => handleDuplicate(recipe.id)}
+                          className="p-2 hover:bg-muted rounded transition-colors"
+                          title="Duplicate recipe"
+                        >
+                          <Copy className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirmRecipeId(recipe.id)}
+                          className="p-2 hover:bg-muted rounded transition-colors"
+                          title="Delete recipe"
+                        >
+                          <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground mb-4">No recipes yet. Create your first recipe!</p>
+                  <Button onClick={() => setLocation("/recipe-builder")}>
+                    Create Recipe
+                  </Button>
+                </div>
+              )}
             </div>
           </section>
         </main>
       </div>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteConfirmRecipeId} onOpenChange={() => setDeleteConfirmRecipeId(null)}>
+      <AlertDialog open={!!deleteConfirmRecipeId} onOpenChange={(open) => !open && setDeleteConfirmRecipeId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Recipe</AlertDialogTitle>
@@ -385,7 +326,7 @@ export default function RecipeLibrary() {
               Are you sure you want to delete this recipe? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="flex gap-3 justify-end">
+          <div className="flex gap-3">
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
@@ -393,16 +334,9 @@ export default function RecipeLibrary() {
                   handleDelete(deleteConfirmRecipeId);
                 }
               }}
-              disabled={deleteRecipeMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleteRecipeMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                "Delete"
-              )}
+              Delete
             </AlertDialogAction>
           </div>
         </AlertDialogContent>
