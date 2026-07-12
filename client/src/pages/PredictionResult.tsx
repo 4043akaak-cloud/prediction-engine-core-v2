@@ -18,6 +18,7 @@ import { AgreementSummary } from "@/components/PredictionResult/AgreementSummary
 import { FrameworkSummary, FrameworkData } from "@/components/PredictionResult/FrameworkSummary";
 import { FrameworkDetails } from "@/components/PredictionResult/FrameworkDetails";
 import { AggregatorSection } from "@/components/PredictionResult/AggregatorSection";
+import { CounterPredictionSection } from "@/components/PredictionResult/CounterPredictionSection";
 import { ActionSection } from "@/components/PredictionResult/ActionSection";
 
 // Convert evidence list to framework display format
@@ -180,6 +181,9 @@ export default function PredictionResult() {
 
             {/* 6. Aggregator Explanation */}
             <AggregatorSection reason={currentPrediction.reason} />
+
+            {/* 6b. Counter-Prediction (Alternative Perspective) */}
+            <CounterPredictionSection counterPrediction={counterPrediction} />
 
             {/* 7. Action Buttons */}
             <ActionSection 
