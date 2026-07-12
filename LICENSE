@@ -1,0 +1,991 @@
+MIT License
+
+Copyright (c) 2026 Prediction Engine Core Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limited to the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*** Add File: /home/ubuntu/prediction-engine-core-v2/.gitignore
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+.nyc_output/
+
+# Production
+dist/
+build/
+
+# Misc
+.DS_Store
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+
+# OS
+Thumbs.db
+*** Add File: /home/ubuntu/prediction-engine-core-v2/docs/PEC_MASTER_BLUEPRINT.md
+# Prediction Engine Core Master Blueprint v0.1
+
+## Constitutional Role
+
+This document is the **Constitution of Prediction Engine Core**.
+
+It is the **Single Source of Truth** for all future PEC development.
+
+**Every implementation must follow this Constitution.**
+
+If any future instruction conflicts with this Constitution:
+
+1. Stop before implementation.
+2. Clearly explain the conflict.
+3. Ask for confirmation before proceeding.
+4. Never silently ignore the Constitution.
+
+The responsibility is not only to implement requests, but also to protect the architectural integrity of PEC.
+
+If a requested implementation weakens, contradicts, or unnecessarily complicates the design philosophy described in this Constitution, it must be pointed out and an alternative must be recommended.
+
+Do not hesitate to challenge implementation decisions when they violate the Constitution.
+
+The Constitution may evolve over time. However, it must never be changed implicitly. Any modification to the Constitution must be explicitly approved before implementation.
+
+Until such approval is given, always follow the latest committed version of this document as the single source of truth.
+
+---
+
+## Core Principles
+
+**Prediction Engine Core (PEC) is NOT defined by prediction targets.**
+
+**PEC is defined by Prediction Models.**
+
+Prediction Types (Stocks, Sports, Lottery, Crypto, Weather, etc.) are only implementations that utilize the Prediction Engine.
+
+Never describe PEC as a stock prediction application.
+
+Always describe PEC as a universal Prediction Engine built upon humanity's prediction models.
+
+---
+
+## Chapter 1 — Identity
+
+### Project Name
+
+Prediction Engine Core (PEC)
+
+### Mission
+
+Prediction Engine Core is a tool to reduce uncertainty about the future.
+
+### Tagline
+
+Predict Better. Decide Better.
+
+### Brand Personality
+
+For people who choose curiosity over fear.
+
+### Vision
+
+To become the world's prediction engine by integrating humanity's collective prediction knowledge.
+
+---
+
+## Chapter 2 — Philosophy
+
+### What is Prediction?
+
+Prediction is one possible scenario emerging from the present.
+
+### Prediction is not Certainty
+
+Predictions are possibilities, not guarantees. They represent the most likely outcome based on available models and data, but they are inherently uncertain.
+
+### Scenario Definition
+
+A scenario is a coherent narrative about how the future might unfold. It includes the conditions, assumptions, and reasoning that lead to a particular outcome.
+
+### Counter Prediction
+
+Counter Prediction represents the strongest alternative scenario. For every prediction, we must also articulate the most compelling counter-prediction to acknowledge uncertainty and alternative possibilities.
+
+### Models First Philosophy
+
+PEC is built on the principle that prediction models are the foundation. The engine combines, evaluates, and refines these models to improve prediction quality over time.
+
+---
+
+## Chapter 3 — Core Values
+
+- **Simplicity**: Every design decision prioritizes clarity and simplicity. When in doubt, simplify.
+- **Transparency**: All predictions and reasoning are explainable. Users understand why a prediction was made.
+- **Explainability**: The reasoning behind predictions is always visible and understandable.
+- **Invisible Complexity**: Complex logic is hidden behind simple interfaces. Users see clarity, not complexity.
+- **Curiosity**: We believe in continuous learning, evolution, and exploration of new prediction models.
+- **Continuous Evolution**: The system improves over time by learning from predictions and refining models.
+
+---
+
+## Chapter 4 — Design Rules
+
+### Rule 1: Design the Final Product First, Build the MVP Second
+
+Always design the complete vision before building the minimum viable product. This ensures architectural coherence.
+
+### Rule 2: One Issue. One Decision.
+
+Each issue addresses a single problem and leads to a single decision. Do not mix multiple concerns in one issue.
+
+### Rule 3: One Task. One Verification.
+
+Each task has a single, clear objective with a corresponding verification method. Do not combine multiple tasks.
+
+### Rule 4: When in Doubt, Simplify
+
+Simplicity is the ultimate sophistication. Remove unnecessary complexity.
+
+### Rule 5: Every Screen Should Be Understandable Within Five Seconds
+
+The interface must communicate its purpose and functionality within five seconds of viewing.
+
+---
+
+## Chapter 5 — User Experience
+
+### Prediction Flow
+
+The user journey through the prediction process:
+1. User asks a question
+2. Engine selects and combines models
+3. Engine generates a prediction with confidence level
+4. User sees the prediction, reasoning, and counter-prediction
+5. User can save the prediction to their diary
+
+### Desired User Experience
+
+- Clear and intuitive prediction interface
+- Transparent reasoning and model selection
+- Easy access to predictions history
+- Ability to track prediction accuracy over time
+
+### Desired User Emotions
+
+- Tomorrow becomes interesting
+- I'm glad I installed PEC
+- I have more options
+- Maybe I can build my own prediction model someday
+
+---
+
+## Chapter 6 — Homepage
+
+### Structure
+
+- **Header**: Logo, navigation, theme toggle, sign in
+- **Hero**: Project name, mission, tagline, question input, predict button
+- **Prediction Area**: Featured prediction types (future expansion)
+- **Examples**: Community models and examples (future expansion)
+- **Footer**: Links, version information
+
+### MVP vs Future
+
+**MVP (Phase 1 - Skeleton)**:
+- Minimal structure
+- Question input
+- Predict button
+- Placeholder sections
+
+**Future Expansion**:
+- Featured Prediction Types
+- Community section
+- Marketplace section
+- Latest Models section
+
+---
+
+## Chapter 7 — Prediction Experience
+
+### Prediction Card Components
+
+- **Prediction**: The main prediction statement
+- **Confidence**: Confidence level (percentage or scale)
+- **Reason**: The reasoning behind the prediction
+- **Details**: Model information and data sources
+- **Counter Prediction**: The strongest alternative scenario
+- **Save**: Option to save to diary
+
+### Interaction Model
+
+Users interact with predictions through:
+- Viewing prediction details
+- Comparing with counter-predictions
+- Saving to diary for tracking
+- Viewing accuracy over time
+
+---
+
+## Chapter 8 — Diary
+
+### Philosophy
+
+Diary is NOT history.
+
+Diary is a timeline showing how predictions evolve over time.
+
+It tracks:
+- When predictions were made
+- How predictions changed
+- Actual outcomes vs predictions
+- Learning from prediction accuracy
+
+### Purpose
+
+The Diary enables users to:
+- Track prediction accuracy
+- See how their thinking evolves
+- Learn from past predictions
+- Understand model performance
+
+---
+
+## Chapter 9 — Prediction Types
+
+### Official vs Expandable
+
+- **Prediction Types**: Official only. Managed by the core team.
+- **Prediction Models**: Expandable. Can be created by community and users.
+
+### Core Principle
+
+Prediction Types never define PEC.
+
+Prediction Models define PEC.
+
+Examples of Prediction Types (Official):
+- Stock market predictions
+- Sports outcomes
+- Weather forecasts
+- Economic indicators
+
+---
+
+## Chapter 10 — Prediction Models
+
+### Model Categories
+
+- **Official Models**: Created and maintained by the core team
+- **Community Models**: Created by community members
+- **Private Models**: Personal models for individual use
+- **Experimental Models**: Models in testing phase
+
+### Model Metadata
+
+Each model includes:
+- Name and description
+- Creator information
+- Performance metrics
+- Supported prediction types
+- Model version
+
+### Performance & Benchmarking
+
+- Models are benchmarked against historical data
+- Performance metrics are publicly available
+- Users can compare model accuracy
+- Models improve through feedback and learning
+
+---
+
+## Chapter 11 — Recipes
+
+### Concept
+
+Recipes are combinations of models executed in a specific order with defined weights.
+
+### Components
+
+- **Model Combinations**: Which models are used
+- **Execution Order**: The sequence of model execution
+- **Weights**: How much each model contributes to the final prediction
+
+### Types
+
+- **Public Recipes**: Shared with the community
+- **Private Recipes**: Personal recipes for individual use
+- **Sharing**: Ability to share recipes with others
+
+---
+
+## Chapter 12 — Marketplace
+
+### Concept
+
+A marketplace for prediction models and recipes.
+
+### Features
+
+- **Buying**: Users can purchase premium models
+- **Selling**: Model creators can sell their models
+- **Creator Economy**: Revenue sharing with model creators
+- **Revenue Sharing**: Fair compensation for creators
+- **Ratings**: Community ratings for models
+- **Subscriptions**: Subscription-based access to premium models
+
+---
+
+## Chapter 13 — Community
+
+### Community Features
+
+- **Tutorials**: How-to guides for using PEC
+- **Reviews**: Community reviews of models
+- **Rankings**: Leaderboards for model performance
+- **Knowledge Sharing**: Forum for sharing insights
+- **Challenges**: Prediction challenges and competitions
+- **Comments**: Discussion on predictions and models
+
+### Community Role
+
+The community drives innovation through shared knowledge and collaborative model development.
+
+---
+
+## Chapter 14 — Governance
+
+### Responsibility Separation
+
+**Official** manages:
+- Mission and vision
+- Core prediction engine
+- Official prediction types
+- Security and API
+- Platform rules and standards
+
+**Community** manages:
+- Prediction models
+- Recipes
+- Knowledge and tutorials
+- Reviews and ratings
+- Community challenges
+
+**Marketplace** manages:
+- Model transactions
+- Creator payments
+- Subscription management
+- Quality assurance
+
+---
+
+## Chapter 15 — Business Model
+
+### Current Draft
+
+**⚠️ DRAFT - Subject to Change**
+
+#### Free Tier
+
+- 3 predictions per day
+- Access to official models
+- No diary access
+
+#### Subscription Tier
+
+- Unlimited predictions
+- Full diary access
+- Community model access
+- $5/month or $50/year
+
+**Note**: Pricing is DRAFT and subject to change based on market research and user feedback.
+
+---
+
+## Chapter 16 — Architecture
+
+### High-Level Architecture
+
+```
+User Interface
+    ↓
+Prediction Engine
+    ↓
+Model Manager
+    ↓
+Prediction Models (Official, Community, Private)
+    ↓
+Data Sources & APIs
+```
+
+### Components
+
+- **Frontend**: User interface for making predictions
+- **Prediction Engine**: Core logic for combining and executing models
+- **Model Manager**: Management of prediction models
+- **Data Layer**: Integration with data sources
+- **API**: External API for integrations
+
+---
+
+## Chapter 17 — AI Development Framework (ADF)
+
+### Principles
+
+PEC development simultaneously improves the AI Development Framework.
+
+### Workflow
+
+- **One Issue**: Each issue addresses a single problem
+- **One Task**: Each task has a single objective
+- **One Commit**: Each completed task results in one commit
+- **One Verification**: Each task has a corresponding verification method
+
+### Blueprint-First Development
+
+1. Consult the Blueprint before implementation
+2. If conflicts exist, stop and ask for clarification
+3. Implement only after Blueprint alignment is confirmed
+4. Verify implementation against Blueprint
+
+### Continuous Improvement
+
+- The framework improves with each development cycle
+- Lessons learned are documented
+- The process becomes more efficient over time
+- AI-assisted development becomes more effective
+
+---
+
+## Chapter 18 — Long-Term Vision
+
+### The Future of PEC
+
+Prediction Engine Core is a continuously evolving prediction engine powered by humanity's prediction models.
+
+### Evolution Path
+
+1. **Phase 1**: Foundation - Core engine and official models
+2. **Phase 2**: Community - Community-contributed models and recipes
+3. **Phase 3**: Marketplace - Commercial model ecosystem
+4. **Phase 4**: Intelligence - Advanced learning and optimization
+5. **Phase 5**: Integration - Seamless integration with external systems
+
+### Ultimate Goal
+
+To become the world's most trusted and accurate prediction engine by harnessing the collective intelligence of humanity.
+
+---
+
+## Amendment History
+
+- **v0.1** (2026-07-03): Initial Constitution created
+
+---
+
+**This Constitution is the foundation of Prediction Engine Core.**
+
+**All development must follow this document.**
+*** Add File: /home/ubuntu/prediction-engine-core-v2/docs/ADF.md
+# AI Development Framework (ADF)
+
+## Overview
+
+The AI Development Framework is the methodology for developing Prediction Engine Core with AI assistance.
+
+It ensures quality, clarity, and architectural integrity throughout the development process.
+
+---
+
+## Core Principles
+
+### One Issue
+
+Each GitHub issue addresses a single, well-defined problem.
+
+- Clear problem statement
+- Single objective
+- Specific success criteria
+
+### One Task
+
+Each task has a single, clear objective.
+
+- One feature, one fix, or one documentation update
+- Clear input and output
+- Measurable completion criteria
+
+### One Commit
+
+Each completed task results in exactly one commit.
+
+- Commit message follows convention: `type: description`
+- Commit contains only changes related to the task
+- Commit is atomic and self-contained
+
+### One Verification
+
+Each task has a corresponding verification method.
+
+- Tests pass
+- Code review approved
+- Documentation updated
+- No regressions introduced
+
+---
+
+## Blueprint-First Development
+
+### Before Implementation
+
+1. **Read the Blueprint**: Consult `PEC_MASTER_BLUEPRINT.md` before writing any code
+2. **Check for Conflicts**: Verify that the task aligns with the Blueprint
+3. **Ask for Clarification**: If conflicts exist, stop and ask for confirmation
+4. **Never Ignore the Blueprint**: The Blueprint is the Single Source of Truth
+
+### During Implementation
+
+1. **Follow the Blueprint**: Implement exactly as described in the Blueprint
+2. **Maintain Integrity**: Do not add features not in the Blueprint
+3. **Simplify**: When in doubt, follow Rule 4: Simplify
+4. **Document**: Keep documentation up-to-date
+
+### After Implementation
+
+1. **Verify**: Ensure implementation matches the Blueprint
+2. **Test**: Run all tests and verify no regressions
+3. **Review**: Get code review from team members
+4. **Commit**: Create a single, well-documented commit
+
+---
+
+## Git Workflow
+
+### Branch Policy
+
+- **main**: Production-ready code only
+- **develop**: Integration branch (if needed)
+- **feature/**: Feature branches for new work
+- **fix/**: Bug fix branches
+
+### Commit Style
+
+```
+type: description
+
+Detailed explanation (if needed)
+```
+
+**Types**:
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation
+- `refactor`: Code refactoring
+- `test`: Test updates
+- `chore`: Maintenance
+
+### Pull Request Policy
+
+1. Create a feature branch
+2. Make changes
+3. Create a pull request
+4. Get approval from at least one reviewer
+5. Merge to main
+6. Delete feature branch
+
+---
+
+## Development Workflow
+
+### Step 1: Issue Creation
+
+- Create a GitHub issue with clear problem statement
+- Define success criteria
+- Assign to developer
+
+### Step 2: Blueprint Review
+
+- Read the relevant sections of `PEC_MASTER_BLUEPRINT.md`
+- Identify any conflicts or ambiguities
+- Ask for clarification if needed
+
+### Step 3: Implementation
+
+- Create a feature branch
+- Implement the feature following the Blueprint
+- Write tests
+- Update documentation
+
+### Step 4: Verification
+
+- Run all tests
+- Verify no regressions
+- Check code quality
+- Get code review
+
+### Step 5: Commit & Push
+
+- Create a single, atomic commit
+- Push to GitHub
+- Close the issue
+
+---
+
+## AI Collaboration Principles
+
+### AI as Implementation Engineer
+
+The AI assistant acts as the Implementation Engineer:
+- Reads the Blueprint
+- Implements according to specifications
+- Asks for clarification when needed
+- Protects architectural integrity
+
+### Human as System Architect
+
+The human acts as the System Architect:
+- Creates the Blueprint
+- Approves implementations
+- Resolves conflicts
+- Evolves the architecture
+
+### Collaboration Model
+
+1. **Human**: Defines requirements and architecture
+2. **AI**: Implements according to specifications
+3. **Human**: Reviews and approves
+4. **AI**: Iterates based on feedback
+5. **Human**: Merges to main branch
+
+### Communication
+
+- Clear, explicit instructions
+- Questions when ambiguous
+- Documented decisions
+- Transparent reasoning
+
+---
+
+## Quality Standards
+
+### Code Quality
+
+- Follows project style guide
+- No console errors or warnings
+- Passes all tests
+- Properly formatted and linted
+
+### Documentation
+
+- README updated
+- Code comments where needed
+- Architecture decisions documented
+- API documentation complete
+
+### Testing
+
+- Unit tests for new code
+- Integration tests where applicable
+- No regressions
+- Test coverage maintained
+
+---
+
+## Continuous Improvement
+
+### Learning from Each Cycle
+
+- Document lessons learned
+- Identify process improvements
+- Update ADF based on experience
+- Refine Blueprint as needed
+
+### Feedback Loop
+
+- Collect feedback after each task
+- Identify bottlenecks
+- Optimize workflow
+- Improve communication
+
+### Evolution
+
+The ADF itself evolves through use. Each development cycle improves the framework.
+
+---
+
+## Summary
+
+The AI Development Framework ensures that:
+
+✓ Every task is well-defined and focused
+✓ The Blueprint guides all implementation
+✓ Quality is maintained throughout
+✓ Collaboration is clear and efficient
+✓ The process continuously improves
+
+**All development must follow the ADF.**
+*** Add File: /home/ubuntu/prediction-engine-core-v2/docs/CONTRIBUTING.md
+# Contributing to Prediction Engine Core
+
+Thank you for your interest in contributing to Prediction Engine Core!
+
+This document outlines the guidelines for contributing to the project.
+
+---
+
+## Before You Start
+
+**Read the Blueprint First**
+
+Before contributing any code or documentation, read the [PEC Master Blueprint](PEC_MASTER_BLUEPRINT.md).
+
+This is the Single Source of Truth for all development decisions.
+
+---
+
+## Development Principles
+
+### Blueprint-First Development
+
+1. Every feature must be defined in the Blueprint
+2. If a feature is not in the Blueprint, it must be added first
+3. Implementation follows the Blueprint exactly
+4. If you find a conflict, stop and ask for clarification
+
+### Documentation-First Philosophy
+
+1. Document the feature before implementing it
+2. Update the Blueprint if needed
+3. Write code comments for complex logic
+4. Keep README and documentation up-to-date
+
+### One Issue, One Task, One Commit
+
+1. Each GitHub issue addresses a single problem
+2. Each task has a single objective
+3. Each completed task results in one commit
+4. Each commit has a corresponding verification
+
+---
+
+## Branch Policy
+
+### Main Branch
+
+- `main` branch contains production-ready code only
+- All code must be reviewed before merging to main
+- All tests must pass
+- No direct commits to main
+
+### Feature Branches
+
+- Create a feature branch from main: `git checkout -b feature/your-feature-name`
+- Keep branches focused on a single feature
+- Delete branch after merging
+
+### Branch Naming
+
+```
+feature/description-of-feature
+fix/description-of-fix
+docs/description-of-docs
+```
+
+---
+
+## Commit Style
+
+### Commit Message Format
+
+```
+type: description
+
+Detailed explanation (optional)
+```
+
+### Commit Types
+
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `refactor`: Code refactoring
+- `test`: Test updates
+- `chore`: Maintenance tasks
+
+### Commit Examples
+
+```
+feat: add prediction caching
+
+Implement caching layer for frequently used predictions
+to improve response time.
+
+fix: resolve null pointer in model selector
+
+Added null check before accessing model properties.
+
+docs: update API documentation
+```
+
+---
+
+## Pull Request Policy
+
+### Before Creating a PR
+
+1. Update your branch with latest main: `git pull origin main`
+2. Run all tests locally
+3. Verify no console errors or warnings
+4. Update documentation
+
+### Creating a PR
+
+1. Create a descriptive PR title
+2. Link to the related GitHub issue
+3. Describe what changed and why
+4. List any breaking changes
+5. Request review from team members
+
+### PR Template
+
+```markdown
+## Description
+
+Brief description of changes.
+
+## Related Issue
+
+Closes #123
+
+## Changes
+
+- Change 1
+- Change 2
+
+## Testing
+
+How to test these changes.
+
+## Checklist
+
+- [ ] Code follows project style
+- [ ] Tests pass
+- [ ] Documentation updated
+- [ ] No console errors
+```
+
+### Code Review
+
+- At least one approval required
+- Address all comments
+- Resolve conversations
+- Merge only after approval
+
+---
+
+## Code Quality Standards
+
+### Style Guide
+
+- Follow project conventions
+- Use consistent naming
+- Format code properly
+- Add comments for complex logic
+
+### Testing
+
+- Write tests for new features
+- Maintain test coverage
+- All tests must pass
+- No regressions allowed
+
+### Documentation
+
+- Update README if needed
+- Add code comments
+- Document API changes
+- Update CHANGELOG
+
+---
+
+## Reporting Issues
+
+### Bug Reports
+
+Include:
+- Clear description of the bug
+- Steps to reproduce
+- Expected behavior
+- Actual behavior
+- Screenshots if applicable
+
+### Feature Requests
+
+Include:
+- Clear description of the feature
+- Why it's needed
+- How it should work
+- Any related issues or discussions
+
+---
+
+## Getting Help
+
+- Read the [PEC Master Blueprint](PEC_MASTER_BLUEPRINT.md)
+- Read the [AI Development Framework](ADF.md)
+- Check existing issues and discussions
+- Ask in GitHub discussions
+
+---
+
+## Code of Conduct
+
+- Be respectful and inclusive
+- Welcome diverse perspectives
+- Focus on the code, not the person
+- Help others learn and grow
+
+---
+
+## Summary
+
+✓ Read the Blueprint before contributing
+✓ Follow the ADF workflow
+✓ One issue, one task, one commit
+✓ Write tests and documentation
+✓ Get code review before merging
+✓ Keep main branch clean and production-ready
+
+Thank you for contributing to Prediction Engine Core!
+
