@@ -291,3 +291,15 @@ Recipe Library → Recipe Detail → Prediction Result → Diary
 - [ ] Validate Diary Detail page navigation and display
 
 **Status:** Backend prediction pipeline is functional despite type errors. Frontend renders correctly. Type errors are cosmetic (union type property access).
+
+---
+
+### Issue #052: Recipe Selector Dropdown on Homepage (COMPLETE)
+- [x] Implement recipe selector dropdown between question input and Start Prediction button
+- [x] Dynamically load SYSTEM recipes from recipe system
+- [x] Default selection to Stock Default (first by displayOrder)
+- [x] Sort recipes by displayOrder (future-proof, no hardcoding)
+- [x] Integrate with existing prediction flow
+- [x] Support all current and future SYSTEM recipes without code changes
+
+**Status:** Recipe selector dropdown fully functional. Renders correctly on homepage. Ready for end-to-end testing.

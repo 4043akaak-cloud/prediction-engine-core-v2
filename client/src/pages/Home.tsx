@@ -1,12 +1,12 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
-import { PageContainer } from "@/components/PageContainer";
-import { trpc } from "@/lib/trpc";
-import { usePrediction } from "@/hooks/usePrediction";
-import { generatePrediction } from "@/services/api";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
+import { PageContainer } from "@/components/PageContainer";
+import { trpc } from "@/lib/trpc";
+import { usePrediction } from "@/hooks/usePrediction";
+import { generatePrediction } from "@/services/api";
 
 export default function Home() {
   const { user, loading, error, isAuthenticated, logout } = useAuth();
@@ -28,6 +35,7 @@ export default function Home() {
   const recipesQuery = trpc.recipes.search.useQuery({ query: "" });
   const recipeCountQuery = trpc.recipes.getRecipeCount.useQuery();
   const createStarterRecipeMutation = trpc.recipes.createStarterRecipe.useMutation();
+  const systemRecipesQuery = trpc.recipe.list.useQuery({ type: "SYSTEM", status: "ACTIVE", limit: 100 });
 
   useEffect(() => {
     if (recipeCountQuery.data && recipeCountQuery.data.count === 0 && !isCreatingStarter) {
@@ -63,6 +71,15 @@ export default function Home() {
       setSelectedRecipe(starterRecipe);
     }
   }, [recipesQuery.data, state.selectedRecipe, isCreatingStarter, setSelectedRecipe]);
+
+  // Set default recipe to first SYSTEM recipe (sorted by displayOrder)
+  useEffect(() => {
+    if (systemRecipesQuery.data && systemRecipesQuery.data.data && systemRecipesQuery.data.data.length > 0 && !state.selectedRecipe) {
+      // Sort by displayOrder to ensure consistent ordering
+      const sorted = [...systemRecipesQuery.data.data].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+      setSelectedRecipe(sorted[0]);
+    }
+  }, [systemRecipesQuery.data, state.selectedRecipe, setSelectedRecipe]);
 
   const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuestion(e.target.value);
@@ -139,6 +156,38 @@ export default function Home() {
                   }}
                   className="border border-border rounded px-4 py-3 text-base"
                 />
+                {/* Recipe Selector Dropdown */}
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium mb-2 text-foreground">Prediction Recipe</label>
+                  <Select
+                    value={state.selectedRecipe?.id || ""}
+                    onValueChange={(recipeId) => {
+                      const recipe = systemRecipesQuery.data?.data?.find((r) => r.id === recipeId);
+                      if (recipe) {
+                        setSelectedRecipe(recipe);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a recipe..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {systemRecipesQuery.isLoading ? (
+                        <div className="p-2 text-sm text-muted-foreground">Loading recipes...</div>
+                      ) : systemRecipesQuery.data?.data && systemRecipesQuery.data.data.length > 0 ? (
+                        [...systemRecipesQuery.data.data]
+                          .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+                          .map((recipe) => (
+                            <SelectItem key={recipe.id} value={recipe.id}>
+                              {recipe.name}
+                            </SelectItem>
+                          ))
+                      ) : (
+                        <div className="p-2 text-sm text-muted-foreground">No recipes available</div>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Button
                   onClick={() => handleGeneratePrediction()}
                   disabled={isGenerating || !question.trim()}
