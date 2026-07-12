@@ -43,6 +43,7 @@ export default function PredictionResult() {
   const [isSaving, setIsSaving] = useState(false);
 
   const { currentPrediction, counterPrediction, isLoading, error, lastInput } = predictionState;
+  console.log('[PredictionResult] Current prediction state:', { currentPrediction, isLoading, error });
   const predictMutation = trpc.prediction.predict.useMutation();
   const predictionContext = useContext(PredictionContext);
   const selectedRecipe = predictionContext?.state.selectedRecipe;
@@ -63,6 +64,7 @@ export default function PredictionResult() {
   };
 
   // Empty state
+  console.log('[PredictionResult] Checking empty state:', { hasPrediction: !!currentPrediction, isLoading, hasError: !!error });
   if (!currentPrediction && !isLoading && !error) {
     return (
       <PageContainer>

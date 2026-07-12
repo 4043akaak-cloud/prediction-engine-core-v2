@@ -55,16 +55,20 @@ function getValidRecipeIds(): Set<string> {
 
 function savePredictionToStorage(prediction: Prediction | null, counterPrediction: CounterPrediction | null, selectedRecipe: { id: string; name: string } | null) {
   if (!prediction) {
+    console.log('[Storage] Removing prediction from storage (prediction is null)');
+    console.trace('Stack trace for prediction removal');
     localStorage.removeItem(PREDICTION_STORAGE_KEY);
     return;
   }
   try {
+    console.log('[Storage] Saving prediction to localStorage:', prediction);
     localStorage.setItem(PREDICTION_STORAGE_KEY, JSON.stringify({
       prediction,
       counterPrediction,
       selectedRecipe,
       timestamp: Date.now(),
     }));
+    console.log('[Storage] Successfully saved to localStorage');
   } catch (err) {
     console.error('Failed to save prediction to storage:', err);
   }
@@ -73,6 +77,7 @@ function savePredictionToStorage(prediction: Prediction | null, counterPredictio
 function loadPredictionFromStorage(): { prediction: Prediction | null; counterPrediction: CounterPrediction | null; selectedRecipe: { id: string; name: string } | null } {
   try {
     const stored = localStorage.getItem(PREDICTION_STORAGE_KEY);
+    console.log('[Storage] Loading from localStorage:', stored ? 'Found' : 'Not found');
     if (!stored) return { prediction: null, counterPrediction: null, selectedRecipe: null };
     
     const data = JSON.parse(stored);
@@ -192,10 +197,16 @@ export const PredictionProvider: React.FC<{ children: ReactNode }> = ({ children
 
   // Save to storage whenever prediction, counterPrediction, or selectedRecipe changes
   useEffect(() => {
+    if (!state.currentPrediction) {
+      console.log('[PredictionContext] WARNING: currentPrediction is null! Clearing storage.');
+      console.trace('Stack trace for prediction clear');
+    }
+    console.log('[PredictionContext] Saving to storage:', { prediction: state.currentPrediction, counterPrediction: state.counterPrediction });
     savePredictionToStorage(state.currentPrediction, state.counterPrediction, state.selectedRecipe);
   }, [state.currentPrediction, state.counterPrediction, state.selectedRecipe]);
 
   const setPrediction = (prediction: Prediction) => {
+    console.log('[PredictionContext] setPrediction called with:', prediction);
     setState((prev) => ({ ...prev, currentPrediction: prediction }));
   };
 

@@ -48,6 +48,8 @@ export async function generatePrediction(
         confidence: predictionResult.confidence,
         reason: predictionResult.reason,
         predictionType: input.predictionType,
+        evidenceList: predictionResult.evidenceList || [],
+        explanation: predictionResult.explanation || predictionResult.reason,
         metadata: {
           createdAt: new Date(predictionResult.timestamp).toISOString(),
           modelUsed: predictionResult.recipeUsed,
