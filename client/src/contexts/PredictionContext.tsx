@@ -1,8 +1,84 @@
-import React, { createContext, useState, ReactNode } from 'react';
-import { useEffect } from 'react';
+import { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 
 const PREDICTION_STORAGE_KEY = 'pec-prediction-result';
 const RECIPE_VALIDATION_KEY = 'pec-recipe-validation-cache';
+
+// ============================================================================
+// STATE LIFECYCLE TRACING
+// ============================================================================
+
+interface StateTransition {
+  timestamp: number;
+  previousValue: any;
+  nextValue: any;
+  caller: string;
+  file: string;
+  line: number;
+  stackTrace: string;
+}
+
+const stateTransitions: StateTransition[] = [];
+
+function captureStackTrace(): string {
+  const stack = new Error().stack || '';
+  const lines = stack.split('\n');
+  // Return lines 3-6 to skip Error, captureStackTrace, and the immediate caller
+  return lines.slice(3, 7).join('\n');
+}
+
+function getCallerInfo(): { file: string; line: number; caller: string } {
+  const stack = new Error().stack || '';
+  const lines = stack.split('\n');
+  const callerLine = lines[3] || '';
+  
+  // Extract file and line from stack trace
+  const match = callerLine.match(/\(([^:]+):(\d+):\d+\)|at ([^:]+):(\d+):/);
+  if (match) {
+    const file = match[1] || match[3] || 'unknown';
+    const line = parseInt(match[2] || match[4] || '0');
+    const caller = callerLine.match(/at\s+(\w+)/)?.[1] || 'unknown';
+    return { file: file.split('/').pop() || file, line, caller };
+  }
+  return { file: 'unknown', line: 0, caller: 'unknown' };
+}
+
+function logStateTransition(previousValue: any, nextValue: any, context: string) {
+  const { file, line, caller } = getCallerInfo();
+  const transition: StateTransition = {
+    timestamp: Date.now(),
+    previousValue,
+    nextValue,
+    caller,
+    file,
+    line,
+    stackTrace: captureStackTrace(),
+  };
+  
+  stateTransitions.push(transition);
+  
+  console.log(`[StateTrace] ${context}`, {
+    timestamp: new Date(transition.timestamp).toISOString(),
+    previousValue: JSON.stringify(previousValue).substring(0, 100),
+    nextValue: JSON.stringify(nextValue).substring(0, 100),
+    caller: `${file}:${line} in ${caller}`,
+  });
+  
+  if (!nextValue && previousValue) {
+    console.error(`[StateTrace] CRITICAL: State cleared from valid to null!`, {
+      wasValid: !!previousValue,
+      nowNull: !nextValue,
+      caller: `${file}:${line}`,
+      stackTrace: transition.stackTrace,
+    });
+  }
+}
+
+// Export for debugging
+(window as any).__predictionStateTransitions = stateTransitions;
+
+// ============================================================================
+// RECIPE VALIDATION
+// ============================================================================
 
 /**
  * Validate if a recipe exists by checking against a cache of known recipe IDs.
@@ -52,6 +128,10 @@ function getValidRecipeIds(): Set<string> {
     return new Set();
   }
 }
+
+// ============================================================================
+// STORAGE OPERATIONS
+// ============================================================================
 
 function savePredictionToStorage(prediction: Prediction | null, counterPrediction: CounterPrediction | null, selectedRecipe: { id: string; name: string } | null) {
   if (!prediction) {
@@ -109,6 +189,10 @@ function loadPredictionFromStorage(): { prediction: Prediction | null; counterPr
     return { prediction: null, counterPrediction: null, selectedRecipe: null };
   }
 }
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
 
 export interface StandardizedEvidence {
   id: string;
@@ -184,15 +268,21 @@ const initialState: PredictionState = {
 
 export const PredictionContext = createContext<PredictionContextType | undefined>(undefined);
 
+// ============================================================================
+// PROVIDER COMPONENT
+// ============================================================================
+
 export const PredictionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, setState] = useState<PredictionState>(() => {
     const { prediction, counterPrediction, selectedRecipe } = loadPredictionFromStorage();
-    return {
+    const initializedState = {
       ...initialState,
       currentPrediction: prediction,
       counterPrediction,
       selectedRecipe,
     };
+    console.log('[PredictionProvider] Initialized state from localStorage:', initializedState);
+    return initializedState;
   });
 
   // Save to storage whenever prediction, counterPrediction, or selectedRecipe changes
@@ -207,15 +297,24 @@ export const PredictionProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const setPrediction = (prediction: Prediction) => {
     console.log('[PredictionContext] setPrediction called with:', prediction);
-    setState((prev) => ({ ...prev, currentPrediction: prediction }));
+    setState((prev) => {
+      logStateTransition(prev.currentPrediction, prediction, 'setPrediction');
+      return { ...prev, currentPrediction: prediction };
+    });
   };
 
   const setCounterPrediction = (counterPrediction: CounterPrediction) => {
-    setState((prev) => ({ ...prev, counterPrediction }));
+    setState((prev) => {
+      logStateTransition(prev.counterPrediction, counterPrediction, 'setCounterPrediction');
+      return { ...prev, counterPrediction };
+    });
   };
 
   const setLastInput = (input: { question: string; predictionType: string }) => {
-    setState((prev) => ({ ...prev, lastInput: input }));
+    setState((prev) => {
+      logStateTransition(prev.lastInput, input, 'setLastInput');
+      return { ...prev, lastInput: input };
+    });
   };
 
   const retryPrediction = async () => {
@@ -225,23 +324,39 @@ export const PredictionProvider: React.FC<{ children: ReactNode }> = ({ children
   };
 
   const setSelectedModel = (model: string) => {
-    setState((prev) => ({ ...prev, selectedModel: model }));
+    setState((prev) => {
+      logStateTransition(prev.selectedModel, model, 'setSelectedModel');
+      return { ...prev, selectedModel: model };
+    });
   };
 
   const setLoading = (loading: boolean) => {
-    setState((prev) => ({ ...prev, isLoading: loading }));
+    setState((prev) => {
+      logStateTransition(prev.isLoading, loading, 'setLoading');
+      return { ...prev, isLoading: loading };
+    });
   };
 
   const setError = (error: string | null) => {
-    setState((prev) => ({ ...prev, error }));
+    setState((prev) => {
+      logStateTransition(prev.error, error, 'setError');
+      return { ...prev, error };
+    });
   };
 
   const clearPrediction = () => {
-    setState(initialState);
+    console.log('[PredictionContext] clearPrediction called');
+    setState((prev) => {
+      logStateTransition(prev.currentPrediction, null, 'clearPrediction');
+      return initialState;
+    });
   };
 
   const setSelectedRecipe = (recipe: { id: string; name: string } | null) => {
-    setState((prev) => ({ ...prev, selectedRecipe: recipe }));
+    setState((prev) => {
+      logStateTransition(prev.selectedRecipe, recipe, 'setSelectedRecipe');
+      return { ...prev, selectedRecipe: recipe };
+    });
   };
 
   const updateRecipeCache = (recipeIds: string[]) => {
@@ -276,4 +391,8 @@ export const PredictionProvider: React.FC<{ children: ReactNode }> = ({ children
       {children}
     </PredictionContext.Provider>
   );
+};
+
+export const usePredictionDebug = () => {
+  return (window as any).__predictionStateTransitions || [];
 };
